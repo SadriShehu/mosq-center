@@ -101,5 +101,17 @@ func (s *service) bootstrap() {
 
 	// Handler injection
 	h := handlers.New(s.router, ps)
+	
+	fr := repository.NewFamiliesRepository(s.nosql)
+
+	fs := services.NewFamiliesService(fr)
+	
+	h := handlers.New(s.router, fs)
+	
+	nr := repository.NewNeighbourhoodsRepository(s.nosql)
+
+	ns := services.NewNeighbourhoodsRepository(nr)
+	
+	h := handlers.New(s.router, ns)
 	h.RegisterRoutesV1()
 }
