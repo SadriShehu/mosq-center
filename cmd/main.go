@@ -95,23 +95,16 @@ func newService(c *config.Config, r *chi.Mux, nosql *mongo.Client) {
 func (s *service) bootstrap() {
 	// Repository injection
 	pr := repository.NewPaymentsRepository(s.nosql)
+	fr := repository.NewFamiliesRepository(s.nosql)
+	nr := repository.NewNeighbourhoodsRepository(s.nosql)
 
 	// Service injection
 	ps := services.NewPaymentsService(pr)
+	fs := services.NewFamiliesService(fr)
+	ns := services.NewNeighbourhoodsRepository(nr)
 
 	// Handler injection
-	h := handlers.New(s.router, ps)
-	
-	fr := repository.NewFamiliesRepository(s.nosql)
+	h := handlers.New(s.router, ps, fs, ns)
 
-	fs := services.NewFamiliesService(fr)
-	
-	h := handlers.New(s.router, fs)
-	
-	nr := repository.NewNeighbourhoodsRepository(s.nosql)
-
-	ns := services.NewNeighbourhoodsRepository(nr)
-	
-	h := handlers.New(s.router, ns)
 	h.RegisterRoutesV1()
 }

@@ -8,9 +8,8 @@ type familiesService struct {
 	FamiliesRepository models.FamiliesRepository
 }
 
-func NewFamiliesRepository(FamiliesRepository models.FamiliesRepository) *familiesService {
+func NewFamiliesService(FamiliesRepository models.FamiliesRepository) *familiesService {
 	return &familiesService{
 		FamiliesRepository: FamiliesRepository,
 	}
 }
-
