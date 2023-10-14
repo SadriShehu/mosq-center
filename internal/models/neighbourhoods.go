@@ -3,19 +3,31 @@ package models
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type Neighbourhood struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	Region     string    `json:"region"`
-	Country    string    `json:"country"`
-	PostalCode string    `json:"postal_code"`
-	CreatedAt  string    `json:"created_at"`
-	UpdatedAt  string    `json:"updated_at"`
-	DeletedAt  string    `json:"deleted_at"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Region     string `json:"region"`
+	Country    string `json:"country"`
+	PostalCode string `json:"postal_code"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+	DeletedAt  string `json:"deleted_at"`
+}
+
+func (n *Neighbourhood) Hydrate(req *NeighbourhoodRequest) {
+	n.Name = req.Name
+	n.Region = req.Region
+	n.Country = req.Country
+	n.PostalCode = req.PostalCode
+
+	n.ID = uuid.New().String()
+	n.CreatedAt = time.Now().UTC().Format(time.RFC3339)
+	n.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 }
 
 type NeighbourhoodRequest struct {
@@ -33,11 +45,11 @@ func (nReq *NeighbourhoodRequest) Bind(*http.Request) error {
 }
 
 type NeighbourhoodResponse struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	Region     string    `json:"region"`
-	Country    string    `json:"country"`
-	PostalCode string    `json:"postal_code"`
-	CreatedAt  string    `json:"created_at"`
-	UpdatedAt  string    `json:"updated_at"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Region     string `json:"region"`
+	Country    string `json:"country"`
+	PostalCode string `json:"postal_code"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }

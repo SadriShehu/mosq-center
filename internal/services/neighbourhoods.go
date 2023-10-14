@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
+	"log"
 
-	"github.com/google/uuid"
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
 
@@ -18,6 +18,21 @@ func NewNeighbourhoodsRepository(NeighbourhoodsRepository models.NeighbourhoodsR
 }
 
 func (s *neighbourhoodsService) Create(ctx context.Context, body *models.NeighbourhoodRequest) (string, error) {
-	// implement business logic here
-	return uuid.NewString(), nil
+	var neighbourhood *models.Neighbourhood
+	neighbourhood.Hydrate(body)
+
+	id, err := s.NeighbourhoodsRepository.Create(ctx, neighbourhood)
+	if err != nil {
+		log.Printf("failed to create neighbourhood: %v\n", err)
+		return "", err
+	}
+
+	log.Printf("neighbourhood created successfully with interal id: %s\n", id)
+
+	return neighbourhood.ID, nil
+}
+
+func (s *neighbourhoodsService) GetNeighbourhood(ctx context.Context, id string) (*models.NeighbourhoodResponse, error) {
+	// TODO: implement this method
+	return nil, nil
 }

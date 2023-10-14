@@ -32,3 +32,8 @@ func (h *handler) Create(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(id))
 }
+
+func (h *handler) GetNeighbourhood(w http.ResponseWriter, req *http.Request) {
+	// TODO: implement this method
+	w.WriteHeader(http.StatusNotImplemented)
+}

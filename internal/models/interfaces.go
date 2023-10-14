@@ -22,8 +22,11 @@ type FamiliesService interface {
 }
 
 type NeighbourhoodsRepository interface {
+	Create(context.Context, *Neighbourhood) (string, error)
+	FindByID(context.Context, string) (*Neighbourhood, error)
 }
 
 type NeighbourhoodsService interface {
 	Create(context.Context, *NeighbourhoodRequest) (string, error)
+	GetNeighbourhood(context.Context, string) (*NeighbourhoodResponse, error)
 }
