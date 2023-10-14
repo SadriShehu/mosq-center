@@ -36,6 +36,7 @@ func (h *handler) RegisterRoutesV1() {
 
 		r.Route("/neighbourhoods", func(r chi.Router) {
 			r.Post("/", h.Create)
+			r.Get("/{id}", h.GetNeighbourhood)
 		})
 	})
 }
