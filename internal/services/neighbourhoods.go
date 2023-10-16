@@ -18,7 +18,7 @@ func NewNeighbourhoodsRepository(NeighbourhoodsRepository models.NeighbourhoodsR
 }
 
 func (s *neighbourhoodsService) Create(ctx context.Context, body *models.NeighbourhoodRequest) (string, error) {
-	var neighbourhood *models.Neighbourhood
+	neighbourhood := &models.Neighbourhood{}
 	neighbourhood.Hydrate(body)
 
 	id, err := s.NeighbourhoodsRepository.Create(ctx, neighbourhood)
