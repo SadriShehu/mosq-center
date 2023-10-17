@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
@@ -34,6 +35,29 @@ func (h *handler) Create(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *handler) GetNeighbourhood(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	id := chi.URLParam(req, "id")
+
+	neighbourhood, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, id)
+	if err != nil {
+		log.Printf("failed to get neighbourhood: %v\n", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(fmt.Sprintf("failed to get neighbourhood: %v\n", err)))
+		return
+	}
+
+	log.Println("neighbourhood retrieved successfully")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, req, neighbourhood)
+}
+
+func (h *handler) GetAllNeighbourhoods(w http.ResponseWriter, req *http.Request) {
+	// TODO: implement this method
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+func (h *handler) UpdateNeighbourhood(w http.ResponseWriter, req *http.Request) {
 	// TODO: implement this method
 	w.WriteHeader(http.StatusNotImplemented)
 }
