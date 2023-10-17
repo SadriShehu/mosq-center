@@ -51,6 +51,8 @@ func (r *neighbourhoodsRepository) FindAll(ctx context.Context) ([]*models.Neigh
 		return nil, err
 	}
 
+	defer cur.Close(ctx)
+
 	var neighbourhoods []*models.Neighbourhood
 	for cur.Next(ctx) {
 		neighbourhood := &models.Neighbourhood{}
@@ -59,6 +61,11 @@ func (r *neighbourhoodsRepository) FindAll(ctx context.Context) ([]*models.Neigh
 			return nil, err
 		}
 		neighbourhoods = append(neighbourhoods, neighbourhood)
+	}
+
+	if cur.Err() != nil {
+		log.Printf("failed to get neighbourhoods: %v\n", cur.Err())
+		return nil, cur.Err()
 	}
 
 	return neighbourhoods, nil
