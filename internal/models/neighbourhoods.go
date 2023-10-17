@@ -53,3 +53,13 @@ type NeighbourhoodResponse struct {
 	CreatedAt  string `json:"created_at"`
 	UpdatedAt  string `json:"updated_at"`
 }
+
+func (n *NeighbourhoodResponse) MapResponse(neighbourhood *Neighbourhood) {
+	n.ID = neighbourhood.ID
+	n.Name = neighbourhood.Name
+	n.Region = neighbourhood.Region
+	n.Country = neighbourhood.Country
+	n.PostalCode = neighbourhood.PostalCode
+	n.CreatedAt = neighbourhood.CreatedAt
+	n.UpdatedAt = neighbourhood.UpdatedAt
+}
