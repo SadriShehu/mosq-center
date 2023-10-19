@@ -58,6 +58,24 @@ func (h *handler) GetAllNeighbourhoods(w http.ResponseWriter, req *http.Request)
 }
 
 func (h *handler) UpdateNeighbourhood(w http.ResponseWriter, req *http.Request) {
-	// TODO: implement this method
-	w.WriteHeader(http.StatusNotImplemented)
+	ctx := req.Context()
+	id := chi.URLParam(req, "id")
+
+	body := &models.NeighbourhoodRequest{}
+	if err := render.Bind(req, body); err != nil {
+		log.Printf("failed to bind request: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to bind request: %v\n", err)))
+		return
+	}
+
+	if err := h.NeighbourhoodsService.Update(ctx, id, body); err != nil {
+		log.Printf("failed to update neighbourhood: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to update neighbourhood: %v\n", err)))
+		return
+	}
+
+	log.Printf("neighbourhood with id %s updated successfully", id)
+	w.WriteHeader(http.StatusOK)
 }

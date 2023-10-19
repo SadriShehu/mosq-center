@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
@@ -52,6 +53,23 @@ func (s *neighbourhoodsService) GetAllNeighbourhoods(ctx context.Context) ([]*mo
 }
 
 func (s *neighbourhoodsService) Update(ctx context.Context, id string, body *models.NeighbourhoodRequest) error {
-	// TODO: implement this method
+	neighbourhood, err := s.NeighbourhoodsRepository.FindByID(ctx, id)
+	if err != nil {
+		log.Printf("failed to get neighbourhood: %v\n", err)
+		return err
+	}
+
+	neighbourhood.Name = body.Name
+	neighbourhood.Region = body.Region
+	neighbourhood.Country = body.Country
+	neighbourhood.PostalCode = body.PostalCode
+	neighbourhood.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+
+	err = s.NeighbourhoodsRepository.Update(ctx, id, neighbourhood)
+	if err != nil {
+		log.Printf("failed to update neighbourhood: %v\n", err)
+		return err
+	}
+
 	return nil
 }
