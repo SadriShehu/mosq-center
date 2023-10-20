@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -35,13 +33,6 @@ type NeighbourhoodRequest struct {
 	Region     string `json:"region" validate:"required"`
 	Country    string `json:"country"`
 	PostalCode string `json:"postal_code"`
-}
-
-func (nReq *NeighbourhoodRequest) Bind(*http.Request) error {
-	if err := Validator.Struct(nReq); err != nil {
-		return fmt.Errorf("validation failed: %w", err)
-	}
-	return nil
 }
 
 type NeighbourhoodResponse struct {

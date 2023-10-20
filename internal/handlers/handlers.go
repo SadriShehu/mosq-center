@@ -2,20 +2,19 @@ package handlers
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/sadrishehu/mosq-center/internal/models"
 )
 
 type handler struct {
 	RouterService         *chi.Mux
-	PaymentsService       models.PaymentsService
-	FamiliesService       models.FamiliesService
-	NeighbourhoodsService models.NeighbourhoodsService
+	PaymentsService       PaymentsService
+	FamiliesService       FamiliesService
+	NeighbourhoodsService NeighbourhoodsService
 }
 
 func New(router *chi.Mux,
-	ps models.PaymentsService,
-	fs models.FamiliesService,
-	ns models.NeighbourhoodsService) *handler {
+	ps PaymentsService,
+	fs FamiliesService,
+	ns NeighbourhoodsService) *handler {
 	return &handler{
 		RouterService:         router,
 		PaymentsService:       ps,

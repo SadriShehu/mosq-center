@@ -1,14 +1,13 @@
 package services
 
-import (
-	"github.com/sadrishehu/mosq-center/internal/models"
-)
-
-type familiesService struct {
-	FamiliesRepository models.FamiliesRepository
+type FamiliesRepository interface {
 }
 
-func NewFamiliesService(FamiliesRepository models.FamiliesRepository) *familiesService {
+type familiesService struct {
+	FamiliesRepository FamiliesRepository
+}
+
+func NewFamiliesService(FamiliesRepository FamiliesRepository) *familiesService {
 	return &familiesService{
 		FamiliesRepository: FamiliesRepository,
 	}

@@ -8,11 +8,18 @@ import (
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
 
-type neighbourhoodsService struct {
-	NeighbourhoodsRepository models.NeighbourhoodsRepository
+type NeighbourhoodsRepository interface {
+	Create(context.Context, *models.Neighbourhood) (string, error)
+	FindByID(context.Context, string) (*models.Neighbourhood, error)
+	FindAll(context.Context) ([]*models.Neighbourhood, error)
+	Update(context.Context, string, *models.Neighbourhood) error
 }
 
-func NewNeighbourhoodsRepository(NeighbourhoodsRepository models.NeighbourhoodsRepository) *neighbourhoodsService {
+type neighbourhoodsService struct {
+	NeighbourhoodsRepository NeighbourhoodsRepository
+}
+
+func NewNeighbourhoodsRepository(NeighbourhoodsRepository NeighbourhoodsRepository) *neighbourhoodsService {
 	return &neighbourhoodsService{
 		NeighbourhoodsRepository: NeighbourhoodsRepository,
 	}

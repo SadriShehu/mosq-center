@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,13 @@ import (
 	"github.com/go-chi/render"
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
+
+type NeighbourhoodsService interface {
+	Create(context.Context, *models.NeighbourhoodRequest) (string, error)
+	GetNeighbourhood(context.Context, string) (*models.NeighbourhoodResponse, error)
+	GetAllNeighbourhoods(context.Context) ([]*models.NeighbourhoodResponse, error)
+	Update(context.Context, string, *models.NeighbourhoodRequest) error
+}
 
 func (h *handler) Create(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()

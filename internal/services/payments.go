@@ -1,14 +1,13 @@
 package services
 
-import (
-	"github.com/sadrishehu/mosq-center/internal/models"
-)
-
-type paymentsService struct {
-	PaymentsRepository models.PaymentsRepository
+type PaymentsRepository interface {
 }
 
-func NewPaymentsService(PaymentsRepository models.PaymentsRepository) *paymentsService {
+type paymentsService struct {
+	PaymentsRepository PaymentsRepository
+}
+
+func NewPaymentsService(PaymentsRepository PaymentsRepository) *paymentsService {
 	return &paymentsService{
 		PaymentsRepository: PaymentsRepository,
 	}
