@@ -48,8 +48,20 @@ func (s *neighbourhoodsService) GetNeighbourhood(ctx context.Context, id string)
 }
 
 func (s *neighbourhoodsService) GetAllNeighbourhoods(ctx context.Context) ([]*models.NeighbourhoodResponse, error) {
-	// TODO: implement this method
-	return nil, nil
+	neighbourhoods, err := s.NeighbourhoodsRepository.FindAll(ctx)
+	if err != nil {
+		log.Printf("failed to get neighbourhoods: %v\n", err)
+		return nil, err
+	}
+
+	var n []*models.NeighbourhoodResponse
+	for _, neighbourhood := range neighbourhoods {
+		nm := &models.NeighbourhoodResponse{}
+		nm.MapResponse(neighbourhood)
+		n = append(n, nm)
+	}
+
+	return n, nil
 }
 
 func (s *neighbourhoodsService) Update(ctx context.Context, id string, body *models.NeighbourhoodRequest) error {
