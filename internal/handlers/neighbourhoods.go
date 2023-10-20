@@ -53,8 +53,20 @@ func (h *handler) GetNeighbourhood(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *handler) GetAllNeighbourhoods(w http.ResponseWriter, req *http.Request) {
-	// TODO: implement this method
-	w.WriteHeader(http.StatusNotImplemented)
+	ctx := req.Context()
+
+	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	if err != nil {
+		log.Printf("failed to get neighbourhood: %v\n", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(fmt.Sprintf("failed to get neighbourhood: %v\n", err)))
+		return
+	}
+
+	log.Println("neighbourhood retrieved successfully")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, req, neighbourhoods)
 }
 
 func (h *handler) UpdateNeighbourhood(w http.ResponseWriter, req *http.Request) {
