@@ -35,7 +35,7 @@ func main() {
 	}
 	defer dbc.Disconnect(ctx)
 
-	auth, err := auth0.New()
+	auth, err := auth0.New(c)
 	if err != nil {
 		log.Fatalf("Failed to initialize the authenticator: %v", err)
 	}
