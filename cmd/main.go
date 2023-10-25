@@ -15,6 +15,7 @@ import (
 	"github.com/sadrishehu/mosq-center/config"
 	"github.com/sadrishehu/mosq-center/internal/db"
 	"github.com/sadrishehu/mosq-center/internal/handlers"
+	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
 	"github.com/sadrishehu/mosq-center/internal/repository"
 	"github.com/sadrishehu/mosq-center/internal/services"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -34,6 +35,11 @@ func main() {
 	}
 	defer dbc.Disconnect(ctx)
 
+	auth, err := auth0.New()
+	if err != nil {
+		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.Recoverer)
@@ -48,7 +54,7 @@ func main() {
 	})
 	r.Use(ch.Handler)
 
-	newService(c, r, dbc)
+	newService(c, r, dbc, auth)
 	srv := &http.Server{
 		Addr:    c.Port,
 		Handler: r,
@@ -80,13 +86,15 @@ type service struct {
 	config *config.Config
 	router *chi.Mux
 	nosql  *mongo.Client
+	auth0  *auth0.Authenticator
 }
 
-func newService(c *config.Config, r *chi.Mux, nosql *mongo.Client) {
+func newService(c *config.Config, r *chi.Mux, nosql *mongo.Client, auth0 *auth0.Authenticator) {
 	s := &service{
 		config: c,
 		router: r,
 		nosql:  nosql,
+		auth0:  auth0,
 	}
 
 	s.bootstrap()
@@ -104,7 +112,7 @@ func (s *service) bootstrap() {
 	ns := services.NewNeighbourhoodsRepository(nr)
 
 	// Handler injection
-	h := handlers.New(s.router, ps, fs, ns)
+	h := handlers.New(s.router, s.auth0, ps, fs, ns)
 
 	h.RegisterRoutesV1()
 }

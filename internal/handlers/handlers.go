@@ -2,21 +2,25 @@ package handlers
 
 import (
 	"github.com/go-chi/chi"
+	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
 )
 
 type handler struct {
 	RouterService         *chi.Mux
+	Auth0                 *auth0.Authenticator
 	PaymentsService       PaymentsService
 	FamiliesService       FamiliesService
 	NeighbourhoodsService NeighbourhoodsService
 }
 
 func New(router *chi.Mux,
+	auth0 *auth0.Authenticator,
 	ps PaymentsService,
 	fs FamiliesService,
 	ns NeighbourhoodsService) *handler {
 	return &handler{
 		RouterService:         router,
+		Auth0:                 auth0,
 		PaymentsService:       ps,
 		FamiliesService:       fs,
 		NeighbourhoodsService: ns,
@@ -38,6 +42,13 @@ func (h *handler) RegisterRoutesV1() {
 			r.Get("/{id}", h.GetNeighbourhood)
 			r.Get("/", h.GetAllNeighbourhoods)
 			r.Put("/{id}", h.UpdateNeighbourhood)
+		})
+
+		r.Route("/auth", func(r chi.Router) {
+			r.Get("/login", h.Login)
+			r.Get("/callback", h.Callback)
+			r.Get("/logout", h.Logout)
+			r.Get("/user", h.User)
 		})
 	})
 }
