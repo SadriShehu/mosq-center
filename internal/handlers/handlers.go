@@ -35,10 +35,14 @@ func (h *handler) RegisterRoutesV1() {
 		})
 
 		r.Route("/families", func(r chi.Router) {
+			r.Post("/", h.CreateFamilie)
+			r.Get("/{id}", h.GetFamilies)
+			r.Get("/", h.GetAllFamilies)
+			r.Put("/{id}", h.UpdateFamilie)
 		})
 
 		r.Route("/neighbourhoods", func(r chi.Router) {
-			r.Post("/", h.Create)
+			r.Post("/", h.CreateNeighbourhood)
 			r.Get("/{id}", h.GetNeighbourhood)
 			r.Get("/", h.GetAllNeighbourhoods)
 			r.Put("/{id}", h.UpdateNeighbourhood)

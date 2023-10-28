@@ -41,3 +41,12 @@ type PaymentsResponse struct {
 	CreatedAt       string `json:"created_at"`
 	UpdatedAt       string `json:"updated_at"`
 }
+
+func (p *PaymentsResponse) MapResponse(payment *Payments) {
+	p.ID = payment.ID
+	p.FamilyID = payment.FamilyID
+	p.Amount = payment.Amount
+	p.NeighbourhoodID = payment.NeighbourhoodID
+	p.CreatedAt = payment.CreatedAt
+	p.UpdatedAt = payment.UpdatedAt
+}

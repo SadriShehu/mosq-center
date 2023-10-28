@@ -1,13 +1,92 @@
 package repository
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"context"
+	"errors"
+	"log"
 
-type paymentsRepository struct {
-	CDB *mongo.Client
+	"github.com/sadrishehu/mosq-center/internal/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type PaymentsRepository struct {
+	CDB *mongo.Collection
 }
 
-func NewPaymentsRepository(CDB *mongo.Client) *paymentsRepository {
-	return &paymentsRepository{
-		CDB: CDB,
+func NewPaymentsRepository(CDB *mongo.Client) *PaymentsRepository {
+	return &PaymentsRepository{
+		CDB: CDB.Database("center-mosq").Collection("payments"),
 	}
+}
+
+func (r *PaymentsRepository) Create(ctx context.Context, n *models.Payments) (string, error) {
+	doc, err := bson.Marshal(n)
+	if err != nil {
+		return "", err
+	}
+
+	rez, err := r.CDB.InsertOne(ctx, doc)
+	if err != nil {
+		return "", err
+	}
+
+	return rez.InsertedID.(primitive.ObjectID).Hex(), nil
+}
+
+func (r *PaymentsRepository) FindByID(ctx context.Context, id string) (*models.Payments, error) {
+	payment := &models.Payments{}
+	err := r.CDB.FindOne(ctx, bson.M{"id": id}).Decode(payment)
+	if err != nil {
+		log.Printf("failed to get payment: %v\n", err)
+		return nil, errors.New("payment not found")
+	}
+	return payment, nil
+}
+
+func (r *PaymentsRepository) FindAll(ctx context.Context) ([]*models.Payments, error) {
+	cur, err := r.CDB.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	defer cur.Close(ctx)
+
+	var payments []*models.Payments
+	for cur.Next(ctx) {
+		payment := &models.Payments{}
+		err := cur.Decode(payment)
+		if err != nil {
+			return nil, err
+		}
+		payments = append(payments, payment)
+	}
+
+	if cur.Err() != nil {
+		log.Printf("failed to get payments: %v\n", cur.Err())
+		return nil, cur.Err()
+	}
+
+	return payments, nil
+}
+
+func (r *PaymentsRepository) Update(ctx context.Context, id string, n *models.Payments) error {
+	rez, err := r.CDB.UpdateOne(ctx, bson.M{"id": id}, bson.M{"$set": n})
+	if err != nil {
+		log.Printf("failed to update payment: %v\n", err)
+		return err
+	}
+
+	if rez.MatchedCount == 0 {
+		log.Printf("failed to update payment: %v\n", err)
+		return errors.New("payment not found")
+	}
+
+	if rez.ModifiedCount == 0 {
+		log.Printf("failed to update payment: %v\n", err)
+		return errors.New("payment not modified")
+	}
+
+	return nil
 }

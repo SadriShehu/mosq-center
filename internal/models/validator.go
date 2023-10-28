@@ -16,3 +16,17 @@ func (nReq *NeighbourhoodRequest) Bind(*http.Request) error {
 	}
 	return nil
 }
+
+func (fReq *FamiliesRequest) Bind(*http.Request) error {
+	if err := Validator.Struct(fReq); err != nil {
+		return fmt.Errorf("validation failed: %w", err)
+	}
+	return nil
+}
+
+func (pReq *PaymentsRequest) Bind(*http.Request) error {
+	if err := Validator.Struct(pReq); err != nil {
+		return fmt.Errorf("validation failed: %w", err)
+	}
+	return nil
+}

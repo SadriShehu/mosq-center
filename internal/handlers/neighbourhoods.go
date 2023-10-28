@@ -18,7 +18,7 @@ type NeighbourhoodsService interface {
 	Update(context.Context, string, *models.NeighbourhoodRequest) error
 }
 
-func (h *handler) Create(w http.ResponseWriter, req *http.Request) {
+func (h *handler) CreateNeighbourhood(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	body := &models.NeighbourhoodRequest{}
