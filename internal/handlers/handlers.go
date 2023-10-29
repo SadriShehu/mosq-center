@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/sadrishehu/mosq-center/internal"
 	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
+	"github.com/sadrishehu/mosq-center/internal/templates"
 )
 
 type handler struct {
@@ -31,10 +31,10 @@ func New(router *chi.Mux,
 }
 
 func (h *handler) RegisterTemplates() {
-	fs := http.FileServer(http.FS(internal.Files))
-	h.RouterService.Handle("/templates/app/css/styles.css", fs)
-	h.RouterService.Handle("/templates/app/js/scripts.js", fs)
-	h.RouterService.Handle("/templates/app/assets/favicon.ico", fs)
+	fs := http.FileServer(http.FS(templates.Files))
+	h.RouterService.Handle("/app/css/styles.css", fs)
+	h.RouterService.Handle("/app/js/scripts.js", fs)
+	h.RouterService.Handle("/app/assets/favicon.ico", fs)
 
 	h.RouterService.Route("/", func(r chi.Router) {
 		r.Get("/lagjet", h.Lagjet)
