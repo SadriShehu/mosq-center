@@ -19,9 +19,9 @@ type neighbourhoodsService struct {
 	NeighbourhoodsRepository NeighbourhoodsRepository
 }
 
-func NewNeighbourhoodsRepository(NeighbourhoodsRepository NeighbourhoodsRepository) *neighbourhoodsService {
+func NewNeighbourhoodsRepository(neighbourhoodsRepository NeighbourhoodsRepository) *neighbourhoodsService {
 	return &neighbourhoodsService{
-		NeighbourhoodsRepository: NeighbourhoodsRepository,
+		NeighbourhoodsRepository: neighbourhoodsRepository,
 	}
 }
 

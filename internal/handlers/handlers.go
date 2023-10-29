@@ -32,13 +32,17 @@ func (h *handler) RegisterRoutesV1() {
 		r.Get("/health", h.HealthCheck)
 
 		r.Route("/payments", func(r chi.Router) {
+			r.Post("/", h.CreatePayment)
+			r.Get("/{id}", h.GetPayment)
+			r.Get("/", h.GetAllPayments)
+			r.Put("/{id}", h.UpdatePayment)
 		})
 
 		r.Route("/families", func(r chi.Router) {
-			r.Post("/", h.CreateFamilie)
-			r.Get("/{id}", h.GetFamilies)
+			r.Post("/", h.CreateFamily)
+			r.Get("/{id}", h.GetFamily)
 			r.Get("/", h.GetAllFamilies)
-			r.Put("/{id}", h.UpdateFamilie)
+			r.Put("/{id}", h.UpdateFamily)
 		})
 
 		r.Route("/neighbourhoods", func(r chi.Router) {

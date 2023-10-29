@@ -15,17 +15,17 @@ type PaymentsRepository interface {
 	Update(context.Context, string, *models.Payments) error
 }
 
-type PaymentsService struct {
+type paymentsService struct {
 	PaymentsRepository PaymentsRepository
 }
 
-func NewPaymentsService(PaymentsRepository PaymentsRepository) *PaymentsService {
-	return &PaymentsService{
-		PaymentsRepository: PaymentsRepository,
+func NewPaymentsService(paymentsRepository PaymentsRepository) *paymentsService {
+	return &paymentsService{
+		PaymentsRepository: paymentsRepository,
 	}
 }
 
-func (s *PaymentsService) Create(ctx context.Context, body *models.PaymentsRequest) (string, error) {
+func (s *paymentsService) Create(ctx context.Context, body *models.PaymentsRequest) (string, error) {
 	payment := &models.Payments{}
 	payment.Hydrate(body)
 
@@ -40,7 +40,7 @@ func (s *PaymentsService) Create(ctx context.Context, body *models.PaymentsReque
 	return payment.ID, nil
 }
 
-func (s *PaymentsService) GetPayments(ctx context.Context, id string) (*models.PaymentsResponse, error) {
+func (s *paymentsService) GetPayments(ctx context.Context, id string) (*models.PaymentsResponse, error) {
 	payment, err := s.PaymentsRepository.FindByID(ctx, id)
 	if err != nil {
 		log.Printf("failed to get payment: %v\n", err)
@@ -54,7 +54,7 @@ func (s *PaymentsService) GetPayments(ctx context.Context, id string) (*models.P
 	return paymentsResponse, nil
 }
 
-func (s *PaymentsService) GetAllPayments(ctx context.Context) ([]*models.PaymentsResponse, error) {
+func (s *paymentsService) GetAllPayments(ctx context.Context) ([]*models.PaymentsResponse, error) {
 	payments, err := s.PaymentsRepository.FindAll(ctx)
 	if err != nil {
 		log.Printf("failed to get payments: %v\n", err)
@@ -71,7 +71,7 @@ func (s *PaymentsService) GetAllPayments(ctx context.Context) ([]*models.Payment
 	return n, nil
 }
 
-func (s *PaymentsService) Update(ctx context.Context, id string, body *models.PaymentsRequest) error {
+func (s *paymentsService) Update(ctx context.Context, id string, body *models.PaymentsRequest) error {
 	payment, err := s.PaymentsRepository.FindByID(ctx, id)
 	if err != nil {
 		log.Printf("failed to get payment: %v\n", err)
@@ -80,6 +80,7 @@ func (s *PaymentsService) Update(ctx context.Context, id string, body *models.Pa
 
 	payment.FamilyID = body.FamilyID
 	payment.Amount = body.Amount
+	payment.Year = body.Year
 	payment.NeighbourhoodID = body.NeighbourhoodID
 	payment.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 
