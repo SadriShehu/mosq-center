@@ -11,17 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type FamiliesRepository struct {
+type familiesRepository struct {
 	CDB *mongo.Collection
 }
 
-func NewFamiliesRepository(CDB *mongo.Client) *FamiliesRepository {
-	return &FamiliesRepository{
+func NewFamiliesRepository(CDB *mongo.Client) *familiesRepository {
+	return &familiesRepository{
 		CDB: CDB.Database("center-mosq").Collection("families"),
 	}
 }
 
-func (r *FamiliesRepository) Create(ctx context.Context, n *models.Families) (string, error) {
+func (r *familiesRepository) Create(ctx context.Context, n *models.Families) (string, error) {
 	doc, err := bson.Marshal(n)
 	if err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func (r *FamiliesRepository) Create(ctx context.Context, n *models.Families) (st
 	return rez.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (r *FamiliesRepository) FindByID(ctx context.Context, id string) (*models.Families, error) {
+func (r *familiesRepository) FindByID(ctx context.Context, id string) (*models.Families, error) {
 	familie := &models.Families{}
 	err := r.CDB.FindOne(ctx, bson.M{"id": id}).Decode(familie)
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *FamiliesRepository) FindByID(ctx context.Context, id string) (*models.F
 	return familie, nil
 }
 
-func (r *FamiliesRepository) FindAll(ctx context.Context) ([]*models.Families, error) {
+func (r *familiesRepository) FindAll(ctx context.Context) ([]*models.Families, error) {
 	cur, err := r.CDB.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (r *FamiliesRepository) FindAll(ctx context.Context) ([]*models.Families, e
 	return families, nil
 }
 
-func (r *FamiliesRepository) Update(ctx context.Context, id string, n *models.Families) error {
+func (r *familiesRepository) Update(ctx context.Context, id string, n *models.Families) error {
 	rez, err := r.CDB.UpdateOne(ctx, bson.M{"id": id}, bson.M{"$set": n})
 	if err != nil {
 		log.Printf("failed to update familie: %v\n", err)

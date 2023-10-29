@@ -18,7 +18,7 @@ type FamiliesService interface {
 	Update(context.Context, string, *models.FamiliesRequest) error
 }
 
-func (h *handler) CreateFamilie(w http.ResponseWriter, req *http.Request) {
+func (h *handler) CreateFamily(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	body := &models.FamiliesRequest{}
@@ -42,7 +42,7 @@ func (h *handler) CreateFamilie(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(id))
 }
 
-func (h *handler) GetFamilies(w http.ResponseWriter, req *http.Request) {
+func (h *handler) GetFamily(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	id := chi.URLParam(req, "id")
 
@@ -77,7 +77,7 @@ func (h *handler) GetAllFamilies(w http.ResponseWriter, req *http.Request) {
 	render.JSON(w, req, families)
 }
 
-func (h *handler) UpdateFamilie(w http.ResponseWriter, req *http.Request) {
+func (h *handler) UpdateFamily(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	id := chi.URLParam(req, "id")
 

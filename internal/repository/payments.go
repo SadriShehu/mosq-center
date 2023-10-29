@@ -11,17 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type PaymentsRepository struct {
+type paymentsRepository struct {
 	CDB *mongo.Collection
 }
 
-func NewPaymentsRepository(CDB *mongo.Client) *PaymentsRepository {
-	return &PaymentsRepository{
+func NewPaymentsRepository(CDB *mongo.Client) *paymentsRepository {
+	return &paymentsRepository{
 		CDB: CDB.Database("center-mosq").Collection("payments"),
 	}
 }
 
-func (r *PaymentsRepository) Create(ctx context.Context, n *models.Payments) (string, error) {
+func (r *paymentsRepository) Create(ctx context.Context, n *models.Payments) (string, error) {
 	doc, err := bson.Marshal(n)
 	if err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func (r *PaymentsRepository) Create(ctx context.Context, n *models.Payments) (st
 	return rez.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (r *PaymentsRepository) FindByID(ctx context.Context, id string) (*models.Payments, error) {
+func (r *paymentsRepository) FindByID(ctx context.Context, id string) (*models.Payments, error) {
 	payment := &models.Payments{}
 	err := r.CDB.FindOne(ctx, bson.M{"id": id}).Decode(payment)
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *PaymentsRepository) FindByID(ctx context.Context, id string) (*models.P
 	return payment, nil
 }
 
-func (r *PaymentsRepository) FindAll(ctx context.Context) ([]*models.Payments, error) {
+func (r *paymentsRepository) FindAll(ctx context.Context) ([]*models.Payments, error) {
 	cur, err := r.CDB.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (r *PaymentsRepository) FindAll(ctx context.Context) ([]*models.Payments, e
 	return payments, nil
 }
 
-func (r *PaymentsRepository) Update(ctx context.Context, id string, n *models.Payments) error {
+func (r *paymentsRepository) Update(ctx context.Context, id string, n *models.Payments) error {
 	rez, err := r.CDB.UpdateOne(ctx, bson.M{"id": id}, bson.M{"$set": n})
 	if err != nil {
 		log.Printf("failed to update payment: %v\n", err)

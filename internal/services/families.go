@@ -15,17 +15,17 @@ type FamiliesRepository interface {
 	Update(context.Context, string, *models.Families) error
 }
 
-type FamiliesService struct {
+type familiesService struct {
 	FamiliesRepository FamiliesRepository
 }
 
-func NewFamiliesService(FamiliesRepository FamiliesRepository) *FamiliesService {
-	return &FamiliesService{
-		FamiliesRepository: FamiliesRepository,
+func NewFamiliesService(familiesRepository FamiliesRepository) *familiesService {
+	return &familiesService{
+		FamiliesRepository: familiesRepository,
 	}
 }
 
-func (s *FamiliesService) Create(ctx context.Context, body *models.FamiliesRequest) (string, error) {
+func (s *familiesService) Create(ctx context.Context, body *models.FamiliesRequest) (string, error) {
 	familie := &models.Families{}
 	familie.Hydrate(body)
 
@@ -40,7 +40,7 @@ func (s *FamiliesService) Create(ctx context.Context, body *models.FamiliesReque
 	return familie.ID, nil
 }
 
-func (s *FamiliesService) GetFamilies(ctx context.Context, id string) (*models.FamiliesResponse, error) {
+func (s *familiesService) GetFamilies(ctx context.Context, id string) (*models.FamiliesResponse, error) {
 	familie, err := s.FamiliesRepository.FindByID(ctx, id)
 	if err != nil {
 		log.Printf("failed to get familie: %v\n", err)
@@ -54,7 +54,7 @@ func (s *FamiliesService) GetFamilies(ctx context.Context, id string) (*models.F
 	return familiesResponse, nil
 }
 
-func (s *FamiliesService) GetAllFamilies(ctx context.Context) ([]*models.FamiliesResponse, error) {
+func (s *familiesService) GetAllFamilies(ctx context.Context) ([]*models.FamiliesResponse, error) {
 	families, err := s.FamiliesRepository.FindAll(ctx)
 	if err != nil {
 		log.Printf("failed to get families: %v\n", err)
@@ -71,7 +71,7 @@ func (s *FamiliesService) GetAllFamilies(ctx context.Context) ([]*models.Familie
 	return n, nil
 }
 
-func (s *FamiliesService) Update(ctx context.Context, id string, body *models.FamiliesRequest) error {
+func (s *familiesService) Update(ctx context.Context, id string, body *models.FamiliesRequest) error {
 	familie, err := s.FamiliesRepository.FindByID(ctx, id)
 	if err != nil {
 		log.Printf("failed to get familie: %v\n", err)

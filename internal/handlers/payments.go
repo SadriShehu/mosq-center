@@ -42,7 +42,7 @@ func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(id))
 }
 
-func (h *handler) GetPayments(w http.ResponseWriter, req *http.Request) {
+func (h *handler) GetPayment(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	id := chi.URLParam(req, "id")
 
@@ -77,7 +77,7 @@ func (h *handler) GetAllPayments(w http.ResponseWriter, req *http.Request) {
 	render.JSON(w, req, payments)
 }
 
-func (h *handler) UpdatePayments(w http.ResponseWriter, req *http.Request) {
+func (h *handler) UpdatePayment(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	id := chi.URLParam(req, "id")
 
