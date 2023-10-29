@@ -57,6 +57,7 @@ func (p *PaymentsResponse) MapResponse(payment *Payments) {
 
 type PaymentsTemplate struct {
 	FamilyName        string  `json:"family_name"`
+	Members           int     `json:"members"`
 	Amount            float64 `json:"amount"`
 	Year              int     `json:"year"`
 	NeighbourhoodName string  `json:"neighbourhood_name"`
@@ -64,8 +65,9 @@ type PaymentsTemplate struct {
 	UpdatedAt         string  `json:"updated_at"`
 }
 
-func (p *PaymentsTemplate) MapTemplate(payment *Payments, familyName string, neighbourhoodName string) {
+func (p *PaymentsTemplate) MapTemplate(payment *Payments, familyName string, familyMembers int, neighbourhoodName string) {
 	p.FamilyName = familyName
+	p.Members = familyMembers
 	p.Amount = payment.Amount
 	p.Year = payment.Year
 	p.NeighbourhoodName = neighbourhoodName
