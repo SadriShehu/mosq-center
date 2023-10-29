@@ -1,0 +1,32 @@
+{{ define "content" }}
+<div class="container">
+    <h1>Lagjet</h1>
+    <p class="lead">Lista e lagjeve</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Emri i lagjes</th>
+                <th>Qyteti</th>
+                <th>Shteti</th>
+                <th>Kodi Postal</th>
+                <th>Krijuar me</th>
+                <th>Ndryshuar me</th>
+                <th>Ndrysho</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Neighbourhoods}}
+            <tr>
+                <td>{{.Name}}</td>
+                <td>{{.Region}}</td>
+                <td>{{.Country}}</td>
+                <td>{{.PostalCode}}</td>
+                <td>{{.CreatedAt}}</td>
+                <td>{{.UpdatedAt}}</td>
+                <td><a href="/neighbourhoods/{{.ID}}/edit">Ndrysho</a></td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{ end }}

@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi"
+	"github.com/sadrishehu/mosq-center/internal"
 	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
 )
 
@@ -25,6 +28,18 @@ func New(router *chi.Mux,
 		FamiliesService:       fs,
 		NeighbourhoodsService: ns,
 	}
+}
+
+func (h *handler) RegisterTemplates() {
+	fs := http.FileServer(http.FS(internal.Files))
+	h.RouterService.Handle("/templates/app/css/styles.css", fs)
+	h.RouterService.Handle("/templates/app/js/scripts.js", fs)
+	h.RouterService.Handle("/templates/app/assets/favicon.ico", fs)
+
+	h.RouterService.Route("/", func(r chi.Router) {
+		r.Get("/lagjet", h.Lagjet)
+		r.Get("/familjet", h.Familjet)
+	})
 }
 
 func (h *handler) RegisterRoutesV1() {

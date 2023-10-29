@@ -1,0 +1,34 @@
+{{ define "content" }}
+<div class="container">
+    <h1>Familjet</h1>
+    <p class="lead">Lista e familjeve</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Emri</th>
+                <th>Prindi</th>
+                <th>Mbimeri</th>
+                <th>Numri i antareve</th>
+                <th>Lagje</th>
+                <th>Krijuar me</th>
+                <th>Ndryshuar me</th>
+                <th>Ndrysho</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Families}}
+            <tr>
+                <td>{{.Family.Name}}</td>
+                <td>{{.Family.Middlename}}</td>
+                <td>{{.Family.Surname}}</td>
+                <td>{{.Family.Members}}</td>
+                <td>{{.Neighbourhood}}</td>
+                <td>{{.Family.CreatedAt}}</td>
+                <td>{{.Family.UpdatedAt}}</td>
+                <td><a href="/familjet/{{.Family.ID}}/ndrysho">Ndrysho</a></td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{ end }}

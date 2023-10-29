@@ -59,3 +59,8 @@ func (f *FamiliesResponse) MapResponse(family *Families) {
 	f.CreatedAt = family.CreatedAt
 	f.UpdatedAt = family.UpdatedAt
 }
+
+type FamiliesTemplate struct {
+	Family        *FamiliesResponse
+	Neighbourhood string
+}

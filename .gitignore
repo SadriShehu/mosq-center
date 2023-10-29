@@ -1,2 +1,7 @@
 db-user-cert.pem
 .DS_Store
+internal/.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+.vscode

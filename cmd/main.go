@@ -115,4 +115,5 @@ func (s *service) bootstrap() {
 	h := handlers.New(s.router, s.auth0, ps, fs, ns)
 
 	h.RegisterRoutesV1()
+	h.RegisterTemplates()
 }
