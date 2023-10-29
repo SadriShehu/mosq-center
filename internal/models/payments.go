@@ -54,3 +54,21 @@ func (p *PaymentsResponse) MapResponse(payment *Payments) {
 	p.CreatedAt = payment.CreatedAt
 	p.UpdatedAt = payment.UpdatedAt
 }
+
+type PaymentsTemplate struct {
+	FamilyName        string  `json:"family_name"`
+	Amount            float64 `json:"amount"`
+	Year              int     `json:"year"`
+	NeighbourhoodName string  `json:"neighbourhood_name"`
+	CreatedAt         string  `json:"created_at"`
+	UpdatedAt         string  `json:"updated_at"`
+}
+
+func (p *PaymentsTemplate) MapTemplate(payment *Payments, familyName string, neighbourhoodName string) {
+	p.FamilyName = familyName
+	p.Amount = payment.Amount
+	p.Year = payment.Year
+	p.NeighbourhoodName = neighbourhoodName
+	p.CreatedAt = payment.CreatedAt
+	p.UpdatedAt = payment.UpdatedAt
+}
