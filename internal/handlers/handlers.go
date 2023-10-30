@@ -39,6 +39,7 @@ func (h *handler) RegisterTemplates() {
 	h.RouterService.Route("/", func(r chi.Router) {
 		r.Get("/lagjet", h.Lagjet)
 		r.Get("/familjet", h.Familjet)
+		r.Get("/pagesat", h.Pagesat)
 	})
 }
 

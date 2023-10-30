@@ -14,6 +14,7 @@ var Files embed.FS
 var (
 	lagjet   = parse("app/lagjet.html")
 	familjet = parse("app/familjet.html")
+	pagesat  = parse("app/pagesat.html")
 )
 
 type LagjetParams struct {
@@ -37,6 +38,18 @@ func Familjet(w io.Writer, p FamiljetParams, partial string) error {
 	}
 
 	return familjet.ExecuteTemplate(w, partial, p)
+}
+
+type PagesatParams struct {
+	Payments []*models.PaymentsTemplate
+}
+
+func Pagesat(w io.Writer, p PagesatParams, partial string) error {
+	if partial == "" {
+		partial = "layout.html"
+	}
+
+	return pagesat.ExecuteTemplate(w, partial, p)
 }
 
 func parse(file string) *template.Template {

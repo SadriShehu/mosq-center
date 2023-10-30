@@ -40,7 +40,7 @@ func (s *familiesService) Create(ctx context.Context, body *models.FamiliesReque
 	return familie.ID, nil
 }
 
-func (s *familiesService) GetFamilies(ctx context.Context, id string) (*models.FamiliesResponse, error) {
+func (s *familiesService) GetFamily(ctx context.Context, id string) (*models.FamiliesResponse, error) {
 	familie, err := s.FamiliesRepository.FindByID(ctx, id)
 	if err != nil {
 		log.Printf("failed to get familie: %v\n", err)

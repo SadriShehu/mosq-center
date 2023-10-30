@@ -13,7 +13,7 @@ import (
 
 type FamiliesService interface {
 	Create(context.Context, *models.FamiliesRequest) (string, error)
-	GetFamilies(context.Context, string) (*models.FamiliesResponse, error)
+	GetFamily(context.Context, string) (*models.FamiliesResponse, error)
 	GetAllFamilies(context.Context) ([]*models.FamiliesResponse, error)
 	Update(context.Context, string, *models.FamiliesRequest) error
 }
@@ -46,7 +46,7 @@ func (h *handler) GetFamily(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	id := chi.URLParam(req, "id")
 
-	familie, err := h.FamiliesService.GetFamilies(ctx, id)
+	familie, err := h.FamiliesService.GetFamily(ctx, id)
 	if err != nil {
 		log.Printf("failed to get familie: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)

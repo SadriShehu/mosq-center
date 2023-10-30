@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/sadrishehu/mosq-center/internal/models"
@@ -50,6 +51,43 @@ func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 		Families: families,
 	}
 	templates.Familjet(w, p, partial(req))
+}
+
+func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
+	p, err := h.PaymentsService.GetAllPayments(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var payments []*models.PaymentsTemplate
+	for _, payment := range p {
+		paymentTemplate := &models.PaymentsTemplate{}
+
+		f, err := h.FamiliesService.GetFamily(ctx, payment.FamilyID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, payment.NeighbourhoodID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		familyName := fmt.Sprintf("%s %s %s", f.Name, f.Middlename, f.Surname)
+		paymentTemplate.MapTemplate(payment, familyName, f.Members, n.Name)
+
+		payments = append(payments, paymentTemplate)
+	}
+
+	paymentsParams := templates.PagesatParams{
+		Payments: payments,
+	}
+	templates.Pagesat(w, paymentsParams, partial(req))
 }
 
 func partial(r *http.Request) string {
