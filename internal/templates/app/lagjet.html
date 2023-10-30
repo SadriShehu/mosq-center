@@ -1,7 +1,29 @@
 {{ define "content" }}
 <div class="container">
-    <h1>Lagjet</h1>
-    <p class="lead">Lista e lagjeve</p>
+    <h1>Krijo Lagje</h1>
+    <form id="neighbourhood-form" method="POST" action="/api/v1/neighbourhoods">
+        <div class="row">
+            <div class="col">
+                <input name="name" type="text" placeholder='Emri i lagjes' class="form-control" />
+            </div>
+            <div class="col">
+                <input name="region" type="text" placeholder="Qyteti" class="form-control" />
+            </div>
+            <div class="col">
+                <input name="country" type="text" placeholder="Shteti" class="form-control" />
+            </div>
+            <div class="col">
+                <input name="postal_code" type="text" placeholder="Kodi Postal" class="form-control" />
+            </div>
+            <div class="col">
+                <input type="submit" value="Krijo" class="btn btn-primary" />
+            </div>
+        </div>
+    </form>
+    <br />
+</div>
+<div class="container">
+    <h3>Lista e lagjeve</h3>
     <table class="table">
         <thead>
             <tr>
