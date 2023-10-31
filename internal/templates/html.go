@@ -29,7 +29,8 @@ func Lagjet(w io.Writer, p LagjetParams, partial string) error {
 }
 
 type FamiljetParams struct {
-	Families []*models.FamiliesTemplate
+	Families       []*models.FamiliesTemplate
+	Neighbourhoods []*models.NeighbourhoodResponse
 }
 
 func Familjet(w io.Writer, p FamiljetParams, partial string) error {
@@ -42,6 +43,7 @@ func Familjet(w io.Writer, p FamiljetParams, partial string) error {
 
 type PagesatParams struct {
 	Payments []*models.PaymentsTemplate
+	Families []*models.FamiliesResponse
 }
 
 func Pagesat(w io.Writer, p PagesatParams, partial string) error {

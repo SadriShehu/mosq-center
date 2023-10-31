@@ -32,6 +32,12 @@ func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var families []*models.FamiliesTemplate
 	for _, family := range f {
 		familyTemplate := &models.FamiliesTemplate{}
@@ -48,7 +54,8 @@ func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 	}
 
 	p := templates.FamiljetParams{
-		Families: families,
+		Families:       families,
+		Neighbourhoods: n,
 	}
 	templates.Familjet(w, p, partial(req))
 }
@@ -57,6 +64,12 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	p, err := h.PaymentsService.GetAllPayments(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	f, err := h.FamiliesService.GetAllFamilies(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -72,7 +85,7 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, payment.NeighbourhoodID)
+		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, f.NeighbourhoodID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -86,6 +99,7 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 
 	paymentsParams := templates.PagesatParams{
 		Payments: payments,
+		Families: f,
 	}
 	templates.Pagesat(w, paymentsParams, partial(req))
 }

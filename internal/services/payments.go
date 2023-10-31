@@ -81,7 +81,6 @@ func (s *paymentsService) Update(ctx context.Context, id string, body *models.Pa
 	payment.FamilyID = body.FamilyID
 	payment.Amount = body.Amount
 	payment.Year = body.Year
-	payment.NeighbourhoodID = body.NeighbourhoodID
 	payment.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
 
 	err = s.PaymentsRepository.Update(ctx, id, payment)

@@ -1,7 +1,31 @@
 {{ define "content" }}
 <div class="container">
-    <h1>Pagesat</h1>
-    <p class="lead">Lista e pagesave</p>
+    <h1>Krijo Pagese</h1>
+    <form id="payment-form" method="POST" action="/api/v1/payments">
+        <div class="row">
+            <div class="col">
+                <select name="family_id" class="form-control">
+                    <option value="" disabled selected>Zgjidh familjen</option>
+                    {{range .Families}}
+                    <option value="{{.ID}}">{{.Name}} {{.Middlename}} {{.Surname}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="col">
+                <input name="amount" type="number" step=".01" placeholder='Shuma per pagese' class="form-control" />
+            </div>
+            <div class="col">
+                <input name="year" type="number" placeholder="Viti" class="form-control" />
+            </div>
+            <div class="col">
+                <input type="submit" value="Krijo" class="btn btn-primary" />
+            </div>
+        </div>
+    </form>
+    <br />
+</div>
+<div class="container">
+    <h3>Lista e pagesave</h3>
     <table class="table">
         <thead>
             <tr>
@@ -31,4 +55,5 @@
         </tbody>
     </table>
 </div>
+<script src="app/js/krijoPagese.js"></script>
 {{ end }}

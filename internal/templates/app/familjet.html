@@ -1,7 +1,37 @@
 {{ define "content" }}
 <div class="container">
-    <h1>Familjet</h1>
-    <p class="lead">Lista e familjeve</p>
+    <h1>Krijo Familje</h1>
+    <form id="family-form" method="POST" action="/api/v1/families">
+        <div class="row">
+            <div class="col">
+                <input name="name" type="text" placeholder='Emri' class="form-control" />
+            </div>
+            <div class="col">
+                <input name="middle_name" type="text" placeholder="Emri i Prindit" class="form-control" />
+            </div>
+            <div class="col">
+                <input name="surname" type="text" placeholder="Mbiemri" class="form-control" />
+            </div>
+            <div class="col">
+                <input name="members" type="number" placeholder="Numri i anetareve" class="form-control" />
+            </div>
+            <div class="col">
+                <select name="neighbourhood_id" class="form-control">
+                    <option value="" disabled selected>Zgjidh lagjen</option>
+                    {{range .Neighbourhoods}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="col">
+                <input type="submit" value="Krijo" class="btn btn-primary" />
+            </div>
+        </div>
+    </form>
+    <br />
+</div>
+<div class="container">
+    <h3>Lista e familjeve</h3>
     <table class="table">
         <thead>
             <tr>
@@ -31,4 +61,5 @@
         </tbody>
     </table>
 </div>
+<script src="app/js/krijoFamilje.js"></script>
 {{ end }}
