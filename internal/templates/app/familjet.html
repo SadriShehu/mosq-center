@@ -4,19 +4,19 @@
     <form id="family-form" method="POST" action="/api/v1/families">
         <div class="row">
             <div class="col">
-                <input name="name" type="text" placeholder='Emri' class="form-control" />
+                <input id="name" name="name" type="text" placeholder='Emri' class="form-control" />
             </div>
             <div class="col">
-                <input name="middle_name" type="text" placeholder="Emri i Prindit" class="form-control" />
+                <input id="middle_name" name="middle_name" type="text" placeholder="Emri i Prindit" class="form-control" />
             </div>
             <div class="col">
-                <input name="surname" type="text" placeholder="Mbiemri" class="form-control" />
+                <input id="surname" name="surname" type="text" placeholder="Mbiemri" class="form-control" />
             </div>
             <div class="col">
-                <input name="members" type="number" placeholder="Numri i anetareve" class="form-control" />
+                <input id="members" name="members" type="number" placeholder="Numri i anetareve" class="form-control" />
             </div>
             <div class="col">
-                <select name="neighbourhood_id" class="form-control">
+                <select id="neighbourhood_id" name="neighbourhood_id" class="form-control">
                     <option value="" disabled selected>Zgjidh lagjen</option>
                     {{range .Neighbourhoods}}
                     <option value="{{.ID}}">{{.Name}}</option>
@@ -55,11 +55,54 @@
                 <td>{{.Neighbourhood}}</td>
                 <td>{{.Family.CreatedAt}}</td>
                 <td>{{.Family.UpdatedAt}}</td>
-                <td><a href="/familjet/{{.Family.ID}}/ndrysho">Ndrysho</a></td>
+                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.Family.ID}}', '{{.Family.Name}}', '{{.Family.Middlename}}', '{{.Family.Surname}}', '{{.Family.Members}}', '{{.Family.NeighbourhoodID}}')">Ndrysho</button></td>
             </tr>
             {{end}}
         </tbody>
     </table>
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">Ndrysho Familjen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="update-form" method="PUT">
+                        <input name="id" type="hidden" id="m_id" />
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Emri</label>
+                            <input name="name" type="text" class="form-control" id="m_name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="middlename" class="form-label">Prindi</label>
+                            <input name="middlename" type="text" class="form-control" id="m_middlename">
+                        </div>
+                        <div class="mb-3">
+                            <label for="surname" class="form-label">Mbiemri</label>
+                            <input name="surname" type="text" class="form-control" id="m_surname">
+                        </div>
+                        <div class="mb-3">
+                            <label for="members" class="form-label">Anetaret</label>
+                            <input name="members" type="number" class="form-control" id="m_members">
+                        </div>
+                        <div class="col">
+                            <label for="m_neighbourhood_id" class="form-label">Lagje</label>
+                            <select id="m_neighbourhood_id" name="m_neighbourhood_id" class="form-control">
+                                {{range .Neighbourhoods}}
+                                <option value="{{.ID}}">{{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
+                    <button type="submit" form="update-form" class="btn btn-primary">Ruaj Ndryshimet</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="app/js/krijoFamilje.js"></script>
 {{ end }}

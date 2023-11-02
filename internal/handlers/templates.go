@@ -92,7 +92,7 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 		}
 
 		familyName := fmt.Sprintf("%s %s %s", f.Name, f.Middlename, f.Surname)
-		paymentTemplate.MapTemplate(payment, familyName, f.Members, n.Name)
+		paymentTemplate.MapTemplate(payment, f.ID, familyName, f.Members, n.Name)
 
 		payments = append(payments, paymentTemplate)
 	}

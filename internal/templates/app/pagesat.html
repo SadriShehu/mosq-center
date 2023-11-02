@@ -4,7 +4,7 @@
     <form id="payment-form" method="POST" action="/api/v1/payments">
         <div class="row">
             <div class="col">
-                <select name="family_id" class="form-control">
+                <select id="family_id" name="family_id" class="form-control">
                     <option value="" disabled selected>Zgjidh familjen</option>
                     {{range .Families}}
                     <option value="{{.ID}}">{{.Name}} {{.Middlename}} {{.Surname}}</option>
@@ -12,10 +12,10 @@
                 </select>
             </div>
             <div class="col">
-                <input name="amount" type="number" step=".01" placeholder='Shuma per pagese' class="form-control" />
+                <input id="amount" name="amount" type="number" step=".01" placeholder='Shuma per pagese' class="form-control" />
             </div>
             <div class="col">
-                <input name="year" type="number" placeholder="Viti" class="form-control" />
+                <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
             <div class="col">
                 <input type="submit" value="Krijo" class="btn btn-primary" />
@@ -49,11 +49,46 @@
                 <td>{{.NeighbourhoodName}}</td>
                 <td>{{.CreatedAt}}</td>
                 <td>{{.UpdatedAt}}</td>
-                <td><a href="/pagesat/{{.ID}}/ndrysho">Ndrysho</a></td>
+                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.FamilyID}}', '{{.Amount}}', '{{.Year}}')">Ndrysho</button></td>
             </tr>
             {{end}}
         </tbody>
     </table>
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">Ndrysho Pagesen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="update-form" method="PUT">
+                        <input name="id" type="hidden" id="m_id" />
+                        <div class="mb-3">
+                            <label for="family_id" class="form-label">Familja</label>
+                            <select id="m_family_id" name="family_id" class="form-control">
+                                {{range .Families}}
+                                <option value="{{.ID}}">{{.Name}} {{.Middlename}} {{.Surname}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Shuma</label>
+                            <input name="amount" type="number" step=".01" class="form-control" id="m_amount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Viti</label>
+                            <input name="year" type="number" class="form-control" id="m_year">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
+                    <button type="submit" form="update-form" class="btn btn-primary">Ruaj Ndryshimet</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="app/js/krijoPagese.js"></script>
 {{ end }}

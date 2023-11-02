@@ -4,16 +4,16 @@
     <form id="neighbourhood-form" method="POST" action="/api/v1/neighbourhoods">
         <div class="row">
             <div class="col">
-                <input name="name" type="text" placeholder='Emri i lagjes' class="form-control" />
+                <input id="name" name="name" type="text" placeholder='Emri i lagjes' class="form-control" />
             </div>
             <div class="col">
-                <input name="region" type="text" placeholder="Qyteti" class="form-control" />
+                <input id="region" name="region" type="text" placeholder="Qyteti" class="form-control" />
             </div>
             <div class="col">
-                <input name="country" type="text" placeholder="Shteti" class="form-control" />
+                <input id="country" name="country" type="text" placeholder="Shteti" class="form-control" />
             </div>
             <div class="col">
-                <input name="postal_code" type="text" placeholder="Kodi Postal" class="form-control" />
+                <input id="postal_code" name="postal_code" type="text" placeholder="Kodi Postal" class="form-control" />
             </div>
             <div class="col">
                 <input type="submit" value="Krijo" class="btn btn-primary" />
@@ -45,11 +45,46 @@
                 <td>{{.PostalCode}}</td>
                 <td>{{.CreatedAt}}</td>
                 <td>{{.UpdatedAt}}</td>
-                <td><a href="/lagjet/{{.ID}}/ndrysho">Ndrysho</a></td>
+                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.Name}}', '{{.Region}}', '{{.Country}}', '{{.PostalCode}}')">Ndrysho</button></td>
             </tr>
             {{end}}
         </tbody>
     </table>
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">Ndrysho Lagjen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="update-form" method="PUT">
+                        <input name="id" type="hidden" id="m_id" />
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Emri i lagjes</label>
+                            <input name="name" type="text" class="form-control" id="m_name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="region" class="form-label">Qyteti</label>
+                            <input name="region" type="text" class="form-control" id="m_region">
+                        </div>
+                        <div class="mb-3">
+                            <label for="country" class="form-label">Shteti</label>
+                            <input name="country" type="text" class="form-control" id="m_country">
+                        </div>
+                        <div class="mb-3">
+                            <label for="postal_code" class="form-label">Kodi Postal</label>
+                            <input name="postal_code" type="text" class="form-control" id="m_postal_code">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
+                    <button type="submit" form="update-form" class="btn btn-primary">Ruaj Ndryshimet</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="app/js/krijoLagje.js"></script>
 {{ end }}
