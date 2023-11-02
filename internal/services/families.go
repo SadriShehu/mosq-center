@@ -13,6 +13,7 @@ type FamiliesRepository interface {
 	FindByID(context.Context, string) (*models.Families, error)
 	FindAll(context.Context) ([]*models.Families, error)
 	Update(context.Context, string, *models.Families) error
+	Delete(context.Context, string) error
 }
 
 type familiesService struct {
@@ -88,6 +89,16 @@ func (s *familiesService) Update(ctx context.Context, id string, body *models.Fa
 	err = s.FamiliesRepository.Update(ctx, id, familie)
 	if err != nil {
 		log.Printf("failed to update familie: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *familiesService) Delete(ctx context.Context, id string) error {
+	err := s.FamiliesRepository.Delete(ctx, id)
+	if err != nil {
+		log.Printf("failed to delete familie: %v\n", err)
 		return err
 	}
 

@@ -34,9 +34,9 @@ func (h *handler) RegisterTemplates() {
 	fs := http.FileServer(http.FS(templates.Files))
 	h.RouterService.Handle("/app/css/styles.css", fs)
 	h.RouterService.Handle("/app/js/scripts.js", fs)
-	h.RouterService.Handle("/app/js/krijoLagje.js", fs)
-	h.RouterService.Handle("/app/js/krijoFamilje.js", fs)
-	h.RouterService.Handle("/app/js/krijoPagese.js", fs)
+	h.RouterService.Handle("/app/js/lagje.js", fs)
+	h.RouterService.Handle("/app/js/familje.js", fs)
+	h.RouterService.Handle("/app/js/pagese.js", fs)
 	h.RouterService.Handle("/app/assets/favicon.ico", fs)
 
 	h.RouterService.Route("/", func(r chi.Router) {
@@ -62,6 +62,7 @@ func (h *handler) RegisterRoutesV1() {
 			r.Get("/{id}", h.GetFamily)
 			r.Get("/", h.GetAllFamilies)
 			r.Put("/{id}", h.UpdateFamily)
+			r.Delete("/{id}", h.DeleteFamily)
 		})
 
 		r.Route("/neighbourhoods", func(r chi.Router) {

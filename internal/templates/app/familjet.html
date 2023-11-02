@@ -24,7 +24,9 @@
                 </select>
             </div>
             <div class="col">
-                <input type="submit" value="Krijo" class="btn btn-primary" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-floppy-disk"></i> Ruaj
+                </button>
             </div>
         </div>
     </form>
@@ -43,6 +45,7 @@
                 <th>Krijuar me</th>
                 <th>Ndryshuar me</th>
                 <th>Ndrysho</th>
+                <th>Fshi</th>
             </tr>
         </thead>
         <tbody>
@@ -55,7 +58,8 @@
                 <td>{{.Neighbourhood}}</td>
                 <td>{{.Family.CreatedAt}}</td>
                 <td>{{.Family.UpdatedAt}}</td>
-                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.Family.ID}}', '{{.Family.Name}}', '{{.Family.Middlename}}', '{{.Family.Surname}}', '{{.Family.Members}}', '{{.Family.NeighbourhoodID}}')">Ndrysho</button></td>
+                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.Family.ID}}', '{{.Family.Name}}', '{{.Family.Middlename}}', '{{.Family.Surname}}', '{{.Family.Members}}', '{{.Family.NeighbourhoodID}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                <td><button type="button" class="btn btn-danger" onclick="deleteFamily('{{.Family.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
             </tr>
             {{end}}
         </tbody>
@@ -97,12 +101,12 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
-                    <button type="submit" form="update-form" class="btn btn-primary">Ruaj Ndryshimet</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <button type="submit" form="update-form" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i></button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script src="app/js/krijoFamilje.js"></script>
+<script src="app/js/familje.js"></script>
 {{ end }}

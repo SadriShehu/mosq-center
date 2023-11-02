@@ -16,6 +16,7 @@ type FamiliesService interface {
 	GetFamily(context.Context, string) (*models.FamiliesResponse, error)
 	GetAllFamilies(context.Context) ([]*models.FamiliesResponse, error)
 	Update(context.Context, string, *models.FamiliesRequest) error
+	Delete(context.Context, string) error
 }
 
 func (h *handler) CreateFamily(w http.ResponseWriter, req *http.Request) {
@@ -97,5 +98,20 @@ func (h *handler) UpdateFamily(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Printf("familie with id %s updated successfully", id)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *handler) DeleteFamily(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	id := chi.URLParam(req, "id")
+
+	if err := h.FamiliesService.Delete(ctx, id); err != nil {
+		log.Printf("failed to delete familie: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to delete familie: %v\n", err)))
+		return
+	}
+
+	log.Printf("familie with id %s deleted successfully", id)
 	w.WriteHeader(http.StatusOK)
 }

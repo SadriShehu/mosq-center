@@ -14,7 +14,6 @@ type Neighbourhood struct {
 	PostalCode string `json:"postal_code"`
 	CreatedAt  string `json:"created_at"`
 	UpdatedAt  string `json:"updated_at"`
-	DeletedAt  string `json:"deleted_at"`
 }
 
 func (n *Neighbourhood) Hydrate(req *NeighbourhoodRequest) {

@@ -90,3 +90,26 @@ func (r *familiesRepository) Update(ctx context.Context, id string, n *models.Fa
 
 	return nil
 }
+
+func (r *familiesRepository) Delete(ctx context.Context, id string) error {
+	// Delete all payments related to the family
+	_, err := r.CDB.Database().Collection("payments").DeleteMany(ctx, bson.M{"familyid": id})
+	if err != nil {
+		log.Printf("failed to delete payments: %v\n", err)
+		return err
+	}
+
+	// Delete the family
+	rez, err := r.CDB.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		log.Printf("failed to delete familie: %v\n", err)
+		return err
+	}
+
+	if rez.DeletedCount == 0 {
+		log.Printf("failed to delete familie: %v\n", err)
+		return errors.New("familie not found")
+	}
+
+	return nil
+}

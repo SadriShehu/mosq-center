@@ -13,7 +13,6 @@ type Payments struct {
 	Year      int     `json:"year"`
 	CreatedAt string  `json:"created_at"`
 	UpdatedAt string  `json:"updated_at"`
-	DeletedAt string  `json:"deleted_at"`
 }
 
 func (p *Payments) Hydrate(req *PaymentsRequest) {
