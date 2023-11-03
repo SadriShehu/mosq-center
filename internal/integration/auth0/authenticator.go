@@ -21,16 +21,16 @@ type Authenticator struct {
 func New(c *config.Config) (*Authenticator, error) {
 	provider, err := oidc.NewProvider(
 		context.Background(),
-		"https://"+c.Auth0Domain+"/",
+		"https://"+c.Auth.Domain+"/",
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     c.Auth0ClientID,
-		ClientSecret: c.Auth0ClientSecret,
-		RedirectURL:  c.Auth0CallbackURL,
+		ClientID:     c.Auth.ClientID,
+		ClientSecret: c.Auth.ClientSecret,
+		RedirectURL:  c.Auth.CallbackURL,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}

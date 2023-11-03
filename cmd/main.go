@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/sessions"
 	"github.com/rs/cors"
 	"github.com/sadrishehu/mosq-center/config"
 	"github.com/sadrishehu/mosq-center/internal/db"
@@ -20,6 +22,10 @@ import (
 	"github.com/sadrishehu/mosq-center/internal/services"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+func init() {
+	gob.Register(map[string]interface{}{})
+}
 
 func main() {
 	c := config.New()
@@ -111,8 +117,9 @@ func (s *service) bootstrap() {
 	fs := services.NewFamiliesService(fr)
 	ns := services.NewNeighbourhoodsRepository(nr)
 
+	ss := sessions.NewCookieStore([]byte(s.config.Auth.SessionsSecret))
 	// Handler injection
-	h := handlers.New(s.router, s.auth0, ps, fs, ns)
+	h := handlers.New(s.router, s.auth0, ps, fs, ns, ss, s.config.Auth)
 
 	h.RegisterRoutesV1()
 	h.RegisterTemplates()
