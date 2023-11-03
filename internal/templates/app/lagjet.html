@@ -10,6 +10,9 @@
                 <input id="region" name="region" type="text" placeholder="Qyteti" class="form-control" />
             </div>
             <div class="col">
+                <input id="city" name="city" type="text" placeholder="Fshati" class="form-control" />
+            </div>
+            <div class="col">
                 <input id="country" name="country" type="text" placeholder="Shteti" class="form-control" />
             </div>
             <div class="col">
@@ -31,6 +34,7 @@
             <tr>
                 <th>Emri i lagjes</th>
                 <th>Qyteti</th>
+                <th>Fshati</th>
                 <th>Shteti</th>
                 <th>Kodi Postal</th>
                 <th>Krijuar me</th>
@@ -44,11 +48,12 @@
             <tr>
                 <td>{{.Name}}</td>
                 <td>{{.Region}}</td>
+                <td>{{.City}}</td>
                 <td>{{.Country}}</td>
                 <td>{{.PostalCode}}</td>
                 <td>{{.CreatedAt}}</td>
                 <td>{{.UpdatedAt}}</td>
-                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.Name}}', '{{.Region}}', '{{.Country}}', '{{.PostalCode}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.Name}}', '{{.City}}', '{{.Region}}', '{{.Country}}', '{{.PostalCode}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
                 <td><button type="button" class="btn btn-danger" onclick="deleteNeighbourhood('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
             </tr>
             {{end}}
@@ -71,6 +76,10 @@
                         <div class="mb-3">
                             <label for="region" class="form-label">Qyteti</label>
                             <input name="region" type="text" class="form-control" id="m_region">
+                        </div>
+                        <div class="mb-3">
+                            <label for="region" class="form-label">Fshati</label>
+                            <input name="city" type="text" class="form-control" id="m_city">
                         </div>
                         <div class="mb-3">
                             <label for="country" class="form-label">Shteti</label>
