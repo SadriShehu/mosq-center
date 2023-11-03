@@ -12,9 +12,11 @@ import (
 var Files embed.FS
 
 var (
-	lagjet   = parse("app/lagjet.html")
-	familjet = parse("app/familjet.html")
-	pagesat  = parse("app/pagesat.html")
+	lagjet     = parse("app/lagjet.html")
+	familjet   = parse("app/familjet.html")
+	pagesat    = parse("app/pagesat.html")
+	publike    = parseNoAuth("app/publike.html")
+	perdoruesi = parse("app/perdoruesi.html")
 )
 
 type LagjetParams struct {
@@ -54,7 +56,35 @@ func Pagesat(w io.Writer, p PagesatParams, partial string) error {
 	return pagesat.ExecuteTemplate(w, partial, p)
 }
 
+type PublikeParams struct{}
+
+func Publike(w io.Writer, p PublikeParams, partial string) error {
+	if partial == "" {
+		partial = "layout-noauth.html"
+	}
+
+	return publike.ExecuteTemplate(w, partial, p)
+}
+
+type PerdoruesiParams struct {
+	Picture string
+	Name    string
+}
+
+func Perdoruesi(w io.Writer, p PerdoruesiParams, partial string) error {
+	if partial == "" {
+		partial = "layout.html"
+	}
+
+	return perdoruesi.ExecuteTemplate(w, partial, p)
+}
+
 func parse(file string) *template.Template {
 	return template.Must(
 		template.New("layout.html").ParseFS(Files, "layout.html", file))
+}
+
+func parseNoAuth(file string) *template.Template {
+	return template.Must(
+		template.New("layout-noauth.html").ParseFS(Files, "layout-noauth.html", file))
 }

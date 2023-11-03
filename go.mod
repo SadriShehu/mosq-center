@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/render v1.0.3
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/google/uuid v1.3.1
+	github.com/gorilla/sessions v1.2.1
 	github.com/rs/cors v1.10.1
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
@@ -19,6 +20,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect

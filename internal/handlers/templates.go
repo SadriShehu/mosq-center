@@ -104,6 +104,29 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 	templates.Pagesat(w, paymentsParams, partial(req))
 }
 
+func (h *handler) Publike(w http.ResponseWriter, req *http.Request) {
+	p := templates.PublikeParams{}
+	templates.Publike(w, p, partial(req))
+}
+
+func (h *handler) User(w http.ResponseWriter, req *http.Request) {
+	store, err := h.SessionStore.Get(req, "auth-store")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	profile := store.Values["profile"]
+	name := profile.(map[string]interface{})["name"]
+	picture := profile.(map[string]interface{})["picture"]
+
+	p := templates.PerdoruesiParams{
+		Picture: picture.(string),
+		Name:    name.(string),
+	}
+	templates.Perdoruesi(w, p, partial(req))
+}
+
 func partial(r *http.Request) string {
 	return r.URL.Query().Get("partial")
 }
