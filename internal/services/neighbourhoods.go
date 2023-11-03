@@ -80,6 +80,7 @@ func (s *neighbourhoodsService) Update(ctx context.Context, id string, body *mod
 
 	neighbourhood.Name = body.Name
 	neighbourhood.Region = body.Region
+	neighbourhood.City = body.City
 	neighbourhood.Country = body.Country
 	neighbourhood.PostalCode = body.PostalCode
 	neighbourhood.UpdatedAt = time.Now().UTC().Format(time.RFC3339)

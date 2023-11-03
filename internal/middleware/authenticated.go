@@ -11,13 +11,14 @@ func AuthenticateUser(store *sessions.CookieStore) func(next http.Handler) http.
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			session, err := store.Get(req, "auth-store")
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				w.Header().Set("X-Reason", "Unable to get session")
+				http.Redirect(w, req, "/", http.StatusSeeOther)
 				return
 			}
 
 			if session.Values["profile"] == nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				http.Redirect(w, req, "/", http.StatusTemporaryRedirect)
+				w.Header().Set("X-Reason", "User is not authenticated")
+				http.Redirect(w, req, "/", http.StatusSeeOther)
 				return
 			}
 

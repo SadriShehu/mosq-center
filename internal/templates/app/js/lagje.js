@@ -7,6 +7,7 @@ document.getElementById("neighbourhood-form").addEventListener("submit", functio
     const payload = {
         name: document.getElementById("name").value,
         region: document.getElementById("region").value,
+        city: document.getElementById("city").value,
         country: document.getElementById("country").value,
         postal_code: document.getElementById("postal_code").value
     };
@@ -33,10 +34,11 @@ document.getElementById("neighbourhood-form").addEventListener("submit", functio
     };
 });
 
-function updateModal(id, name, region, country, postalCode) {
+function updateModal(id, name, city, region, country, postalCode) {
     document.getElementById('m_id').value = id;
     document.getElementById('m_name').value = name;
     document.getElementById('m_region').value = region;
+    document.getElementById('m_city').value = city;
     document.getElementById('m_country').value = country;
     document.getElementById('m_postal_code').value = postalCode;
 }
@@ -50,6 +52,7 @@ document.getElementById("update-form").addEventListener("submit", function (even
     const payload = {
         name: document.getElementById("m_name").value,
         region: document.getElementById("m_region").value,
+        city: document.getElementById("m_city").value,
         country: document.getElementById("m_country").value,
         postal_code: document.getElementById("m_postal_code").value
     };

@@ -72,3 +72,37 @@ document.getElementById("update-form").addEventListener("submit", function (even
         }
     };
 });
+
+function deletePayment(id) {
+    // Send an AJAX request to the server with the payload in the request body
+    const xhr = new XMLHttpRequest();
+    xhr.open("DELETE", "/api/v1/payments/" + id);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+    // Convert the payload object to a JSON string and send it in the request body
+    xhr.send();
+
+    // Set up a callback function to handle the response
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Request was successful, handle the response here
+            console.log("Request was successful");
+            console.log(xhr.responseText);
+            location.reload();
+        } else {
+            // Request had an error, handle the error here
+            console.error("Request failed with status code: " + xhr.status);
+        }
+    };
+}
+
+const AMOUNT_PER_MEMBER = 3;
+const familySelect = document.getElementById('family_id');
+const amountInput = document.getElementById('amount');
+
+familySelect.addEventListener('change', () => {
+    const selectedOption = familySelect.options[familySelect.selectedIndex];
+    const members = selectedOption.getAttribute('data-members');
+    const amount = members * parseInt(AMOUNT_PER_MEMBER, 10);
+    amountInput.value = amount;
+});
