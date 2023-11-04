@@ -12,11 +12,12 @@ import (
 var Files embed.FS
 
 var (
-	lagjet     = parse("app/lagjet.html")
-	familjet   = parse("app/familjet.html")
-	pagesat    = parse("app/pagesat.html")
-	publike    = parseNoAuth("app/publike.html")
-	perdoruesi = parse("app/perdoruesi.html")
+	lagjet          = parse("app/lagjet.html")
+	familjet        = parse("app/familjet.html")
+	pagesat         = parse("app/pagesat.html")
+	pagesatPakryera = parse("app/pagesat-pakryera.html")
+	publike         = parseNoAuth("app/publike.html")
+	perdoruesi      = parse("app/perdoruesi.html")
 )
 
 type LagjetParams struct {
@@ -54,6 +55,18 @@ func Pagesat(w io.Writer, p PagesatParams, partial string) error {
 	}
 
 	return pagesat.ExecuteTemplate(w, partial, p)
+}
+
+type PagesatPakryeraParams struct {
+	Families []*models.FamiliesTemplate
+}
+
+func PagesatPakryera(w io.Writer, p PagesatPakryeraParams, partial string) error {
+	if partial == "" {
+		partial = "layout.html"
+	}
+
+	return pagesatPakryera.ExecuteTemplate(w, partial, p)
 }
 
 type PublikeParams struct{}

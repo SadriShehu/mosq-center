@@ -3,6 +3,8 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/sadrishehu/mosq-center/internal/models"
 	"github.com/sadrishehu/mosq-center/internal/templates"
@@ -125,6 +127,47 @@ func (h *handler) User(w http.ResponseWriter, req *http.Request) {
 		Name:    name.(string),
 	}
 	templates.Perdoruesi(w, p, partial(req))
+}
+
+func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
+	year := req.URL.Query().Get("year")
+	if year == "" {
+		year = fmt.Sprintf("%d", time.Now().Year())
+	}
+
+	yearInt, err := strconv.Atoi(year)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	f, err := h.PaymentsService.NoPayment(ctx, yearInt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var families []*models.FamiliesTemplate
+	for _, family := range f {
+		familyTemplate := &models.FamiliesTemplate{}
+		familyTemplate.Family = family
+
+		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, family.NeighbourhoodID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		familyTemplate.Neighbourhood = n.Name
+
+		families = append(families, familyTemplate)
+	}
+
+	paymentsParams := templates.PagesatPakryeraParams{
+		Families: families,
+	}
+	templates.PagesatPakryera(w, paymentsParams, partial(req))
 }
 
 func partial(r *http.Request) string {
