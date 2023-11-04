@@ -58,10 +58,9 @@ func (h *handler) RegisterTemplates() {
 			r.Get("/lagjet", h.Lagjet)
 			r.Get("/familjet", h.Familjet)
 			r.Get("/pagesat", h.Pagesat)
+			r.Get("/pagesat-pakryera", h.PagesatPakryera)
 			r.Get("/user", h.User)
-			h.RouterService.Handle("/app/js/lagje.js", fs)
-			h.RouterService.Handle("/app/js/familje.js", fs)
-			h.RouterService.Handle("/app/js/pagese.js", fs)
+			h.RouterService.Handle("/app/js/*", fs)
 		})
 	})
 }
