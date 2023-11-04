@@ -90,3 +90,20 @@ func (r *paymentsRepository) Update(ctx context.Context, id string, n *models.Pa
 
 	return nil
 }
+
+func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
+
+	// Delete the family
+	rez, err := r.CDB.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		log.Printf("failed to delete payment: %v\n", err)
+		return err
+	}
+
+	if rez.DeletedCount == 0 {
+		log.Printf("failed to delete payment: %v\n", err)
+		return errors.New("payment not found")
+	}
+
+	return nil
+}

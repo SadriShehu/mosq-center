@@ -16,6 +16,7 @@ type PaymentsService interface {
 	GetPayments(context.Context, string) (*models.PaymentsResponse, error)
 	GetAllPayments(context.Context) ([]*models.PaymentsResponse, error)
 	Update(context.Context, string, *models.PaymentsRequest) error
+	Delete(context.Context, string) error
 }
 
 func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
@@ -97,5 +98,20 @@ func (h *handler) UpdatePayment(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Printf("payment with id %s updated successfully", id)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *handler) DeletePayment(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	id := chi.URLParam(req, "id")
+
+	if err := h.PaymentsService.Delete(ctx, id); err != nil {
+		log.Printf("failed to delete payment: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to delete payment: %v\n", err)))
+		return
+	}
+
+	log.Printf("payment with id %s deleted successfully", id)
 	w.WriteHeader(http.StatusOK)
 }

@@ -13,6 +13,7 @@ type PaymentsRepository interface {
 	FindByID(context.Context, string) (*models.Payments, error)
 	FindAll(context.Context) ([]*models.Payments, error)
 	Update(context.Context, string, *models.Payments) error
+	Delete(context.Context, string) error
 }
 
 type paymentsService struct {
@@ -86,6 +87,17 @@ func (s *paymentsService) Update(ctx context.Context, id string, body *models.Pa
 	err = s.PaymentsRepository.Update(ctx, id, payment)
 	if err != nil {
 		log.Printf("failed to update payment: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *paymentsService) Delete(ctx context.Context, id string) error {
+
+	err := s.PaymentsRepository.Delete(ctx, id)
+	if err != nil {
+		log.Printf("failed to delete payment: %v\n", err)
 		return err
 	}
 
