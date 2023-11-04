@@ -103,6 +103,6 @@ const amountInput = document.getElementById('amount');
 familySelect.addEventListener('change', () => {
     const selectedOption = familySelect.options[familySelect.selectedIndex];
     const members = selectedOption.getAttribute('data-members');
-    const amount = members * parseInt(AMOUNT_PER_MEMBER, 10);
+    const amount = members * AMOUNT_PER_MEMBER;
     amountInput.value = amount;
 });
