@@ -54,18 +54,8 @@ func (r *paymentsRepository) FindAll(ctx context.Context) ([]*models.Payments, e
 	defer cur.Close(ctx)
 
 	var payments []*models.Payments
-	for cur.Next(ctx) {
-		payment := &models.Payments{}
-		err := cur.Decode(payment)
-		if err != nil {
-			return nil, err
-		}
-		payments = append(payments, payment)
-	}
-
-	if cur.Err() != nil {
-		log.Printf("failed to get payments: %v\n", cur.Err())
-		return nil, cur.Err()
+	if err := cur.All(ctx, &payments); err != nil {
+		return nil, err
 	}
 
 	return payments, nil
@@ -109,42 +99,38 @@ func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *paymentsRepository) NoPayment(ctx context.Context, year int) ([]*models.Families, error) {
-	cur, err := r.CDB.Aggregate(ctx, mongo.Pipeline{
-		bson.D{
-			{Key: "$lookup", Value: bson.D{
-				{Key: "from", Value: "payments"},
-				{Key: "localField", Value: "id"},
-				{Key: "foreignField", Value: "familyid"},
-				{Key: "as", Value: "payments"},
-			}},
+	pipeline := []bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         "payments",
+				"localField":   "id",
+				"foreignField": "familyid",
+				"as":           "payments",
+			},
 		},
-		bson.D{
-			{Key: "$match", Value: bson.D{
-				{Key: "payments.year", Value: bson.D{
-					{Key: "$ne", Value: year},
-				}},
-			}},
+		{
+			"$match": bson.M{
+				"payments": bson.M{
+					"$not": bson.M{
+						"$elemMatch": bson.M{
+							"year": year,
+						},
+					},
+				},
+			},
 		},
-	})
+	}
+
+	// Create an aggregation cursor
+	cur, err := r.CDB.Database().Collection("families").Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
-
 	defer cur.Close(ctx)
 
 	var families []*models.Families
-	for cur.Next(ctx) {
-		family := &models.Families{}
-		err := cur.Decode(family)
-		if err != nil {
-			return nil, err
-		}
-		families = append(families, family)
-	}
-
-	if cur.Err() != nil {
-		log.Printf("failed to get families: %v\n", cur.Err())
-		return nil, cur.Err()
+	if err := cur.All(ctx, &families); err != nil {
+		return nil, err
 	}
 
 	return families, nil
