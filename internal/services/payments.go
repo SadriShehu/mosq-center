@@ -95,7 +95,6 @@ func (s *paymentsService) Update(ctx context.Context, id string, body *models.Pa
 }
 
 func (s *paymentsService) Delete(ctx context.Context, id string) error {
-
 	err := s.PaymentsRepository.Delete(ctx, id)
 	if err != nil {
 		log.Printf("failed to delete payment: %v\n", err)

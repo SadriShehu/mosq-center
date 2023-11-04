@@ -16,6 +16,7 @@ type NeighbourhoodsService interface {
 	GetNeighbourhood(context.Context, string) (*models.NeighbourhoodResponse, error)
 	GetAllNeighbourhoods(context.Context) ([]*models.NeighbourhoodResponse, error)
 	Update(context.Context, string, *models.NeighbourhoodRequest) error
+	Delete(context.Context, string) error
 }
 
 func (h *handler) CreateNeighbourhood(w http.ResponseWriter, req *http.Request) {
@@ -97,5 +98,20 @@ func (h *handler) UpdateNeighbourhood(w http.ResponseWriter, req *http.Request) 
 	}
 
 	log.Printf("neighbourhood with id %s updated successfully", id)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *handler) DeleteNeighbourhood(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	id := chi.URLParam(req, "id")
+
+	if err := h.NeighbourhoodsService.Delete(ctx, id); err != nil {
+		log.Printf("failed to delete neighbourhood: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to delete neighbourhood: %v\n", err)))
+		return
+	}
+
+	log.Printf("neighbourhood with id %s deleted successfully", id)
 	w.WriteHeader(http.StatusOK)
 }
