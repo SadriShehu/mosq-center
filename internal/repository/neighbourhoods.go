@@ -80,3 +80,18 @@ func (r *neighbourhoodsRepository) Update(ctx context.Context, id string, n *mod
 
 	return nil
 }
+
+func (r *neighbourhoodsRepository) Delete(ctx context.Context, id string) error {
+	rez, err := r.CDB.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		log.Printf("failed to delete neighbourhood: %v\n", err)
+		return err
+	}
+
+	if rez.DeletedCount == 0 {
+		log.Printf("failed to delete neighbourhood: %v\n", err)
+		return errors.New("neighbourhood not found")
+	}
+
+	return nil
+}

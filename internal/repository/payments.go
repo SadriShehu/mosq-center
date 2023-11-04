@@ -82,7 +82,6 @@ func (r *paymentsRepository) Update(ctx context.Context, id string, n *models.Pa
 }
 
 func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
-
 	// Delete the family
 	rez, err := r.CDB.DeleteOne(ctx, bson.M{"id": id})
 	if err != nil {

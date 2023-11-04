@@ -70,6 +70,9 @@ func (h *handler) RegisterRoutesV1() {
 		r.Get("/health", h.HealthCheck)
 
 		r.Route("/payments", func(r chi.Router) {
+			if h.AuthConfig.Enable {
+				r.Use(middleware.AuthenticateUser(h.SessionStore))
+			}
 			r.Post("/", h.CreatePayment)
 			r.Get("/{id}", h.GetPayment)
 			r.Get("/", h.GetAllPayments)
@@ -79,6 +82,9 @@ func (h *handler) RegisterRoutesV1() {
 		})
 
 		r.Route("/families", func(r chi.Router) {
+			if h.AuthConfig.Enable {
+				r.Use(middleware.AuthenticateUser(h.SessionStore))
+			}
 			r.Post("/", h.CreateFamily)
 			r.Get("/{id}", h.GetFamily)
 			r.Get("/", h.GetAllFamilies)
@@ -87,10 +93,14 @@ func (h *handler) RegisterRoutesV1() {
 		})
 
 		r.Route("/neighbourhoods", func(r chi.Router) {
+			if h.AuthConfig.Enable {
+				r.Use(middleware.AuthenticateUser(h.SessionStore))
+			}
 			r.Post("/", h.CreateNeighbourhood)
 			r.Get("/{id}", h.GetNeighbourhood)
 			r.Get("/", h.GetAllNeighbourhoods)
 			r.Put("/{id}", h.UpdateNeighbourhood)
+			r.Delete("/{id}", h.DeleteNeighbourhood)
 		})
 	})
 }

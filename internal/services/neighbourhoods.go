@@ -13,6 +13,7 @@ type NeighbourhoodsRepository interface {
 	FindByID(context.Context, string) (*models.Neighbourhood, error)
 	FindAll(context.Context) ([]*models.Neighbourhood, error)
 	Update(context.Context, string, *models.Neighbourhood) error
+	Delete(context.Context, string) error
 }
 
 type neighbourhoodsService struct {
@@ -88,6 +89,16 @@ func (s *neighbourhoodsService) Update(ctx context.Context, id string, body *mod
 	err = s.NeighbourhoodsRepository.Update(ctx, id, neighbourhood)
 	if err != nil {
 		log.Printf("failed to update neighbourhood: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *neighbourhoodsService) Delete(ctx context.Context, id string) error {
+	err := s.NeighbourhoodsRepository.Delete(ctx, id)
+	if err != nil {
+		log.Printf("failed to delete neighbourhood: %v\n", err)
 		return err
 	}
 
