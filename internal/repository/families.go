@@ -54,18 +54,8 @@ func (r *familiesRepository) FindAll(ctx context.Context) ([]*models.Families, e
 	defer cur.Close(ctx)
 
 	var families []*models.Families
-	for cur.Next(ctx) {
-		familie := &models.Families{}
-		err := cur.Decode(familie)
-		if err != nil {
-			return nil, err
-		}
-		families = append(families, familie)
-	}
-
-	if cur.Err() != nil {
-		log.Printf("failed to get families: %v\n", cur.Err())
-		return nil, cur.Err()
+	if err := cur.All(ctx, &families); err != nil {
+		return nil, err
 	}
 
 	return families, nil
