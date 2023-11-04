@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -17,6 +18,7 @@ type PaymentsService interface {
 	GetAllPayments(context.Context) ([]*models.PaymentsResponse, error)
 	Update(context.Context, string, *models.PaymentsRequest) error
 	Delete(context.Context, string) error
+	NoPayment(context.Context, int) ([]*models.FamiliesResponse, error)
 }
 
 func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
@@ -114,4 +116,44 @@ func (h *handler) DeletePayment(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("payment with id %s deleted successfully", id)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *handler) NoPayment(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	year := req.URL.Query().Get("year")
+
+	if year == "" {
+		log.Printf("failed to get no payments: %v\n", "year is required")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", "year is required")))
+		return
+	}
+
+	if len(year) != 4 {
+		log.Printf("failed to get no payments: %v\n", "year must be 4 digits")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", "year must be 4 digits")))
+		return
+	}
+
+	yearInt, err := strconv.Atoi(year)
+	if err != nil {
+		log.Printf("failed to get no payments: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", err)))
+		return
+	}
+
+	families, err := h.PaymentsService.NoPayment(ctx, yearInt)
+	if err != nil {
+		log.Printf("failed to get no payments: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", err)))
+		return
+	}
+
+	log.Println("no payments retrieved successfully")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, req, families)
 }

@@ -76,6 +76,7 @@ func (h *handler) RegisterRoutesV1() {
 			r.Get("/", h.GetAllPayments)
 			r.Put("/{id}", h.UpdatePayment)
 			r.Delete("/{id}", h.DeletePayment)
+			r.Get("/no-payment", h.NoPayment)
 		})
 
 		r.Route("/families", func(r chi.Router) {
