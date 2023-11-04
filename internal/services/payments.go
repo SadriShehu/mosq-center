@@ -14,6 +14,7 @@ type PaymentsRepository interface {
 	FindAll(context.Context) ([]*models.Payments, error)
 	Update(context.Context, string, *models.Payments) error
 	Delete(context.Context, string) error
+	NoPayment(context.Context, int) ([]*models.Families, error)
 }
 
 type paymentsService struct {
@@ -102,4 +103,21 @@ func (s *paymentsService) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (s *paymentsService) NoPayment(ctx context.Context, year int) ([]*models.FamiliesResponse, error) {
+	families, err := s.PaymentsRepository.NoPayment(ctx, year)
+	if err != nil {
+		log.Printf("failed to get families: %v\n", err)
+		return nil, err
+	}
+
+	var fr []*models.FamiliesResponse
+	for _, family := range families {
+		nm := &models.FamiliesResponse{}
+		nm.MapResponse(family)
+		fr = append(fr, nm)
+	}
+
+	return fr, nil
 }

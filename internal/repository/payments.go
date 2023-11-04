@@ -107,3 +107,45 @@ func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (r *paymentsRepository) NoPayment(ctx context.Context, year int) ([]*models.Families, error) {
+	cur, err := r.CDB.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{Key: "$lookup", Value: bson.D{
+				{Key: "from", Value: "payments"},
+				{Key: "localField", Value: "id"},
+				{Key: "foreignField", Value: "familyid"},
+				{Key: "as", Value: "payments"},
+			}},
+		},
+		bson.D{
+			{Key: "$match", Value: bson.D{
+				{Key: "payments.year", Value: bson.D{
+					{Key: "$ne", Value: year},
+				}},
+			}},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	defer cur.Close(ctx)
+
+	var families []*models.Families
+	for cur.Next(ctx) {
+		family := &models.Families{}
+		err := cur.Decode(family)
+		if err != nil {
+			return nil, err
+		}
+		families = append(families, family)
+	}
+
+	if cur.Err() != nil {
+		log.Printf("failed to get families: %v\n", cur.Err())
+		return nil, cur.Err()
+	}
+
+	return families, nil
+}
