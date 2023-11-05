@@ -2,11 +2,11 @@
 <div class="container">
     <h1>Kerko pagesat e pakryera</h1>
     <form id="no-payment-form" method="GET" action="/pagesat-pakryera">
-        <div class="row">
-            <div class="col">
+        <div class="row g-3">
+            <div class="md-3">
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <button type="submit" class="btn btn-primary">
                 <i class="fas fa-search"></i> Kerko
                 </button>
@@ -17,7 +17,7 @@
 </div>
 <div class="container">
     <h3>Lista e familjeve papaguar per vitin <span id="yearSpan"></span></h3>
-    <table class="table">
+    <table class="table" style="overflow-x: auto; display: block;">
         <thead>
             <tr>
                 <th>Emri</th>

@@ -2,23 +2,23 @@
 <div class="container">
     <h1>Krijo Lagje</h1>
     <form id="neighbourhood-form" method="POST" action="/api/v1/neighbourhoods">
-        <div class="row">
-            <div class="col">
+        <div class="row g-3">
+            <div class="md-3">
                 <input id="name" name="name" type="text" placeholder='Emri i lagjes' class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <input id="region" name="region" type="text" placeholder="Qyteti" class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <input id="city" name="city" type="text" placeholder="Fshati" class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <input id="country" name="country" type="text" placeholder="Shteti" class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <input id="postal_code" name="postal_code" type="text" placeholder="Kodi Postal" class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-floppy-disk"></i> Ruaj
                 </button>
@@ -29,7 +29,7 @@
 </div>
 <div class="container">
     <h3>Lista e lagjeve</h3>
-    <table class="table">
+    <table class="table" style="overflow-x: auto; display: block;">
         <thead>
             <tr>
                 <th>Emri i lagjes</th>

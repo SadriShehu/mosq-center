@@ -2,8 +2,8 @@
 <div class="container">
     <h1>Krijo Pagese</h1>
     <form id="payment-form" method="POST" action="/api/v1/payments">
-        <div class="row">
-            <div class="col">
+        <div class="row g-3">
+            <div class="md-3">
                 <select id="family_id" name="family_id" class="form-control">
                     <option value="" disabled selected>Zgjidh familjen</option>
                     {{range .Families}}
@@ -11,13 +11,13 @@
                     {{end}}
                 </select>
             </div>
-            <div class="col">
+            <div class="md-3">
                 <input id="amount" name="amount" type="number" step=".01" placeholder='Shuma per pagese' class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
-            <div class="col">
+            <div class="md-3">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-floppy-disk"></i> Ruaj
                 </button>
@@ -28,7 +28,7 @@
 </div>
 <div class="container">
     <h3>Lista e pagesave</h3>
-    <table class="table">
+    <table class="table" style="overflow-x: auto; display: block;">
         <thead>
             <tr>
                 <th>Emri i familjes</th>

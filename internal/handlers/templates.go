@@ -118,13 +118,16 @@ func (h *handler) User(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	profile := store.Values["profile"]
-	name := profile.(map[string]interface{})["name"]
-	picture := profile.(map[string]interface{})["picture"]
+	var name, picture string
+	if h.AuthConfig.Enable {
+		profile := store.Values["profile"]
+		name = profile.(map[string]interface{})["name"].(string)
+		picture = profile.(map[string]interface{})["picture"].(string)
+	}
 
 	p := templates.PerdoruesiParams{
-		Picture: picture.(string),
-		Name:    name.(string),
+		Picture: picture,
+		Name:    name,
 	}
 	templates.Perdoruesi(w, p, partial(req))
 }

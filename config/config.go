@@ -41,8 +41,8 @@ func GetBoolOrFalse(key string) bool {
 func New() *Config {
 	return &Config{
 		Port:              ":8080",
-		MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb+srv://center-store.mmuwma4.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority&tlsCertificateKeyFile="),
-		MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", "db-user-cert.pem"),
+		MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
+		MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),
 		Auth: &Auth0Config{
 			Enable:         GetBoolOrFalse("AUTH0_ENABLE"),
 			Domain:         GetOrDefault("AUTH0_DOMAIN", "mosq-center.eu.auth0.com"),
