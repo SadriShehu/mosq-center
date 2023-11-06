@@ -3,7 +3,7 @@
     <h1>Krijo Pagese</h1>
     <form id="payment-form" method="POST" action="/api/v1/payments">
         <div class="row g-3">
-            <div class="md-3">
+            <div class="col-lg-3 col-md-6">
                 <select id="family_id" name="family_id" class="form-control">
                     <option value="" disabled selected>Zgjidh familjen</option>
                     {{range .Families}}
@@ -11,13 +11,13 @@
                     {{end}}
                 </select>
             </div>
-            <div class="md-3">
+            <div class="col-lg-3 col-md-6">
                 <input id="amount" name="amount" type="number" step=".01" placeholder='Shuma per pagese' class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-3 col-md-6">
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-3 col-md-6">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-floppy-disk"></i> Ruaj
                 </button>
@@ -28,36 +28,38 @@
 </div>
 <div class="container">
     <h3>Lista e pagesave</h3>
-    <table class="table" style="overflow-x: auto; display: block;">
-        <thead>
-            <tr>
-                <th>Emri i familjes</th>
-                <th>Anetaret</th>
-                <th>Shuma e pageses</th>
-                <th>Viti</th>
-                <th>Emri i lagjes</th>
-                <th>Krijuar me</th>
-                <th>Ndryshuar me</th>
-                <th>Ndrysho</th>
-                <th>Fshi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .Payments}}
-            <tr>
-                <td>{{.FamilyName}}</td>
-                <td>{{.Members}}</td>
-                <td>{{.Amount}}</td>
-                <td>{{.Year}}</td>
-                <td>{{.NeighbourhoodName}}</td>
-                <td>{{.CreatedAt}}</td>
-                <td>{{.UpdatedAt}}</td>
-                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.FamilyID}}', '{{.Amount}}', '{{.Year}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                <td><button type="button" class="btn btn-danger" onclick="deletePayment('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Emri i familjes</th>
+                    <th>Anetaret</th>
+                    <th>Shuma e pageses</th>
+                    <th>Viti</th>
+                    <th>Emri i lagjes</th>
+                    <th>Krijuar me</th>
+                    <th>Ndryshuar me</th>
+                    <th>Ndrysho</th>
+                    <th>Fshi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Payments}}
+                <tr>
+                    <td>{{.FamilyName}}</td>
+                    <td>{{.Members}}</td>
+                    <td>{{.Amount}}</td>
+                    <td>{{.Year}}</td>
+                    <td>{{.NeighbourhoodName}}</td>
+                    <td>{{.CreatedAt}}</td>
+                    <td>{{.UpdatedAt}}</td>
+                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.FamilyID}}', '{{.Amount}}', '{{.Year}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    <td><button type="button" class="btn btn-danger" onclick="deletePayment('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
     <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

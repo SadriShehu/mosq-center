@@ -3,10 +3,10 @@
     <h1>Kerko pagesat e pakryera</h1>
     <form id="no-payment-form" method="GET" action="/pagesat-pakryera">
         <div class="row g-3">
-            <div class="md-3">
+            <div class="col-lg-3 col-md-6">
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-3 col-md-6">
                 <button type="submit" class="btn btn-primary">
                 <i class="fas fa-search"></i> Kerko
                 </button>
@@ -17,34 +17,36 @@
 </div>
 <div class="container">
     <h3>Lista e familjeve papaguar per vitin <span id="yearSpan"></span></h3>
-    <table class="table" style="overflow-x: auto; display: block;">
-        <thead>
-            <tr>
-                <th>Emri</th>
-                <th>Prindi</th>
-                <th>Mbimeri</th>
-                <th>Numri i antareve</th>
-                <th>Lagje</th>
-                <th>Krijuar me</th>
-                <th>Ndryshuar me</th>
-                <th>Paguaj</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .Families}}
-            <tr>
-                <td>{{.Family.Name}}</td>
-                <td>{{.Family.Middlename}}</td>
-                <td>{{.Family.Surname}}</td>
-                <td>{{.Family.Members}}</td>
-                <td>{{.Neighbourhood}}</td>
-                <td>{{.Family.CreatedAt}}</td>
-                <td>{{.Family.UpdatedAt}}</td>
-                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPaymentModal" onclick="createPaymentModal('{{.Family.ID}}', '{{.Family.Members}}', getYearFromQueryParam())"><i class="fa-solid fa-pen-to-square"></i></button></td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Emri</th>
+                    <th>Prindi</th>
+                    <th>Mbimeri</th>
+                    <th>Numri i antareve</th>
+                    <th>Lagje</th>
+                    <th>Krijuar me</th>
+                    <th>Ndryshuar me</th>
+                    <th>Paguaj</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Families}}
+                <tr>
+                    <td>{{.Family.Name}}</td>
+                    <td>{{.Family.Middlename}}</td>
+                    <td>{{.Family.Surname}}</td>
+                    <td>{{.Family.Members}}</td>
+                    <td>{{.Neighbourhood}}</td>
+                    <td>{{.Family.CreatedAt}}</td>
+                    <td>{{.Family.UpdatedAt}}</td>
+                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPaymentModal" onclick="createPaymentModal('{{.Family.ID}}', '{{.Family.Members}}', getYearFromQueryParam())"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
     <div class="modal fade" id="createPaymentModal" tabindex="-1" aria-labelledby="createPaymentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

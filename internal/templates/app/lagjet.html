@@ -3,22 +3,22 @@
     <h1>Krijo Lagje</h1>
     <form id="neighbourhood-form" method="POST" action="/api/v1/neighbourhoods">
         <div class="row g-3">
-            <div class="md-3">
+            <div class="col-lg-2 col-md-6">
                 <input id="name" name="name" type="text" placeholder='Emri i lagjes' class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-2 col-md-6">
                 <input id="region" name="region" type="text" placeholder="Qyteti" class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-2 col-md-6">
                 <input id="city" name="city" type="text" placeholder="Fshati" class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-2 col-md-6">
                 <input id="country" name="country" type="text" placeholder="Shteti" class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-2 col-md-6">
                 <input id="postal_code" name="postal_code" type="text" placeholder="Kodi Postal" class="form-control" />
             </div>
-            <div class="md-3">
+            <div class="col-lg-2 col-md-6">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-floppy-disk"></i> Ruaj
                 </button>
@@ -29,36 +29,38 @@
 </div>
 <div class="container">
     <h3>Lista e lagjeve</h3>
-    <table class="table" style="overflow-x: auto; display: block;">
-        <thead>
-            <tr>
-                <th>Emri i lagjes</th>
-                <th>Qyteti</th>
-                <th>Fshati</th>
-                <th>Shteti</th>
-                <th>Kodi Postal</th>
-                <th>Krijuar me</th>
-                <th>Ndryshuar me</th>
-                <th>Ndrysho</th>
-                <th>Fshi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .Neighbourhoods}}
-            <tr>
-                <td>{{.Name}}</td>
-                <td>{{.Region}}</td>
-                <td>{{.City}}</td>
-                <td>{{.Country}}</td>
-                <td>{{.PostalCode}}</td>
-                <td>{{.CreatedAt}}</td>
-                <td>{{.UpdatedAt}}</td>
-                <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.Name}}', '{{.City}}', '{{.Region}}', '{{.Country}}', '{{.PostalCode}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                <td><button type="button" class="btn btn-danger" onclick="deleteNeighbourhood('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Emri i lagjes</th>
+                    <th>Qyteti</th>
+                    <th>Fshati</th>
+                    <th>Shteti</th>
+                    <th>Kodi Postal</th>
+                    <th>Krijuar me</th>
+                    <th>Ndryshuar me</th>
+                    <th>Ndrysho</th>
+                    <th>Fshi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Neighbourhoods}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Region}}</td>
+                    <td>{{.City}}</td>
+                    <td>{{.Country}}</td>
+                    <td>{{.PostalCode}}</td>
+                    <td>{{.CreatedAt}}</td>
+                    <td>{{.UpdatedAt}}</td>
+                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.Name}}', '{{.City}}', '{{.Region}}', '{{.Country}}', '{{.PostalCode}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    <td><button type="button" class="btn btn-danger" onclick="deleteNeighbourhood('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
     <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
