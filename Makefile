@@ -25,3 +25,7 @@ docker-db-start: ## Start docker db
 docker-db-stop: ## Stop docker db
 	@echo "Stopping docker db"
 	@docker-compose -f docker-compose.yml down
+
+run: ## Run the application
+	@echo "Running the application"
+	@$(GO) run $(APP_CMD)
