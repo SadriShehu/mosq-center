@@ -5,3 +5,4 @@ internal/.DS_Store
 **/.DS_Store
 **/._.DS_Store
 .vscode
+**/.terraform
