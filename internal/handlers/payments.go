@@ -13,7 +13,7 @@ import (
 )
 
 type PaymentsService interface {
-	Create(context.Context, *models.PaymentsRequest) (string, error)
+	Create(context.Context, *models.PaymentsRequest) ([]string, error)
 	GetPayments(context.Context, string) (*models.PaymentsResponse, error)
 	GetAllPayments(context.Context) ([]*models.PaymentsResponse, error)
 	Update(context.Context, string, *models.PaymentsRequest) error
@@ -32,7 +32,7 @@ func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := h.PaymentsService.Create(ctx, body)
+	ids, err := h.PaymentsService.Create(ctx, body)
 	if err != nil {
 		log.Printf("failed to create payment: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -42,7 +42,7 @@ func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
 
 	log.Println("payment created successfully")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(id))
+	w.Write([]byte(fmt.Sprintf("%v\n", ids)))
 }
 
 func (h *handler) GetPayment(w http.ResponseWriter, req *http.Request) {

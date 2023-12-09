@@ -3,6 +3,10 @@
     <h1>Krijo Pagese</h1>
     <form id="payment-form" method="POST" action="/api/v1/payments">
         <div class="row g-3">
+            <div>
+                <input type="checkbox" id="new-year" name="new-year" class="form-check-input" />
+                <label for="new-year" class="form-check-label">Krijo pagese per disa vite</label>
+            </div>
             <div class="col-lg-3 col-md-6">
                 <select id="family_id" name="family_id" class="form-control">
                     <option value="" disabled selected>Zgjidh familjen</option>
@@ -16,6 +20,9 @@
             </div>
             <div class="col-lg-3 col-md-6">
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
+            </div>
+            <div id="placeholder" class="col-lg-3 col-md-6">
+                <input id="range_year" name="range_year" type="number" placeholder="Viti i pageses" class="form-control" hidden disabled/>
             </div>
             <div class="col-lg-3 col-md-6">
                 <button type="submit" class="btn btn-primary">
@@ -71,7 +78,7 @@
                     <form id="update-form" method="PUT">
                         <input name="id" type="hidden" id="m_id" />
                         <div class="mb-3">
-                            <label for="family_id" class="form-label">Familja</label>
+                            <label for="m_family_id" class="form-label">Familja</label>
                             <select id="m_family_id" name="family_id" class="form-control">
                                 {{range .Families}}
                                 <option value="{{.ID}}">{{.Name}} {{.Middlename}} {{.Surname}}</option>

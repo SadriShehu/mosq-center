@@ -26,9 +26,10 @@ func (p *Payments) Hydrate(req *PaymentsRequest) {
 }
 
 type PaymentsRequest struct {
-	FamilyID string  `json:"family_id" validate:"required"`
-	Amount   float64 `json:"amount" validate:"required"`
-	Year     int     `json:"year" validate:"required"`
+	FamilyID  string  `json:"family_id" validate:"required"`
+	Amount    float64 `json:"amount" validate:"required"`
+	Year      int     `json:"year" validate:"required"`
+	RangeYear int     `json:"range_year"`
 }
 
 type PaymentsResponse struct {
