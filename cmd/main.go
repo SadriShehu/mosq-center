@@ -41,9 +41,12 @@ func main() {
 	}
 	defer dbc.Disconnect(ctx)
 
-	auth, err := auth0.New(c)
-	if err != nil {
-		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	var auth *auth0.Authenticator
+	if c.Auth.Enable {
+		auth, err = auth0.New(c)
+		if err != nil {
+			log.Fatalf("Failed to initialize the authenticator: %v", err)
+		}
 	}
 
 	r := chi.NewRouter()
@@ -60,7 +63,9 @@ func main() {
 	})
 	r.Use(ch.Handler)
 
-	newService(c, r, dbc, auth)
+	services := newService(c, r, dbc, auth)
+	services.bootstrap()
+
 	srv := &http.Server{
 		Addr:    c.Port,
 		Handler: r,
@@ -95,15 +100,18 @@ type service struct {
 	auth0  *auth0.Authenticator
 }
 
-func newService(c *config.Config, r *chi.Mux, nosql *mongo.Client, auth0 *auth0.Authenticator) {
-	s := &service{
+func newService(
+	c *config.Config,
+	r *chi.Mux,
+	nosql *mongo.Client,
+	auth0 *auth0.Authenticator,
+) *service {
+	return &service{
 		config: c,
 		router: r,
 		nosql:  nosql,
 		auth0:  auth0,
 	}
-
-	s.bootstrap()
 }
 
 func (s *service) bootstrap() {

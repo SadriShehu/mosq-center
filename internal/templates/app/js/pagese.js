@@ -8,6 +8,7 @@ document.getElementById("payment-form").addEventListener("submit", function (eve
         family_id: document.getElementById("family_id").value,
         amount: parseFloat(document.getElementById("amount").value),
         year: parseInt(document.getElementById("year").value, 10),
+        range_year: parseInt(document.getElementById("range_year").value, 10),
     };
 
     // Send an AJAX request to the server with the payload in the request body
@@ -105,4 +106,17 @@ familySelect.addEventListener('change', () => {
     const members = selectedOption.getAttribute('data-members');
     const amount = members * AMOUNT_PER_MEMBER;
     amountInput.value = amount;
+});
+
+const checkbox = document.getElementById('new-year');
+const yearInput = document.getElementById('range_year');
+
+checkbox.addEventListener('change', function() {
+    if (this.checked) {
+        yearInput.removeAttribute('hidden');
+        yearInput.removeAttribute('disabled');
+    } else {
+        yearInput.setAttribute('hidden', true);
+        yearInput.setAttribute('disabled', true);
+    }
 });

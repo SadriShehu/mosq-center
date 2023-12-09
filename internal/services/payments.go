@@ -27,19 +27,37 @@ func NewPaymentsService(paymentsRepository PaymentsRepository) *paymentsService 
 	}
 }
 
-func (s *paymentsService) Create(ctx context.Context, body *models.PaymentsRequest) (string, error) {
+func (s *paymentsService) Create(ctx context.Context, body *models.PaymentsRequest) ([]string, error) {
 	payment := &models.Payments{}
 	payment.Hydrate(body)
+
+	if body.RangeYear != 0 {
+		paymentIDs := []string{}
+		for i := body.Year; i <= body.RangeYear; i++ {
+			payment.Year = i
+			id, err := s.PaymentsRepository.Create(ctx, payment)
+			if err != nil {
+				log.Printf("failed to create payment: %v\n", err)
+				return nil, err
+			}
+
+			log.Printf("payment created successfully with interal id: %s\n", id)
+			paymentIDs = append(paymentIDs, id)
+		}
+
+		log.Printf("payments created successfully for period: %d - %d\n", body.Year, body.RangeYear)
+		return paymentIDs, nil
+	}
 
 	id, err := s.PaymentsRepository.Create(ctx, payment)
 	if err != nil {
 		log.Printf("failed to create payment: %v\n", err)
-		return "", err
+		return nil, err
 	}
 
 	log.Printf("payment created successfully with interal id: %s\n", id)
 
-	return payment.ID, nil
+	return []string{payment.ID}, nil
 }
 
 func (s *paymentsService) GetPayments(ctx context.Context, id string) (*models.PaymentsResponse, error) {
