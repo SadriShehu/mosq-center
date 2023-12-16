@@ -124,10 +124,11 @@ func (s *service) bootstrap() {
 	ps := services.NewPaymentsService(pr)
 	fs := services.NewFamiliesService(fr)
 	ns := services.NewNeighbourhoodsRepository(nr)
+	is := services.NewInvoicesService(pr)
 
 	ss := sessions.NewCookieStore([]byte(s.config.Auth.SessionsSecret))
 	// Handler injection
-	h := handlers.New(s.router, s.auth0, ps, fs, ns, ss, s.config.Auth)
+	h := handlers.New(s.router, s.auth0, ps, fs, ns, is, ss, s.config.Auth)
 
 	h.RegisterRoutesV1()
 	h.RegisterTemplates()
