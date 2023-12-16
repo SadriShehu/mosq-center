@@ -19,6 +19,8 @@ type PaymentsService interface {
 	Update(context.Context, string, *models.PaymentsRequest) error
 	Delete(context.Context, string) error
 	NoPayment(context.Context, int) ([]*models.FamiliesResponse, error)
+	GetPaymentsByFamily(context.Context, string) ([]*models.PaymentsResponse, error)
+	GetPaymentsByYear(context.Context, int) ([]*models.PaymentsResponse, error)
 }
 
 func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
@@ -156,4 +158,62 @@ func (h *handler) NoPayment(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, req, families)
+}
+
+func (h *handler) GetPaymentsByFamily(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	id := chi.URLParam(req, "id")
+
+	payments, err := h.PaymentsService.GetPaymentsByFamily(ctx, id)
+	if err != nil {
+		log.Printf("failed to get payments: %v\n", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(fmt.Sprintf("failed to get payments: %v\n", err)))
+		return
+	}
+
+	log.Println("payments retrieved successfully")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, req, payments)
+}
+
+func (h *handler) GetPaymentsByYear(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	year := chi.URLParam(req, "year")
+
+	if year == "" {
+		log.Printf("failed to get payments: %v\n", "year is required")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to get payments: %v\n", "year is required")))
+		return
+	}
+
+	if len(year) != 4 {
+		log.Printf("failed to get payments: %v\n", "year must be 4 digits")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to get payments: %v\n", "year must be 4 digits")))
+		return
+	}
+
+	yearInt, err := strconv.Atoi(year)
+	if err != nil {
+		log.Printf("failed to get payments: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to get payments: %v\n", err)))
+		return
+	}
+
+	payments, err := h.PaymentsService.GetPaymentsByYear(ctx, yearInt)
+	if err != nil {
+		log.Printf("failed to get payments: %v\n", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(fmt.Sprintf("failed to get payments: %v\n", err)))
+		return
+	}
+
+	log.Println("payments retrieved successfully")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, req, payments)
 }

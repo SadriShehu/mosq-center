@@ -15,6 +15,8 @@ type PaymentsRepository interface {
 	Update(context.Context, string, *models.Payments) error
 	Delete(context.Context, string) error
 	NoPayment(context.Context, int) ([]*models.Families, error)
+	FindByFamilyID(context.Context, string) ([]*models.Payments, error)
+	FindByYear(context.Context, int) ([]*models.Payments, error)
 }
 
 type paymentsService struct {
@@ -137,4 +139,38 @@ func (s *paymentsService) NoPayment(ctx context.Context, year int) ([]*models.Fa
 	}
 
 	return fr, nil
+}
+
+func (s *paymentsService) GetPaymentsByFamily(ctx context.Context, id string) ([]*models.PaymentsResponse, error) {
+	payments, err := s.PaymentsRepository.FindByFamilyID(ctx, id)
+	if err != nil {
+		log.Printf("failed to get payments: %v\n", err)
+		return nil, err
+	}
+
+	var n []*models.PaymentsResponse
+	for _, payment := range payments {
+		nm := &models.PaymentsResponse{}
+		nm.MapResponse(payment)
+		n = append(n, nm)
+	}
+
+	return n, nil
+}
+
+func (s *paymentsService) GetPaymentsByYear(ctx context.Context, year int) ([]*models.PaymentsResponse, error) {
+	payments, err := s.PaymentsRepository.FindByYear(ctx, year)
+	if err != nil {
+		log.Printf("failed to get payments: %v\n", err)
+		return nil, err
+	}
+
+	var n []*models.PaymentsResponse
+	for _, payment := range payments {
+		nm := &models.PaymentsResponse{}
+		nm.MapResponse(payment)
+		n = append(n, nm)
+	}
+
+	return n, nil
 }
