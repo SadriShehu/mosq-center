@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sadrishehu/mosq-center/internal/models"
 	"github.com/sadrishehu/mosq-center/internal/templates"
 )
@@ -65,10 +66,38 @@ func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	p, err := h.PaymentsService.GetAllPayments(ctx)
+	year := req.URL.Query().Get("s_year")
+	if year == "" {
+		year = fmt.Sprintf("%d", time.Now().Year())
+	}
+
+	yearInt, err := strconv.Atoi(year)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	familyID := req.URL.Query().Get("s_family_id")
+	if familyID != "" {
+		_, err := uuid.Parse(familyID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	p, err := h.PaymentsService.GetPaymentsByYear(ctx, yearInt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if familyID != "" {
+		p, err = h.PaymentsService.GetPaymentsByFamily(ctx, familyID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	f, err := h.FamiliesService.GetAllFamilies(ctx)

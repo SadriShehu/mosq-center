@@ -120,3 +120,22 @@ checkbox.addEventListener('change', function() {
         yearInput.setAttribute('disabled', true);
     }
 });
+
+const searchByYearRadio = document.getElementById('searchByYear');
+const searchByFamilyRadio = document.getElementById('searchByFamily');
+const searchYearInput = document.getElementById('s_year');
+const searchFamilyInput = document.getElementById('s_family_id');
+
+searchByYearRadio.addEventListener('change', () => {
+    searchYearInput.style.display = 'inline-block';
+    searchFamilyInput.style.display = 'none';
+    searchYearInput.disabled = false;
+    searchFamilyInput.disabled = true;
+});
+
+searchByFamilyRadio.addEventListener('change', () => {
+    searchYearInput.style.display = 'none';
+    searchFamilyInput.style.display = 'inline-block';
+    searchYearInput.disabled = true;
+    searchFamilyInput.disabled = false;
+});
