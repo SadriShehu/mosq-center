@@ -17,6 +17,7 @@ type handler struct {
 	PaymentsService       PaymentsService
 	FamiliesService       FamiliesService
 	NeighbourhoodsService NeighbourhoodsService
+	InvoicesService       InvoicesService
 	SessionStore          *sessions.CookieStore
 	AuthConfig            *config.Auth0Config
 }
@@ -26,6 +27,7 @@ func New(router *chi.Mux,
 	ps PaymentsService,
 	fs FamiliesService,
 	ns NeighbourhoodsService,
+	is InvoicesService,
 	ss *sessions.CookieStore,
 	ac *config.Auth0Config) *handler {
 	return &handler{
@@ -34,6 +36,7 @@ func New(router *chi.Mux,
 		PaymentsService:       ps,
 		FamiliesService:       fs,
 		NeighbourhoodsService: ns,
+		InvoicesService:       is,
 		SessionStore:          ss,
 		AuthConfig:            ac,
 	}
@@ -103,6 +106,13 @@ func (h *handler) RegisterRoutesV1() {
 			r.Get("/", h.GetAllNeighbourhoods)
 			r.Put("/{id}", h.UpdateNeighbourhood)
 			r.Delete("/{id}", h.DeleteNeighbourhood)
+		})
+
+		r.Route("/invoices", func(r chi.Router) {
+			if h.AuthConfig.Enable {
+				r.Use(middleware.AuthenticateUser(h.SessionStore))
+			}
+			r.Get("/", h.GetInvoices)
 		})
 	})
 }

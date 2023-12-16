@@ -53,3 +53,35 @@ function createPaymentCall() {
         }
     };
 }
+
+function exportToPDF(year) {
+    // do a request to the server to get the PDF
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "/api/v1/invoices?year=" + year);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.responseType = 'blob';
+
+    // Set up a callback function to handle the response
+    xhr.send();
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Request was successful, handle the response here
+            console.log("Request was successful");
+            console.log(xhr.response);
+            const blob = new Blob([xhr.response], {type: 'application/pdf'});
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'invoice-' + year + '.pdf';
+            link.click();
+        } else if (xhr.status === 404) {
+            // Request was successful, handle the response here
+            console.log("Request was successful");
+            console.log(xhr.response);
+            alert('No payments found for year ' + year);
+        } else {
+            // Request had an error, handle the error here
+            console.error("Request failed with status code: " + xhr.status);
+        }
+    };
+}
