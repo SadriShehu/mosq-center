@@ -150,3 +150,19 @@ func (r *paymentsRepository) FindByFamilyID(ctx context.Context, familyID string
 
 	return payments, nil
 }
+
+func (r *paymentsRepository) FindByYear(ctx context.Context, year int) ([]*models.Payments, error) {
+	cur, err := r.CDB.Find(ctx, bson.M{"year": year})
+	if err != nil {
+		return nil, err
+	}
+
+	defer cur.Close(ctx)
+
+	var payments []*models.Payments
+	if err := cur.All(ctx, &payments); err != nil {
+		return nil, err
+	}
+
+	return payments, nil
+}
