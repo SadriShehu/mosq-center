@@ -124,7 +124,7 @@ func (s *service) bootstrap() {
 	ps := services.NewPaymentsService(pr)
 	fs := services.NewFamiliesService(fr)
 	ns := services.NewNeighbourhoodsRepository(nr)
-	is := services.NewInvoicesService(pr)
+	is := services.NewInvoicesService(pr, nr)
 
 	ss := sessions.NewCookieStore([]byte(s.config.Auth.SessionsSecret))
 	// Handler injection

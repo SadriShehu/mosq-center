@@ -9,6 +9,7 @@ import (
 )
 
 type Invoice struct {
+	Neighborhood  string
 	FamilyName    string
 	FamilyMembers int
 	Amount        int
@@ -56,7 +57,7 @@ func textProps(margin float64) props.Text {
 func invoiceData(m pdf.Maroto, i *Invoice, number int) {
 	m.Row(10, func() {
 		m.Text(fmt.Sprintf("Fatura #%d", number), props.Text{
-			Top:         1,
+			Top:         2,
 			Size:        14,
 			Extrapolate: true,
 			Align:       consts.Left,
@@ -67,33 +68,51 @@ func invoiceData(m pdf.Maroto, i *Invoice, number int) {
 	// Set page content
 	m.Row(30, func() {
 		m.Col(2, func() {
-			m.Text("Familja: ", headerProps(5))
-			m.Text("Anëtarë: ", headerProps(10))
-			m.Text("Shuma: ", headerProps(15))
-			m.Text("Viti: ", headerProps(20))
+			m.Text("Viti: ", headerProps(5))
+			m.Text("Lagje: ", headerProps(10))
+			m.Text("Familja: ", headerProps(15))
+			m.Text("Anëtarë: ", headerProps(20))
+			m.Text("Nënshkrimi: ", headerProps(25))
+			m.Text("Shuma: ", headerProps(40))
 		})
 		m.Col(4, func() {
-			m.Text(i.FamilyName, textProps(5))
-			m.Text(fmt.Sprintf("%d", i.FamilyMembers), textProps(10))
-			m.Text(fmt.Sprintf("%d €", i.Amount), textProps(15))
-			m.Text(fmt.Sprintf("%d", i.Year), textProps(20))
+			m.Text(fmt.Sprintf("%d", i.Year), textProps(5))
+			m.Text(i.Neighborhood, textProps(10))
+			m.Text(i.FamilyName, textProps(15))
+			m.Text(fmt.Sprintf("%d Persona", i.FamilyMembers), textProps(20))
+			m.Text("", textProps(25))
+			m.Text(fmt.Sprintf("%d €", i.Amount), headerProps(40))
 		})
 
 		m.Col(2, func() {
-			m.Text("Familja: ", headerProps(5))
-			m.Text("Anëtarë: ", headerProps(10))
-			m.Text("Shuma: ", headerProps(15))
-			m.Text("Viti: ", headerProps(20))
+			m.Text("Viti: ", headerProps(5))
+			m.Text("Lagje: ", headerProps(10))
+			m.Text("Familja: ", headerProps(15))
+			m.Text("Anëtarë: ", headerProps(20))
+			m.Text("Nënshkrimi: ", headerProps(25))
+			m.Text("Shuma: ", headerProps(40))
 		})
 		m.Col(4, func() {
-			m.Text(i.FamilyName, textProps(5))
-			m.Text(fmt.Sprintf("%d", i.FamilyMembers), textProps(10))
-			m.Text(fmt.Sprintf("%d €", i.Amount), textProps(15))
-			m.Text(fmt.Sprintf("%d", i.Year), textProps(20))
+			m.Text(fmt.Sprintf("%d", i.Year), textProps(5))
+			m.Text(i.Neighborhood, textProps(10))
+			m.Text(i.FamilyName, textProps(15))
+			m.Text(fmt.Sprintf("%d Persona", i.FamilyMembers), textProps(20))
+			m.Text("", textProps(25))
+			m.Text(fmt.Sprintf("%d €", i.Amount), headerProps(40))
 		})
 	})
 
-	m.Row(10, func() {
+	m.Row(5, func() {
+		m.Line(1)
+		m.Text("", props.Text{
+			Top: 1,
+		})
+	})
+
+	m.Row(5, func() {
+	})
+
+	m.Row(5, func() {
 		m.Line(1)
 	})
 }
