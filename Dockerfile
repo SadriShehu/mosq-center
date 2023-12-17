@@ -7,8 +7,8 @@ RUN apk add --update --no-cache git
 ARG MONGO_DB_URI
 ENV MONGO_DB_URI=${MONGO_DB_URI}
 
-ARG MONGO_CERT
-RUN echo "$MONGO_CERT" > user_cert.pem
+ARG MONGO_USER_CERT_PATH
+RUN echo "$MONGO_USER_CERT_PATH" > user_cert.pem
 
 ENV MONGO_USER_CERT_PATH="./user_cert.pem"
 
