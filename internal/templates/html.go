@@ -22,6 +22,7 @@ var (
 )
 
 type LagjetParams struct {
+	Regions        []*models.Region
 	Neighbourhoods []*models.NeighbourhoodResponse
 }
 

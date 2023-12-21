@@ -101,3 +101,35 @@ function deleteNeighbourhood(id) {
         }
     };
 }
+
+const cities = {
+    "Junik": ["Junik", "Jasiq", "Gjocaj"],
+    "Gjakove": ["Gjakove", "Batushe", "Dobrosh", "Molliq", "Rracaj"]
+}
+
+function updatePostalCodeAndCity() {
+    var regionSelect = document.getElementById("region");
+    var postalCodeInput = document.getElementById("postal_code");
+    var selectedOption = regionSelect.options[regionSelect.selectedIndex];
+    var zip = selectedOption.getAttribute("data-zip");
+    postalCodeInput.value = zip;
+
+    var region = selectedOption.getAttribute("data-region");
+    var citySelect = document.getElementById("city");
+    var citiesList = cities[region];
+    citySelect.innerHTML = "";
+
+    var staticOption = document.createElement("option");
+    staticOption.text = "Zgjidh Fshatin";
+    staticOption.value = "";
+    staticOption.disabled = true;
+    staticOption.selected = true;
+    citySelect.add(staticOption);
+
+    for (var i = 0; i < citiesList.length; i++) {
+        var option = document.createElement("option");
+        option.text = citiesList[i];
+        option.value = citiesList[i];
+        citySelect.add(option);
+    }
+}

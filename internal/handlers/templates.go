@@ -24,6 +24,7 @@ func (h *handler) Lagjet(w http.ResponseWriter, req *http.Request) {
 	}
 
 	p := templates.LagjetParams{
+		Regions:        models.Regions,
 		Neighbourhoods: n,
 	}
 	templates.Lagjet(w, p, partial(req))

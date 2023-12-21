@@ -7,16 +7,23 @@
                 <input id="name" name="name" type="text" placeholder='Emri i lagjes' class="form-control" />
             </div>
             <div class="col-lg-2 col-md-6">
-                <input id="region" name="region" type="text" placeholder="Qyteti" class="form-control" />
+                <select id="region" name="region" class="form-control" onchange="updatePostalCodeAndCity()">
+                    <option value="" disabled selected>Zgjidh Qytetin</option>
+                    {{range .Regions}}
+                    <option value="{{.Name}}" data-zip="{{.Zip}}" data-region="{{.Name}}">{{.Name}}</option>
+                    {{end}}
+                </select>
             </div>
             <div class="col-lg-2 col-md-6">
-                <input id="city" name="city" type="text" placeholder="Fshati" class="form-control" />
-            </div>
-            <div class="col-lg-2 col-md-6">
-                <input id="country" name="country" type="text" placeholder="Shteti" class="form-control" />
+                <select id="city" name="city" type="select" class="form-control">
+                    <option value="" disabled selected>Zgjidh Fshatin</option>
+                </select>
             </div>
             <div class="col-lg-2 col-md-6">
                 <input id="postal_code" name="postal_code" type="text" placeholder="Kodi Postal" class="form-control" />
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <input id="country" name="country" type="text" value="Kosove" disabled class="form-control" />
             </div>
             <div class="col-lg-2 col-md-6">
                 <button type="submit" class="btn btn-primary">
