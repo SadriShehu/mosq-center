@@ -1,7 +1,61 @@
 {{ define "content" }}
 <div class="container">
+    <br>
     <img class="avatar" src="{{ .Picture }}"/>
     <h2>Miresevini {{ .Name }}</h2>
     <p> Jeni kyqur me sukses </p>
+    <hr>
+    <h1>Kohët e namazit</h1>
+    <br>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-moon" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Sabahu: {{ .Prayers.Fajr}}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-sun" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Lindja e Diellit: {{ .Prayers.Sunrise}}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-sun" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Dreka: {{ .Prayers.Dhuhr}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-sun" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Ikindia: {{ .Prayers.Asr}}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-moon" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Akshami: {{ .Prayers.Maghrib}}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-moon" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Jacia: {{ .Prayers.Isha}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="prayer-box" style="border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 10px; text-align: center;">
+                    <i class="fas fa-moon" style="font-size: 24px; padding-bottom: 5px;"></i>
+                    <p class="prayer-time" style="padding-top: 5px;">Pjesa e tretë e natës: {{ .Prayers.Midnight}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {{ end }}

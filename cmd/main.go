@@ -18,6 +18,7 @@ import (
 	"github.com/sadrishehu/mosq-center/internal/db"
 	"github.com/sadrishehu/mosq-center/internal/handlers"
 	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
+	"github.com/sadrishehu/mosq-center/internal/integration/prayers"
 	"github.com/sadrishehu/mosq-center/internal/repository"
 	"github.com/sadrishehu/mosq-center/internal/services"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -49,6 +50,19 @@ func main() {
 		}
 	}
 
+	prayersClient := prayers.NewPrayersClient(http.DefaultClient)
+	prayersClient.SetTune(&prayers.Tune{
+		Imsak:    c.TunePrayers.Imsak,
+		Fajr:     c.TunePrayers.Fajr,
+		Sunrise:  c.TunePrayers.Sunrise,
+		Dhuhr:    c.TunePrayers.Dhuhr,
+		Asr:      c.TunePrayers.Asr,
+		Sunset:   c.TunePrayers.Sunset,
+		Maghrib:  c.TunePrayers.Maghrib,
+		Isha:     c.TunePrayers.Isha,
+		Midnight: c.TunePrayers.Midnight,
+	})
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.Recoverer)
@@ -63,7 +77,7 @@ func main() {
 	})
 	r.Use(ch.Handler)
 
-	services := newService(c, r, dbc, auth)
+	services := newService(c, r, dbc, auth, prayersClient)
 	services.bootstrap()
 
 	srv := &http.Server{
@@ -94,10 +108,11 @@ func main() {
 }
 
 type service struct {
-	config *config.Config
-	router *chi.Mux
-	nosql  *mongo.Client
-	auth0  *auth0.Authenticator
+	config     *config.Config
+	router     *chi.Mux
+	nosql      *mongo.Client
+	auth0      *auth0.Authenticator
+	prayersAPI *prayers.PrayersClient
 }
 
 func newService(
@@ -105,12 +120,14 @@ func newService(
 	r *chi.Mux,
 	nosql *mongo.Client,
 	auth0 *auth0.Authenticator,
+	prayersAPI *prayers.PrayersClient,
 ) *service {
 	return &service{
-		config: c,
-		router: r,
-		nosql:  nosql,
-		auth0:  auth0,
+		config:     c,
+		router:     r,
+		nosql:      nosql,
+		auth0:      auth0,
+		prayersAPI: prayersAPI,
 	}
 }
 
@@ -125,10 +142,11 @@ func (s *service) bootstrap() {
 	fs := services.NewFamiliesService(fr)
 	ns := services.NewNeighbourhoodsRepository(nr)
 	is := services.NewInvoicesService(pr, nr)
+	prs := services.NewPrayersService(s.prayersAPI)
 
 	ss := sessions.NewCookieStore([]byte(s.config.Auth.SessionsSecret))
 	// Handler injection
-	h := handlers.New(s.router, s.auth0, ps, fs, ns, is, ss, s.config.Auth)
+	h := handlers.New(s.router, s.auth0, ps, fs, ns, is, prs, ss, s.config.Auth)
 
 	h.RegisterRoutesV1()
 	h.RegisterTemplates()

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 
+	"github.com/sadrishehu/mosq-center/internal/integration/prayers"
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
 
@@ -69,7 +70,9 @@ func PagesatPakryera(w io.Writer, p PagesatPakryeraParams, partial string) error
 	return pagesatPakryera.ExecuteTemplate(w, partial, p)
 }
 
-type PublikeParams struct{}
+type PublikeParams struct {
+	Prayers *prayers.Timings
+}
 
 func Publike(w io.Writer, p PublikeParams, partial string) error {
 	if partial == "" {
@@ -82,6 +85,7 @@ func Publike(w io.Writer, p PublikeParams, partial string) error {
 type PerdoruesiParams struct {
 	Picture string
 	Name    string
+	Prayers *prayers.Timings
 }
 
 func Perdoruesi(w io.Writer, p PerdoruesiParams, partial string) error {

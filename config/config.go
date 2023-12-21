@@ -10,6 +10,7 @@ type Config struct {
 	MongoDBURI        string
 	MongoUserCertPath string
 	Auth              *Auth0Config
+	TunePrayers       *TunePrayers
 }
 
 type Auth0Config struct {
@@ -21,10 +22,30 @@ type Auth0Config struct {
 	SessionsSecret string
 }
 
+type TunePrayers struct {
+	Imsak    int
+	Fajr     int
+	Sunrise  int
+	Dhuhr    int
+	Asr      int
+	Sunset   int
+	Maghrib  int
+	Isha     int
+	Midnight int
+}
+
 func GetOrDefault(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
 		value = defaultValue
+	}
+	return value
+}
+
+func GetIntOrDefault(key string, defaultValue int) int {
+	value, err := strconv.Atoi(GetOrDefault(key, strconv.Itoa(defaultValue)))
+	if err != nil {
+		return defaultValue
 	}
 	return value
 }
@@ -50,6 +71,17 @@ func New() *Config {
 			ClientSecret:   GetOrDefault("AUTH0_CLIENT_SECRET", "0Q4Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q"),
 			CallbackURL:    GetOrDefault("AUTH0_CALLBACK_URL", "http://localhost:8080/callback"),
 			SessionsSecret: GetOrDefault("SESSIONS_SECRET", "0Q4Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q"),
+		},
+		TunePrayers: &TunePrayers{
+			Imsak:    GetIntOrDefault("TUNE_IMSAK", 5),
+			Fajr:     GetIntOrDefault("TUNE_FAJR", 25),
+			Sunrise:  GetIntOrDefault("TUNE_SUNRISE", -5),
+			Dhuhr:    GetIntOrDefault("TUNE_DHUHR", 3),
+			Asr:      GetIntOrDefault("TUNE_ASR", 9),
+			Sunset:   GetIntOrDefault("TUNE_SUNSET", 5),
+			Maghrib:  GetIntOrDefault("TUNE_MAGHRIB", 5),
+			Isha:     GetIntOrDefault("TUNE_ISHA", 8),
+			Midnight: GetIntOrDefault("TUNE_MIDNIGHT", 90),
 		},
 	}
 }

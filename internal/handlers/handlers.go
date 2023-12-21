@@ -18,6 +18,7 @@ type handler struct {
 	FamiliesService       FamiliesService
 	NeighbourhoodsService NeighbourhoodsService
 	InvoicesService       InvoicesService
+	PrayersService        PrayersService
 	SessionStore          *sessions.CookieStore
 	AuthConfig            *config.Auth0Config
 }
@@ -28,6 +29,7 @@ func New(router *chi.Mux,
 	fs FamiliesService,
 	ns NeighbourhoodsService,
 	is InvoicesService,
+	prs PrayersService,
 	ss *sessions.CookieStore,
 	ac *config.Auth0Config) *handler {
 	return &handler{
@@ -37,6 +39,7 @@ func New(router *chi.Mux,
 		FamiliesService:       fs,
 		NeighbourhoodsService: ns,
 		InvoicesService:       is,
+		PrayersService:        prs,
 		SessionStore:          ss,
 		AuthConfig:            ac,
 	}
@@ -71,6 +74,7 @@ func (h *handler) RegisterTemplates() {
 func (h *handler) RegisterRoutesV1() {
 	h.RouterService.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", h.HealthCheck)
+		r.Get("/prayers", h.GetPrayers)
 
 		r.Route("/payments", func(r chi.Router) {
 			if h.AuthConfig.Enable {

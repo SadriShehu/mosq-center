@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sadrishehu/mosq-center/internal/integration/prayers"
 	"github.com/sadrishehu/mosq-center/internal/models"
 	"github.com/sadrishehu/mosq-center/internal/templates"
 )
@@ -136,11 +139,25 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *handler) Publike(w http.ResponseWriter, req *http.Request) {
-	p := templates.PublikeParams{}
+	ctx := req.Context()
+
+	prayers, err := h.prayerTimes(ctx)
+	if err != nil {
+		log.Printf("failed to get prayers: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to get prayers: %v\n", err)))
+		return
+	}
+
+	p := templates.PublikeParams{
+		Prayers: prayers,
+	}
 	templates.Publike(w, p, partial(req))
 }
 
 func (h *handler) User(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	store, err := h.SessionStore.Get(req, "auth-store")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -154,9 +171,18 @@ func (h *handler) User(w http.ResponseWriter, req *http.Request) {
 		picture = profile.(map[string]interface{})["picture"].(string)
 	}
 
+	prayers, err := h.prayerTimes(ctx)
+	if err != nil {
+		log.Printf("failed to get prayers: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("failed to get prayers: %v\n", err)))
+		return
+	}
+
 	p := templates.PerdoruesiParams{
 		Picture: picture,
 		Name:    name,
+		Prayers: prayers,
 	}
 	templates.Perdoruesi(w, p, partial(req))
 }
@@ -204,4 +230,17 @@ func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
 
 func partial(r *http.Request) string {
 	return r.URL.Query().Get("partial")
+}
+
+func (h *handler) prayerTimes(ctx context.Context) (*prayers.Timings, error) {
+	dateInt := time.Now().Day()
+	monthInt := int(time.Now().Month())
+	yearInt := time.Now().Year()
+
+	prayers, err := h.PrayersService.GetPrayers(ctx, dateInt, monthInt, yearInt)
+	if err != nil {
+		return nil, err
+	}
+
+	return prayers, nil
 }
