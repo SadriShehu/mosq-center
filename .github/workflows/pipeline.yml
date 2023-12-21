@@ -1,0 +1,30 @@
+name: pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Authenticate with Google Cloud
+              id: auth
+              uses: google-github-actions/auth@v0.4.0
+              with:
+                workload_identity_provider: 'projects/495615477282/locations/global/workloadIdentityPools/mosq-center-id-pool/providers/mosq-center-pool-provider'
+                service_account: '495615477282-compute@developer.gserviceaccount.com'
+            - name: Build and Publish Docker Image
+              id: build_docker_image
+              uses: docker/build-push-action@v2
+              with:
+                context: .
+                file: ./Dockerfile
+                push: true
+                tags: mosq-center:latest
