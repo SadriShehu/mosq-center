@@ -84,12 +84,7 @@ func (h *handler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
-
-	returnTo, err := url.Parse(scheme + "://" + r.Host)
+	returnTo, err := url.Parse("https://" + r.Host)
 	if err != nil {
 		log.Printf("failed to logout: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

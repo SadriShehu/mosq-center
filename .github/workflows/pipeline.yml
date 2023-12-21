@@ -1,0 +1,60 @@
+name: pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+    GOOGLE_ARTIFACT_REGISTRY: europe-west1-docker.pkg.dev
+jobs:
+    build:
+        outputs:
+          image_sha: ${{ steps.build_docker_image.outputs.digest }}
+          artifact_registry_image_path: ${{ steps.output_artifact.outputs.artifact_path }}
+        runs-on: ubuntu-latest
+        permissions: 'write-all'
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Authenticate with Google Cloud
+              id: auth
+              uses: google-github-actions/auth@v0.4.0
+              with:
+                token_format: access_token
+                workload_identity_provider: 'projects/495615477282/locations/global/workloadIdentityPools/mosq-center-id-pool/providers/mosq-center-pool-provider'
+                service_account: 'pipeline@mosq-center.iam.gserviceaccount.com'
+            - name: Login to GAR
+              id: docker_login
+              uses: docker/login-action@v3
+              with:
+                registry: ${{ env.GOOGLE_ARTIFACT_REGISTRY }}
+                username: oauth2accesstoken
+                password: ${{ steps.auth.outputs.access_token }}
+            - name: Create artifact path output
+              id: output_artifact
+              run: echo '::set-output name=artifact_path::${{ env.GOOGLE_ARTIFACT_REGISTRY }}/mosq-center/mosq-center-docker/mosq-center'
+            - name: Extract metadata (tags, labels) for Google Docker
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                images: ${{ steps.output_artifact.outputs.artifact_path }}
+            - name: Build and Publish Docker Image
+              id: build_docker_image
+              uses: docker/build-push-action@v2
+              with:
+                context: .
+                file: ./Dockerfile
+                push: true
+                tags: ${{ steps.meta.outputs.tags }}
+    deploy-production:
+      needs: [build]
+      permissions: 'write-all'
+      uses: ./.github/workflows/deploy-template.yml
+      with:
+        deployment_environment: prod
+        artifact_registry_docker_image: ${{ needs.build.outputs.artifact_registry_image_path }}@${{ needs.build.outputs.image_sha }}

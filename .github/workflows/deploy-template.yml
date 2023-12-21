@@ -1,0 +1,48 @@
+name: deploy
+on:
+  workflow_call:
+    inputs:
+      deployment_environment:
+        type: string
+        required: true
+      artifact_registry_docker_image:
+        type: string
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    env:
+      TF_WORKSPACE: ${{ inputs.deployment_environment }}
+      TF_VAR_artifact_registry_docker_image: ${{ inputs.artifact_registry_docker_image }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: infrastructure/gcp/
+    permissions: 'write-all'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0.4.0
+        with:
+            token_format: access_token
+            workload_identity_provider: 'projects/495615477282/locations/global/workloadIdentityPools/mosq-center-id-pool/providers/mosq-center-pool-provider'
+            service_account: 'pipeline@mosq-center.iam.gserviceaccount.com'
+      - name: Get terraform version from file
+        id: get_terraform_version
+        run: echo "version=$(cat .terraform-version)" >> $GITHUB_OUTPUT
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.get_terraform_version.outputs.version }}
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
+      - name: Terraform Plan
+        run: terraform plan -input=false
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: terraform apply -auto-approve -input=false
