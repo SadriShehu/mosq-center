@@ -13,6 +13,9 @@ env:
     GOOGLE_ARTIFACT_REGISTRY: europe-west1-docker.pkg.dev
 jobs:
     build:
+        outputs:
+          image_sha: ${{ steps.build_docker_image.outputs.digest }}
+          artifact_registry_image_path: ${{ steps.output_artifact.outputs.artifact_path }}
         runs-on: ubuntu-latest
         permissions: 'write-all'
         steps:
@@ -48,3 +51,9 @@ jobs:
                 file: ./Dockerfile
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
+    deploy-production:
+      needs: [build]
+      uses: ./.github/workflows/deploy-template.yml
+      with:
+        deployment_environment: prod
+        artifact_registry_docker_image: ${{ needs.build.outputs.artifact_registry_image_path }}@${{ needs.build.outputs.image_sha }}
