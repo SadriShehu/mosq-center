@@ -23,7 +23,7 @@ jobs:
               uses: google-github-actions/auth@v0.4.0
               with:
                 workload_identity_provider: 'projects/495615477282/locations/global/workloadIdentityPools/mosq-center-id-pool/providers/mosq-center-pool-provider'
-                service_account: '495615477282-compute@developer.gserviceaccount.com'
+                service_account: 'pipeline@mosq-center.iam.gserviceaccount.com'
             - name: Build and Publish Docker Image
               id: build_docker_image
               uses: docker/build-push-action@v2
