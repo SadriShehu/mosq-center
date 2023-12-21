@@ -38,7 +38,7 @@ resource "google_cloud_run_v2_service" "mosq_center" {
 
       env {
         name  = "AUTH0_ENABLE"
-        value = "false"
+        value = "true"
       }
 
       env {
