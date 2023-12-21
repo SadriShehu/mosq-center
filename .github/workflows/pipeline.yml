@@ -53,6 +53,7 @@ jobs:
                 tags: ${{ steps.meta.outputs.tags }}
     deploy-production:
       needs: [build]
+      permissions: 'write-all'
       uses: ./.github/workflows/deploy-template.yml
       with:
         deployment_environment: prod
