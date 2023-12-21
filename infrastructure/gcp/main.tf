@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "terraform-state-fourth-walker-185309"
+    bucket = "terraform-state-mosq-center"
     prefix = "terraform/state/mosq-center"
   }
 

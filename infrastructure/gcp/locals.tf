@@ -1,5 +1,5 @@
 locals {
-  region = "europe-central2"
-  zone = "europe-central2-a"
-  project_id = "fourth-walker-185309"
+  region     = "europe-west1"
+  zone       = "europe-west1-a"
+  project_id = "mosq-center"
 }
