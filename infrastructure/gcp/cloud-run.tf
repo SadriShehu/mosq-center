@@ -12,12 +12,84 @@ resource "google_cloud_run_v2_service" "mosq_center" {
     max_instance_request_concurrency = 200
     timeout                          = "10s"
 
+    volumes {
+      name = "mosq-center-secrets"
+      secret {
+        secret = "user-cert"
+        items {
+          version = "latest"
+          path    = "user-cert"
+          mode    = 0
+        }
+      }
+    }
     containers {
       image = var.artifact_registry_docker_image
+
+      volume_mounts {
+        name       = "mosq-center-secrets"
+        mount_path = "/secrets"
+      }
+
+      env {
+        name  = "MONGO_USER_CERT_PATH"
+        value = "/secrets/user-cert"
+      }
 
       env {
         name  = "AUTH0_ENABLE"
         value = "false"
+      }
+
+      env {
+        name  = "AUTH0_DOMAIN"
+        value = "mosq-center.eu.auth0.com"
+      }
+
+      env {
+        name = "AUTH0_CLIENT_ID"
+        value_source {
+          secret_key_ref {
+            secret  = "AUTH0_CLIENT_ID"
+            version = "1"
+          }
+        }
+      }
+
+      env {
+        name = "AUTH0_CLIENT_SECRET"
+        value_source {
+          secret_key_ref {
+            secret  = "AUTH0_CLIENT_SECRET"
+            version = "1"
+          }
+        }
+      }
+
+      env {
+        name = "AUTH0_CALLBACK_URL"
+        // get the cloud run url
+        value = "https://xhamia-qender.com/callback"
+      }
+
+      env {
+        name = "SESSIONS_SECRET"
+        value_source {
+          secret_key_ref {
+            secret  = "SESSIONS_SECRET"
+            version = "1"
+          }
+        }
+      }
+
+      env {
+        name = "MONGO_DB_URI"
+        value_source {
+          secret_key_ref {
+            secret  = "MONGO_DB_URI"
+            version = "1"
+          }
+        }
       }
 
       resources {
