@@ -50,6 +50,7 @@ func (h *handler) RegisterTemplates() {
 	h.RouterService.Handle("/app/css/styles.css", fs)
 	h.RouterService.Handle("/app/js/scripts.js", fs)
 	h.RouterService.Handle("/app/assets/favicon.ico", fs)
+	h.RouterService.Handle("/app/assets/logo.png", fs)
 
 	h.RouterService.Route("/", func(r chi.Router) {
 		r.Get("/", h.Publike)
