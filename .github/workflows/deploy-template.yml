@@ -60,15 +60,11 @@ jobs:
               #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
               #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
               <details><summary>Validation Output</summary>
-              \`\`\`\n
-              ${{ steps.validate.outputs }}
-              \`\`\`
+              ${{ steps.validate.outputs.stdout }}
               </details>
               #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
               <details><summary>Show Plan</summary>
-              \`\`\`\n
-                ${{ steps.plan.outputs }}
-              \`\`\`
+                ${{ steps.plan.outputs.stdout }}
               </details>
               *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*
             `;
@@ -91,8 +87,8 @@ jobs:
               #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
               #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
               #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
-              <details><summary>Show Apply</summary>\n
-              ${{ steps.apply.outputs }}
+              <details><summary>Show Apply</summary>
+              ${{ steps.apply.outputs.stdout }}
               </details>
               *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*
             `;
