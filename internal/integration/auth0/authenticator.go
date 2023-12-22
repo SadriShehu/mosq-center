@@ -18,19 +18,19 @@ type Authenticator struct {
 }
 
 // New instantiates the *Authenticator.
-func New(c *config.Config) (*Authenticator, error) {
+func New(c *config.Auth0Config) (*Authenticator, error) {
 	provider, err := oidc.NewProvider(
 		context.Background(),
-		"https://"+c.Auth.Domain+"/",
+		"https://"+c.Domain+"/",
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     c.Auth.ClientID,
-		ClientSecret: c.Auth.ClientSecret,
-		RedirectURL:  c.Auth.CallbackURL,
+		ClientID:     c.ClientID,
+		ClientSecret: c.ClientSecret,
+		RedirectURL:  c.CallbackURL,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
