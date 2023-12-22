@@ -59,13 +59,14 @@ jobs:
               #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
               #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
               #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-              <details><summary>Validation Output</summary>
+              Validation Output
+              \`\`\`
               ${{ steps.validate.outputs.stdout }}
-              </details>
+              \`\`\`
               #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-              <details><summary>Show Plan</summary>
-                ${{ steps.plan.outputs.stdout }}
-              </details>
+              \`\`\`
+              ${{ steps.plan.outputs.stdout }}
+              \`\`\`
               *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*
             `;
             github.rest.issues.createComment({
@@ -87,9 +88,9 @@ jobs:
               #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
               #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
               #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
-              <details><summary>Show Apply</summary>
+              \`\`\`
               ${{ steps.apply.outputs.stdout }}
-              </details>
+              \`\`\`
               *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIR }}\`, Workflow: \`${{ github.workflow }}\`*
             `;
             github.rest.issues.createComment({
