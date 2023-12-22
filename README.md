@@ -1,3 +1,5 @@
+[![pipeline](https://github.com/sadrishehu/mosq-center/actions/workflows/pipeline.yml/badge.svg)](https://github.com/sadrishehu/mosq-center/actions/workflows/pipeline.yml)
+
 # Mosq Center
 
 This is a sample project with a single file `go.mod`. 
