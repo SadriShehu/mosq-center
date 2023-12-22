@@ -51,7 +51,7 @@ jobs:
         id: plan
         run: terraform plan -input=false -no-color
       - uses: actions/github-script@v6
-        if: github.event.pull_request.merged != true
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == false
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -80,7 +80,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve -input=false -no-color
       - uses: actions/github-script@v6
-        if: github.event.pull_request.merged == true
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
         with:
           script: |
             const output = `
