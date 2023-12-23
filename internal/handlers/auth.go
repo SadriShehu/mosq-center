@@ -1,14 +1,23 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"log"
 	"net/http"
 	"net/url"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/sessions"
+	"golang.org/x/oauth2"
 )
+
+type AuthService interface {
+	AuthCodeURL(string, ...oauth2.AuthCodeOption) string
+	Exchange(context.Context, string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+	VerifyIDToken(context.Context, *oauth2.Token) (*oidc.IDToken, error)
+}
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	state, err := generateRandomState()

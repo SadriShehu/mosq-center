@@ -6,14 +6,13 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/gorilla/sessions"
 	"github.com/sadrishehu/mosq-center/config"
-	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
 	"github.com/sadrishehu/mosq-center/internal/middleware"
 	"github.com/sadrishehu/mosq-center/internal/templates"
 )
 
 type handler struct {
 	RouterService         *chi.Mux
-	Auth0                 *auth0.Authenticator
+	Auth0                 AuthService
 	PaymentsService       PaymentsService
 	FamiliesService       FamiliesService
 	NeighbourhoodsService NeighbourhoodsService
@@ -24,7 +23,7 @@ type handler struct {
 }
 
 func New(router *chi.Mux,
-	auth0 *auth0.Authenticator,
+	auth0 AuthService,
 	ps PaymentsService,
 	fs FamiliesService,
 	ns NeighbourhoodsService,

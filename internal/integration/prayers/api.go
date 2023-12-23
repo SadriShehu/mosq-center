@@ -1,6 +1,3 @@
-// write a function that returns the prayer times using this endpoint https://api.aladhan.com/v1/calendar/2023/12?latitude=42.476&longitude=20.277&method=3&tune=5,25,-5,3,9,5,5,8,90
-
-// Path: internal/integration/prayers/api_test.go
 package prayers
 
 import (
