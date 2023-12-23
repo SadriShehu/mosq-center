@@ -7,7 +7,7 @@
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
             <div class="col-lg-3 col-md-6">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-success">
                 <i class="fas fa-search"></i> Kerko
                 </button>
             </div>
@@ -19,7 +19,7 @@
     <h3>Lista e familjeve papaguar per vitin <span id="yearSpan"></span></h3>
     <div class="row g-3">
         <div class="col-12 text-end">
-            <button type="button" class="btn btn-secondary" onclick="exportToPDF(getYearFromQueryParam())">
+            <button type="button" class="btn btn-primary" onclick="exportToPDF(getYearFromQueryParam())">
                 <i class="fas fa-file-pdf"></i> Gjenero Faturat
             </button>
         </div>
@@ -47,7 +47,7 @@
                     <td>{{.Neighbourhood}}</td>
                     <td>{{.Family.CreatedAt}}</td>
                     <td>{{.Family.UpdatedAt}}</td>
-                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPaymentModal" onclick="createPaymentModal('{{.Family.ID}}', '{{.Family.Members}}', getYearFromQueryParam())"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    <td><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPaymentModal" onclick="createPaymentModal('{{.Family.ID}}', '{{.Family.Members}}', getYearFromQueryParam())"><i class="fa-solid fa-pen-to-square"></i></button></td>
                 </tr>
                 {{end}}
             </tbody>
@@ -75,7 +75,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-right-from-bracket"></i></button>
-                    <button onclick="createPaymentCall()" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button onclick="createPaymentCall()" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i></button>
                 </div>
             </div>
         </div>

@@ -24,7 +24,7 @@
                 </select>
             </div>
             <div class="col-lg-2 col-md-6">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-success">
                     <i class="fas fa-floppy-disk"></i> Ruaj
                 </button>
             </div>
@@ -59,7 +59,7 @@
                     <td>{{.Neighbourhood}}</td>
                     <td>{{.Family.CreatedAt}}</td>
                     <td>{{.Family.UpdatedAt}}</td>
-                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.Family.ID}}', '{{.Family.Name}}', '{{.Family.Middlename}}', '{{.Family.Surname}}', '{{.Family.Members}}', '{{.Family.NeighbourhoodID}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    <td><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.Family.ID}}', '{{.Family.Name}}', '{{.Family.Middlename}}', '{{.Family.Surname}}', '{{.Family.Members}}', '{{.Family.NeighbourhoodID}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
                     <td><button type="button" class="btn btn-danger" onclick="deleteFamily('{{.Family.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>
                 {{end}}
@@ -104,7 +104,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-right-from-bracket"></i></button>
-                    <button type="submit" form="update-form" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button type="submit" form="update-form" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i></button>
                 </div>
             </div>
         </div>

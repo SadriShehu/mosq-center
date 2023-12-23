@@ -25,7 +25,7 @@
                 <input id="range_year" name="range_year" type="number" placeholder="Deri ne vitin" class="form-control" hidden disabled/>
             </div>
             <div class="col-lg-3 col-md-6">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-success">
                     <i class="fas fa-floppy-disk"></i> Ruaj
                 </button>
             </div>
@@ -73,7 +73,7 @@
         <br />
         <div class="row g-3">
             <div class="col-lg-3 col-md-6">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-success">
                     <i class="fas fa-search"></i> Kerko
                 </button>
             </div>
@@ -109,7 +109,7 @@
                     <td>{{.NeighbourhoodName}}</td>
                     <td>{{.CreatedAt}}</td>
                     <td>{{.UpdatedAt}}</td>
-                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.FamilyID}}', '{{.Amount}}', '{{.Year}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                    <td><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.FamilyID}}', '{{.Amount}}', '{{.Year}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
                     <td><button type="button" class="btn btn-danger" onclick="deletePayment('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>
                 {{end}}
@@ -146,7 +146,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-right-from-bracket"></i></button>
-                    <button type="submit" form="update-form" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button type="submit" form="update-form" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i></button>
                 </div>
             </div>
         </div>
