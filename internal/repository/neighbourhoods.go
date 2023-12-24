@@ -82,6 +82,43 @@ func (r *neighbourhoodsRepository) Update(ctx context.Context, id string, n *mod
 }
 
 func (r *neighbourhoodsRepository) Delete(ctx context.Context, id string) error {
+	// find all families in neighbourhood
+	families, err := r.CDB.Database().Collection("families").Find(ctx, bson.M{"neighbourhoodid": id})
+	if err != nil {
+		log.Printf("failed to delete neighbourhood: %v\n", err)
+		return err
+	}
+	defer families.Close(ctx)
+
+	// delete all families and payments in neighbourhood
+	for families.Next(ctx) {
+		family := &models.Families{}
+		if err := families.Decode(family); err != nil {
+			log.Printf("failed to delete neighbourhood: %v\n", err)
+			return err
+		}
+
+		log.Printf("found family to be deleted with neighbourhood %s\n", family.ID)
+
+		// delete all payments in family
+		_, err := r.CDB.Database().Collection("payments").DeleteMany(ctx, bson.M{"familyid": family.ID})
+		if err != nil {
+			log.Printf("failed to delete neighbourhood: %v\n", err)
+			return err
+		}
+
+		log.Printf("deleted payments for family %s\n", family.ID)
+
+		// delete family
+		_, err = r.CDB.Database().Collection("families").DeleteOne(ctx, bson.M{"id": family.ID})
+		if err != nil {
+			log.Printf("failed to delete neighbourhood: %v\n", err)
+			return err
+		}
+
+		log.Printf("deleted family %s\n", family.ID)
+	}
+
 	rez, err := r.CDB.DeleteOne(ctx, bson.M{"id": id})
 	if err != nil {
 		log.Printf("failed to delete neighbourhood: %v\n", err)
