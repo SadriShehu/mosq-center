@@ -94,6 +94,10 @@ func (h *handler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	returnTo, err := url.Parse("https://" + r.Host)
+	if h.AuthConfig.Env == "dev" {
+		returnTo, err = url.Parse("http://" + r.Host)
+	}
+
 	if err != nil {
 		log.Printf("failed to logout: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

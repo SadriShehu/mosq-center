@@ -37,6 +37,11 @@ resource "google_cloud_run_v2_service" "mosq_center" {
       }
 
       env {
+        name  = "ENV"
+        value = "prod"
+      }
+
+      env {
         name  = "AUTH0_ENABLE"
         value = "true"
       }

@@ -6,6 +6,7 @@ import (
 )
 
 type Config struct {
+	Env               string
 	Port              string
 	MongoDBURI        string
 	MongoUserCertPath string
@@ -15,6 +16,7 @@ type Config struct {
 
 type Auth0Config struct {
 	Enable         bool
+	Env            string
 	Domain         string
 	ClientID       string
 	ClientSecret   string
@@ -61,11 +63,13 @@ func GetBoolOrFalse(key string) bool {
 
 func New() *Config {
 	return &Config{
+		Env:               GetOrDefault("ENV", "dev"),
 		Port:              ":8080",
 		MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
 		MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),
 		Auth: &Auth0Config{
 			Enable:         GetBoolOrFalse("AUTH0_ENABLE"),
+			Env:            GetOrDefault("ENV", "dev"),
 			Domain:         GetOrDefault("AUTH0_DOMAIN", "mosq-center.eu.auth0.com"),
 			ClientID:       GetOrDefault("AUTH0_CLIENT_ID", "0Q4Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q"),
 			ClientSecret:   GetOrDefault("AUTH0_CLIENT_SECRET", "0Q4Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q"),
