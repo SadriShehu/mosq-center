@@ -90,7 +90,7 @@ function exportToPDF(year, neighborhood) {
             const blob = new Blob([xhr.response], {type: 'application/pdf'});
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = 'invoice-' + year + '.pdf';
+            link.download = 'invoice-' + year + '-' + neighborhood + '.pdf';
             link.click();
         } else if (xhr.status === 404) {
             // Request was successful, handle the response here
