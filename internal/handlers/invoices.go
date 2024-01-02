@@ -5,10 +5,12 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
 )
 
 type InvoicesService interface {
-	GenerateInvoices(ctx context.Context, year int) ([]byte, error)
+	GenerateInvoices(context.Context, int, string) ([]byte, error)
 }
 
 func (h *handler) GetInvoices(w http.ResponseWriter, req *http.Request) {
@@ -30,7 +32,18 @@ func (h *handler) GetInvoices(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	invoices, err := h.InvoicesService.GenerateInvoices(ctx, yearInt)
+	neighbourhoodID := req.URL.Query().Get("s_neighbourhood_id")
+	if neighbourhoodID != "" {
+		_, err := uuid.Parse(neighbourhoodID)
+		if err != nil {
+			log.Printf("invalid neighbourhood id: %s", neighbourhoodID)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("invalid neighbourhood id"))
+			return
+		}
+	}
+
+	invoices, err := h.InvoicesService.GenerateInvoices(ctx, yearInt, neighbourhoodID)
 	if err != nil {
 		log.Printf("failed to get invoices: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

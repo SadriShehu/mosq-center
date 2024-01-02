@@ -10,7 +10,7 @@ import (
 )
 
 type Invoices interface {
-	NoPayment(context.Context, int) ([]*models.Families, error)
+	NoPayment(context.Context, int, string) ([]*models.Families, error)
 }
 
 type Neighborhoods interface {
@@ -29,8 +29,8 @@ func NewInvoicesService(invoicesRepository Invoices, neighbourhoodsRepository Ne
 	}
 }
 
-func (s *invoicesService) GenerateInvoices(ctx context.Context, year int) ([]byte, error) {
-	families, err := s.InvoicesRepository.NoPayment(ctx, year)
+func (s *invoicesService) GenerateInvoices(ctx context.Context, year int, neighbourhoodID string) ([]byte, error) {
+	families, err := s.InvoicesRepository.NoPayment(ctx, year, neighbourhoodID)
 	if err != nil {
 		return nil, err
 	}

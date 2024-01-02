@@ -15,8 +15,26 @@ function getYearFromQueryParam() {
     }
 }
 
+function getNeighbourhoodFromQueryParam() {
+    // Get the URL query string
+    var queryString = window.location.search;
+
+    // Use a regular expression to match the 's_neighbourhood_id' query parameter
+    var neighbourhoodIdMatch = /[\?&]s_neighbourhood_id=([^&]*)/.exec(queryString);
+
+    // If the 'neighbourhoodId' parameter is found, return its value
+    if (neighbourhoodIdMatch) {
+        return neighbourhoodIdMatch[1];
+    } else {
+        // If no 'neighbourhoodId' parameter is found, return an empty string
+        return "";
+    }
+}
+
 var currentYear = getYearFromQueryParam();
 document.getElementById('yearSpan').textContent = currentYear;
+
+var currentNeighbourhood = getNeighbourhoodFromQueryParam();
 
 function createPaymentModal(id, members, year) {
     const AMOUNT_PER_MEMBER = 3;
@@ -54,10 +72,10 @@ function createPaymentCall() {
     };
 }
 
-function exportToPDF(year) {
+function exportToPDF(year, neighborhood) {
     // do a request to the server to get the PDF
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", "/api/v1/invoices?year=" + year);
+    xhr.open("GET", "/api/v1/invoices?year=" + year + "&s_neighbourhood_id=" + neighborhood);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.responseType = 'blob';
 

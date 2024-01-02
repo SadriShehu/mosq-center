@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/google/uuid"
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
 
@@ -18,7 +19,7 @@ type PaymentsService interface {
 	GetAllPayments(context.Context) ([]*models.PaymentsResponse, error)
 	Update(context.Context, string, *models.PaymentsRequest) error
 	Delete(context.Context, string) error
-	NoPayment(context.Context, int) ([]*models.FamiliesResponse, error)
+	NoPayment(context.Context, int, string) ([]*models.FamiliesResponse, error)
 	GetPaymentsByFamily(context.Context, string) ([]*models.PaymentsResponse, error)
 	GetPaymentsByYear(context.Context, int) ([]*models.PaymentsResponse, error)
 }
@@ -124,17 +125,10 @@ func (h *handler) NoPayment(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	year := req.URL.Query().Get("year")
 
-	if year == "" {
-		log.Printf("failed to get no payments: %v\n", "year is required")
+	if year == "" || len(year) != 4 {
+		log.Printf("failed to get no payments: %v\n", "year is required and must be 4 digits")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", "year is required")))
-		return
-	}
-
-	if len(year) != 4 {
-		log.Printf("failed to get no payments: %v\n", "year must be 4 digits")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", "year must be 4 digits")))
 		return
 	}
 
@@ -146,7 +140,18 @@ func (h *handler) NoPayment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	families, err := h.PaymentsService.NoPayment(ctx, yearInt)
+	neighbourhoodID := req.URL.Query().Get("s_neighbourhood_id")
+	if neighbourhoodID != "" {
+		_, err := uuid.Parse(neighbourhoodID)
+		if err != nil {
+			log.Printf("failed to get no payments: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(fmt.Sprintf("failed to get no payment: %v\n", err)))
+			return
+		}
+	}
+
+	families, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID)
 	if err != nil {
 		log.Printf("failed to get no payments: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

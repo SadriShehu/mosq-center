@@ -202,7 +202,16 @@ func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	f, err := h.PaymentsService.NoPayment(ctx, yearInt)
+	neighbourhoodID := req.URL.Query().Get("s_neighbourhood_id")
+	if neighbourhoodID != "" {
+		_, err := uuid.Parse(neighbourhoodID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	f, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -223,8 +232,15 @@ func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
 		families = append(families, familyTemplate)
 	}
 
+	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	paymentsParams := templates.PagesatPakryeraParams{
-		Families: families,
+		Families:       families,
+		Neighbourhoods: neighbourhoods,
 	}
 	templates.PagesatPakryera(w, paymentsParams, partial(req))
 }

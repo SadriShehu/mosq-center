@@ -97,7 +97,7 @@ func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *paymentsRepository) NoPayment(ctx context.Context, year int) ([]*models.Families, error) {
+func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourhoodID string) ([]*models.Families, error) {
 	pipeline := []bson.M{
 		{
 			"$lookup": bson.M{
@@ -116,6 +116,7 @@ func (r *paymentsRepository) NoPayment(ctx context.Context, year int) ([]*models
 						},
 					},
 				},
+				"neighbourhoodid": neighbourhoodID,
 			},
 		},
 	}

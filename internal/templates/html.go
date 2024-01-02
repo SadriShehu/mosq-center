@@ -60,7 +60,8 @@ func Pagesat(w io.Writer, p PagesatParams, partial string) error {
 }
 
 type PagesatPakryeraParams struct {
-	Families []*models.FamiliesTemplate
+	Families       []*models.FamiliesTemplate
+	Neighbourhoods []*models.NeighbourhoodResponse
 }
 
 func PagesatPakryera(w io.Writer, p PagesatPakryeraParams, partial string) error {
