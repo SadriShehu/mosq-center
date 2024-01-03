@@ -11,7 +11,7 @@ import (
 type FamiliesRepository interface {
 	Create(context.Context, *models.Families) (string, error)
 	FindByID(context.Context, string) (*models.Families, error)
-	FindAll(context.Context) ([]*models.Families, error)
+	FindAll(context.Context, int64, int64) ([]*models.Families, error)
 	Update(context.Context, string, *models.Families) error
 	Delete(context.Context, string) error
 }
@@ -55,8 +55,8 @@ func (s *familiesService) GetFamily(ctx context.Context, id string) (*models.Fam
 	return familiesResponse, nil
 }
 
-func (s *familiesService) GetAllFamilies(ctx context.Context) ([]*models.FamiliesResponse, error) {
-	families, err := s.FamiliesRepository.FindAll(ctx)
+func (s *familiesService) GetAllFamilies(ctx context.Context, limit, skip int64) ([]*models.FamiliesResponse, error) {
+	families, err := s.FamiliesRepository.FindAll(ctx, limit, skip)
 	if err != nil {
 		log.Printf("failed to get families: %v\n", err)
 		return nil, err

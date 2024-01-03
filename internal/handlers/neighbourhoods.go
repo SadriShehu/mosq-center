@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -14,7 +15,7 @@ import (
 type NeighbourhoodsService interface {
 	Create(context.Context, *models.NeighbourhoodRequest) (string, error)
 	GetNeighbourhood(context.Context, string) (*models.NeighbourhoodResponse, error)
-	GetAllNeighbourhoods(context.Context) ([]*models.NeighbourhoodResponse, error)
+	GetAllNeighbourhoods(context.Context, int64, int64) ([]*models.NeighbourhoodResponse, error)
 	Update(context.Context, string, *models.NeighbourhoodRequest) error
 	Delete(context.Context, string) error
 }
@@ -64,7 +65,25 @@ func (h *handler) GetNeighbourhood(w http.ResponseWriter, req *http.Request) {
 func (h *handler) GetAllNeighbourhoods(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get neighbourhood: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)

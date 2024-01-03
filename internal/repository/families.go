@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type familiesRepository struct {
@@ -45,8 +46,13 @@ func (r *familiesRepository) FindByID(ctx context.Context, id string) (*models.F
 	return familie, nil
 }
 
-func (r *familiesRepository) FindAll(ctx context.Context) ([]*models.Families, error) {
-	cur, err := r.CDB.Find(ctx, bson.M{})
+func (r *familiesRepository) FindAll(ctx context.Context, limit, skip int64) ([]*models.Families, error) {
+	opts := &options.FindOptions{
+		Limit: &limit,
+		Skip:  &skip,
+	}
+
+	cur, err := r.CDB.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		return nil, err
 	}

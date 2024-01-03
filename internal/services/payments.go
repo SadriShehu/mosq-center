@@ -11,12 +11,12 @@ import (
 type PaymentsRepository interface {
 	Create(context.Context, *models.Payments) (string, error)
 	FindByID(context.Context, string) (*models.Payments, error)
-	FindAll(context.Context) ([]*models.Payments, error)
+	FindAll(context.Context, int64, int64) ([]*models.Payments, error)
 	Update(context.Context, string, *models.Payments) error
 	Delete(context.Context, string) error
-	NoPayment(context.Context, int, string) ([]*models.Families, error)
-	FindByFamilyID(context.Context, string) ([]*models.Payments, error)
-	FindByYear(context.Context, int) ([]*models.Payments, error)
+	NoPayment(context.Context, int, string, int64, int64) ([]*models.Families, error)
+	FindByFamilyID(context.Context, string, int64, int64) ([]*models.Payments, error)
+	FindByYear(context.Context, int, int64, int64) ([]*models.Payments, error)
 }
 
 type paymentsService struct {
@@ -76,8 +76,8 @@ func (s *paymentsService) GetPayments(ctx context.Context, id string) (*models.P
 	return paymentsResponse, nil
 }
 
-func (s *paymentsService) GetAllPayments(ctx context.Context) ([]*models.PaymentsResponse, error) {
-	payments, err := s.PaymentsRepository.FindAll(ctx)
+func (s *paymentsService) GetAllPayments(ctx context.Context, limit, skip int64) ([]*models.PaymentsResponse, error) {
+	payments, err := s.PaymentsRepository.FindAll(ctx, limit, skip)
 	if err != nil {
 		log.Printf("failed to get payments: %v\n", err)
 		return nil, err
@@ -124,8 +124,8 @@ func (s *paymentsService) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *paymentsService) NoPayment(ctx context.Context, year int, neighbourhoodID string) ([]*models.FamiliesResponse, error) {
-	families, err := s.PaymentsRepository.NoPayment(ctx, year, neighbourhoodID)
+func (s *paymentsService) NoPayment(ctx context.Context, year int, neighbourhoodID string, limit, skip int64) ([]*models.FamiliesResponse, error) {
+	families, err := s.PaymentsRepository.NoPayment(ctx, year, neighbourhoodID, limit, skip)
 	if err != nil {
 		log.Printf("failed to get families: %v\n", err)
 		return nil, err
@@ -141,8 +141,8 @@ func (s *paymentsService) NoPayment(ctx context.Context, year int, neighbourhood
 	return fr, nil
 }
 
-func (s *paymentsService) GetPaymentsByFamily(ctx context.Context, id string) ([]*models.PaymentsResponse, error) {
-	payments, err := s.PaymentsRepository.FindByFamilyID(ctx, id)
+func (s *paymentsService) GetPaymentsByFamily(ctx context.Context, id string, limit, skip int64) ([]*models.PaymentsResponse, error) {
+	payments, err := s.PaymentsRepository.FindByFamilyID(ctx, id, limit, skip)
 	if err != nil {
 		log.Printf("failed to get payments: %v\n", err)
 		return nil, err
@@ -158,8 +158,8 @@ func (s *paymentsService) GetPaymentsByFamily(ctx context.Context, id string) ([
 	return n, nil
 }
 
-func (s *paymentsService) GetPaymentsByYear(ctx context.Context, year int) ([]*models.PaymentsResponse, error) {
-	payments, err := s.PaymentsRepository.FindByYear(ctx, year)
+func (s *paymentsService) GetPaymentsByYear(ctx context.Context, year int, limit, skip int64) ([]*models.PaymentsResponse, error) {
+	payments, err := s.PaymentsRepository.FindByYear(ctx, year, limit, skip)
 	if err != nil {
 		log.Printf("failed to get payments: %v\n", err)
 		return nil, err

@@ -11,7 +11,7 @@ import (
 type NeighbourhoodsRepository interface {
 	Create(context.Context, *models.Neighbourhood) (string, error)
 	FindByID(context.Context, string) (*models.Neighbourhood, error)
-	FindAll(context.Context) ([]*models.Neighbourhood, error)
+	FindAll(context.Context, int64, int64) ([]*models.Neighbourhood, error)
 	Update(context.Context, string, *models.Neighbourhood) error
 	Delete(context.Context, string) error
 }
@@ -55,8 +55,8 @@ func (s *neighbourhoodsService) GetNeighbourhood(ctx context.Context, id string)
 	return neighbourhoodResponse, nil
 }
 
-func (s *neighbourhoodsService) GetAllNeighbourhoods(ctx context.Context) ([]*models.NeighbourhoodResponse, error) {
-	neighbourhoods, err := s.NeighbourhoodsRepository.FindAll(ctx)
+func (s *neighbourhoodsService) GetAllNeighbourhoods(ctx context.Context, limit, skip int64) ([]*models.NeighbourhoodResponse, error) {
+	neighbourhoods, err := s.NeighbourhoodsRepository.FindAll(ctx, limit, skip)
 	if err != nil {
 		log.Printf("failed to get neighbourhoods: %v\n", err)
 		return nil, err

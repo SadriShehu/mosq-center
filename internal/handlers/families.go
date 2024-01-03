@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -14,7 +15,7 @@ import (
 type FamiliesService interface {
 	Create(context.Context, *models.FamiliesRequest) (string, error)
 	GetFamily(context.Context, string) (*models.FamiliesResponse, error)
-	GetAllFamilies(context.Context) ([]*models.FamiliesResponse, error)
+	GetAllFamilies(context.Context, int64, int64) ([]*models.FamiliesResponse, error)
 	Update(context.Context, string, *models.FamiliesRequest) error
 	Delete(context.Context, string) error
 }
@@ -64,7 +65,25 @@ func (h *handler) GetFamily(w http.ResponseWriter, req *http.Request) {
 func (h *handler) GetAllFamilies(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	families, err := h.FamiliesService.GetAllFamilies(ctx)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	families, err := h.FamiliesService.GetAllFamilies(ctx, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get familie: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)
