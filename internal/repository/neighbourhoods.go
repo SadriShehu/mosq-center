@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type neighbourhoodsRepository struct {
@@ -45,8 +46,13 @@ func (r *neighbourhoodsRepository) FindByID(ctx context.Context, id string) (*mo
 	return neighbourhood, nil
 }
 
-func (r *neighbourhoodsRepository) FindAll(ctx context.Context) ([]*models.Neighbourhood, error) {
-	cur, err := r.CDB.Find(ctx, bson.M{})
+func (r *neighbourhoodsRepository) FindAll(ctx context.Context, limit, skip int64) ([]*models.Neighbourhood, error) {
+	opts := &options.FindOptions{
+		Limit: &limit,
+		Skip:  &skip,
+	}
+
+	cur, err := r.CDB.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,16 @@ import (
 func (h *handler) Lagjet(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	limit := req.URL.Query().Get("limit")
+	skip := req.URL.Query().Get("skip")
+
+	limit64, skip64, err := h.offset(limit, skip)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx, limit64, skip64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,13 +42,22 @@ func (h *handler) Lagjet(w http.ResponseWriter, req *http.Request) {
 func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	f, err := h.FamiliesService.GetAllFamilies(ctx)
+	limit := req.URL.Query().Get("limit")
+	skip := req.URL.Query().Get("skip")
+
+	limit64, skip64, err := h.offset(limit, skip)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	f, err := h.FamiliesService.GetAllFamilies(ctx, limit64, skip64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx, limit64, skip64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,13 +68,11 @@ func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 		familyTemplate := &models.FamiliesTemplate{}
 		familyTemplate.Family = family
 
-		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, family.NeighbourhoodID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for _, neighbourhood := range n {
+			if family.NeighbourhoodID == neighbourhood.ID {
+				familyTemplate.Neighbourhood = neighbourhood.Name
+			}
 		}
-		familyTemplate.Neighbourhood = n.Name
-
 		families = append(families, familyTemplate)
 	}
 
@@ -90,21 +106,30 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	p, err := h.PaymentsService.GetPaymentsByYear(ctx, yearInt)
+	limit := req.URL.Query().Get("limit")
+	skip := req.URL.Query().Get("skip")
+
+	limit64, skip64, err := h.offset(limit, skip)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	p, err := h.PaymentsService.GetPaymentsByYear(ctx, yearInt, limit64, skip64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if familyID != "" {
-		p, err = h.PaymentsService.GetPaymentsByFamily(ctx, familyID)
+		p, err = h.PaymentsService.GetPaymentsByFamily(ctx, familyID, limit64, skip64)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
 
-	f, err := h.FamiliesService.GetAllFamilies(ctx)
+	f, err := h.FamiliesService.GetAllFamilies(ctx, limit64, skip64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -211,7 +236,16 @@ func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	f, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID)
+	limit := req.URL.Query().Get("limit")
+	skip := req.URL.Query().Get("skip")
+
+	limit64, skip64, err := h.offset(limit, skip)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	f, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID, limit64, skip64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -232,7 +266,7 @@ func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
 		families = append(families, familyTemplate)
 	}
 
-	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx, limit64, skip64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -260,4 +294,20 @@ func (h *handler) prayerTimes(ctx context.Context) (*prayers.Timings, error) {
 	}
 
 	return prayers, nil
+}
+
+func (h *handler) offset(limit, skip string) (int64, int64, error) {
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		return 0, 0, err
+	}
+
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		return 0, 0, err
+	}
+
+	return limit64, skip64, nil
 }

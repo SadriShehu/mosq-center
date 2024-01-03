@@ -16,12 +16,12 @@ import (
 type PaymentsService interface {
 	Create(context.Context, *models.PaymentsRequest) ([]string, error)
 	GetPayments(context.Context, string) (*models.PaymentsResponse, error)
-	GetAllPayments(context.Context) ([]*models.PaymentsResponse, error)
+	GetAllPayments(context.Context, int64, int64) ([]*models.PaymentsResponse, error)
 	Update(context.Context, string, *models.PaymentsRequest) error
 	Delete(context.Context, string) error
-	NoPayment(context.Context, int, string) ([]*models.FamiliesResponse, error)
-	GetPaymentsByFamily(context.Context, string) ([]*models.PaymentsResponse, error)
-	GetPaymentsByYear(context.Context, int) ([]*models.PaymentsResponse, error)
+	NoPayment(context.Context, int, string, int64, int64) ([]*models.FamiliesResponse, error)
+	GetPaymentsByFamily(context.Context, string, int64, int64) ([]*models.PaymentsResponse, error)
+	GetPaymentsByYear(context.Context, int, int64, int64) ([]*models.PaymentsResponse, error)
 }
 
 func (h *handler) CreatePayment(w http.ResponseWriter, req *http.Request) {
@@ -69,7 +69,25 @@ func (h *handler) GetPayment(w http.ResponseWriter, req *http.Request) {
 func (h *handler) GetAllPayments(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	payments, err := h.PaymentsService.GetAllPayments(ctx)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	payments, err := h.PaymentsService.GetAllPayments(ctx, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get payment: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -151,7 +169,25 @@ func (h *handler) NoPayment(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	families, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	families, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get no payments: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -169,7 +205,25 @@ func (h *handler) GetPaymentsByFamily(w http.ResponseWriter, req *http.Request) 
 	ctx := req.Context()
 	id := chi.URLParam(req, "id")
 
-	payments, err := h.PaymentsService.GetPaymentsByFamily(ctx, id)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	payments, err := h.PaymentsService.GetPaymentsByFamily(ctx, id, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get payments: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -209,7 +263,25 @@ func (h *handler) GetPaymentsByYear(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	payments, err := h.PaymentsService.GetPaymentsByYear(ctx, yearInt)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	payments, err := h.PaymentsService.GetPaymentsByYear(ctx, yearInt, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get payments: %v\n", err)
 		w.WriteHeader(http.StatusNotFound)

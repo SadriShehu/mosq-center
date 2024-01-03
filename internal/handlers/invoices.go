@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 )
 
 type InvoicesService interface {
-	GenerateInvoices(context.Context, int, string) ([]byte, error)
+	GenerateInvoices(context.Context, int, string, int64, int64) ([]byte, error)
 }
 
 func (h *handler) GetInvoices(w http.ResponseWriter, req *http.Request) {
@@ -43,7 +44,25 @@ func (h *handler) GetInvoices(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	invoices, err := h.InvoicesService.GenerateInvoices(ctx, yearInt, neighbourhoodID)
+	limit := req.URL.Query().Get("limit")
+	limit64, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse limit: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse limit: %v\n", err)))
+		return
+	}
+
+	skip := req.URL.Query().Get("skip")
+	skip64, err := strconv.ParseInt(skip, 10, 64)
+	if err != nil {
+		log.Printf("failed to parse skip: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("failed to parse skip: %v\n", err)))
+		return
+	}
+
+	invoices, err := h.InvoicesService.GenerateInvoices(ctx, yearInt, neighbourhoodID, limit64, skip64)
 	if err != nil {
 		log.Printf("failed to get invoices: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

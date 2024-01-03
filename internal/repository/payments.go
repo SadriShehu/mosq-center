@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type paymentsRepository struct {
@@ -45,8 +46,13 @@ func (r *paymentsRepository) FindByID(ctx context.Context, id string) (*models.P
 	return payment, nil
 }
 
-func (r *paymentsRepository) FindAll(ctx context.Context) ([]*models.Payments, error) {
-	cur, err := r.CDB.Find(ctx, bson.M{})
+func (r *paymentsRepository) FindAll(ctx context.Context, limit, skip int64) ([]*models.Payments, error) {
+	opts := &options.FindOptions{
+		Limit: &limit,
+		Skip:  &skip,
+	}
+
+	cur, err := r.CDB.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +103,7 @@ func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourhoodID string) ([]*models.Families, error) {
+func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourhoodID string, limit, skip int64) ([]*models.Families, error) {
 	pipeline := []bson.M{
 		{
 			"$lookup": bson.M{
@@ -119,6 +125,12 @@ func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourh
 				"neighbourhoodid": neighbourhoodID,
 			},
 		},
+		{
+			"$skip": skip,
+		},
+		{
+			"$limit": limit,
+		},
 	}
 
 	// Create an aggregation cursor
@@ -136,8 +148,13 @@ func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourh
 	return families, nil
 }
 
-func (r *paymentsRepository) FindByFamilyID(ctx context.Context, familyID string) ([]*models.Payments, error) {
-	cur, err := r.CDB.Find(ctx, bson.M{"familyid": familyID})
+func (r *paymentsRepository) FindByFamilyID(ctx context.Context, familyID string, limit, skip int64) ([]*models.Payments, error) {
+	opts := &options.FindOptions{
+		Limit: &limit,
+		Skip:  &skip,
+	}
+
+	cur, err := r.CDB.Find(ctx, bson.M{"familyid": familyID}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -152,8 +169,13 @@ func (r *paymentsRepository) FindByFamilyID(ctx context.Context, familyID string
 	return payments, nil
 }
 
-func (r *paymentsRepository) FindByYear(ctx context.Context, year int) ([]*models.Payments, error) {
-	cur, err := r.CDB.Find(ctx, bson.M{"year": year})
+func (r *paymentsRepository) FindByYear(ctx context.Context, year int, limit, skip int64) ([]*models.Payments, error) {
+	opts := &options.FindOptions{
+		Limit: &limit,
+		Skip:  &skip,
+	}
+
+	cur, err := r.CDB.Find(ctx, bson.M{"year": year}, opts)
 	if err != nil {
 		return nil, err
 	}
