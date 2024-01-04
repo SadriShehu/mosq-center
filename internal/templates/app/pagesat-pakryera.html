@@ -7,6 +7,14 @@
                 <input id="year" name="year" type="number" placeholder="Viti" class="form-control" />
             </div>
             <div class="col-lg-3 col-md-6">
+                <select id="s_neighbourhood_id" name="s_neighbourhood_id" class="form-control">
+                    <option value="" disabled selected>Zgjidh Lagjen</option>
+                    {{range .Neighbourhoods}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
                 <button type="submit" class="btn btn-success">
                 <i class="fas fa-search"></i> Kerko
                 </button>
@@ -17,23 +25,6 @@
 </div>
 <div class="container">
     <h3>Lista e familjeve papaguar per vitin <span id="yearSpan"></span></h3>
-    <form id="no-payments-filter-form" method="GET" action="/pagesat-pakryera">
-        <div class="row g-3">
-            <div class="col-lg-3 col-md-6">
-                <select id="s_neighbourhood_id" name="s_neighbourhood_id" class="form-control">
-                    <option value="" disabled selected>Zgjidh Lagjen</option>
-                    {{range .Neighbourhoods}}
-                    <option value="{{.ID}}">{{.Name}}</option>
-                    {{end}}
-                </select>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-search"></i> Kerko
-                </button>
-            </div>
-        </div>
-    </form>
     <div class="row g-3">
         <div class="col-12 text-end">
             <button type="button" class="btn btn-primary" onclick="exportToPDF(getYearFromQueryParam(), getNeighbourhoodFromQueryParam())">

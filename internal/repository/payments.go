@@ -98,16 +98,20 @@ func (r *paymentsRepository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourhoodID string) ([]*models.Families, error) {
-	pipeline := []bson.M{
-		{
-			"$lookup": bson.M{
-				"from":         "payments",
-				"localField":   "id",
-				"foreignField": "familyid",
-				"as":           "payments",
+	match := bson.M{
+		"$match": bson.M{
+			"payments": bson.M{
+				"$not": bson.M{
+					"$elemMatch": bson.M{
+						"year": year,
+					},
+				},
 			},
 		},
-		{
+	}
+
+	if neighbourhoodID != "" {
+		match = bson.M{
 			"$match": bson.M{
 				"payments": bson.M{
 					"$not": bson.M{
@@ -118,7 +122,19 @@ func (r *paymentsRepository) NoPayment(ctx context.Context, year int, neighbourh
 				},
 				"neighbourhoodid": neighbourhoodID,
 			},
+		}
+	}
+
+	pipeline := []bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         "payments",
+				"localField":   "id",
+				"foreignField": "familyid",
+				"as":           "payments",
+			},
 		},
+		match,
 	}
 
 	// Create an aggregation cursor
