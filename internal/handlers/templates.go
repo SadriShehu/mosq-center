@@ -50,12 +50,11 @@ func (h *handler) Familjet(w http.ResponseWriter, req *http.Request) {
 		familyTemplate := &models.FamiliesTemplate{}
 		familyTemplate.Family = family
 
-		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, family.NeighbourhoodID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for _, neighbourhood := range n {
+			if neighbourhood.ID == family.NeighbourhoodID {
+				familyTemplate.Neighbourhood = neighbourhood.Name
+			}
 		}
-		familyTemplate.Neighbourhood = n.Name
 
 		families = append(families, familyTemplate)
 	}
@@ -110,24 +109,32 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var payments []*models.PaymentsTemplate
 	for _, payment := range p {
 		paymentTemplate := &models.PaymentsTemplate{}
 
-		f, err := h.FamiliesService.GetFamily(ctx, payment.FamilyID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		var fam *models.FamiliesResponse
+		for _, family := range f {
+			if family.ID == payment.FamilyID {
+				fam = family
+			}
 		}
 
-		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, f.NeighbourhoodID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		var neigh *models.NeighbourhoodResponse
+		for _, neighbourhood := range n {
+			if neighbourhood.ID == fam.NeighbourhoodID {
+				neigh = neighbourhood
+			}
 		}
 
-		familyName := fmt.Sprintf("%s %s %s", f.Name, f.Middlename, f.Surname)
-		paymentTemplate.MapTemplate(payment, f.ID, familyName, f.Members, n.Name)
+		familyName := fmt.Sprintf("%s %s %s", fam.Name, fam.Middlename, fam.Surname)
+		paymentTemplate.MapTemplate(payment, fam.ID, familyName, fam.Members, neigh.Name)
 
 		payments = append(payments, paymentTemplate)
 	}
@@ -217,30 +224,29 @@ func (h *handler) PagesatPakryera(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var families []*models.FamiliesTemplate
-	for _, family := range f {
-		familyTemplate := &models.FamiliesTemplate{}
-		familyTemplate.Family = family
-
-		n, err := h.NeighbourhoodsService.GetNeighbourhood(ctx, family.NeighbourhoodID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		familyTemplate.Neighbourhood = n.Name
-
-		families = append(families, familyTemplate)
-	}
-
-	neighbourhoods, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
+	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	var families []*models.FamiliesTemplate
+	for _, family := range f {
+		familyTemplate := &models.FamiliesTemplate{}
+		familyTemplate.Family = family
+
+		for _, neighbourhood := range n {
+			if neighbourhood.ID == family.NeighbourhoodID {
+				familyTemplate.Neighbourhood = neighbourhood.Name
+			}
+		}
+
+		families = append(families, familyTemplate)
+	}
+
 	paymentsParams := templates.PagesatPakryeraParams{
 		Families:       families,
-		Neighbourhoods: neighbourhoods,
+		Neighbourhoods: n,
 	}
 	templates.PagesatPakryera(w, paymentsParams, partial(req))
 }

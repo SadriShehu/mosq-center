@@ -15,6 +15,7 @@ type Invoices interface {
 
 type Neighborhoods interface {
 	FindByID(ctx context.Context, id string) (*models.Neighbourhood, error)
+	FindAll(ctx context.Context) ([]*models.Neighbourhood, error)
 }
 
 type invoicesService struct {
@@ -50,14 +51,22 @@ func (s *invoicesService) GenerateInvoices(ctx context.Context, year int, neighb
 
 func (s *invoicesService) generatePDFInvoice(ctx context.Context, family []*models.Families, year int) ([]byte, error) {
 	var invoices []*pdf.Invoice
+
+	neighborhoods, err := s.NeighborhoodsRepository.FindAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get neighbourhoods: %w", err)
+	}
+
 	for _, f := range family {
-		neighbourhood, err := s.NeighborhoodsRepository.FindByID(ctx, f.NeighbourhoodID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get neighbourhood: %w", err)
+		var neighbourhoodName string
+		for _, neighbourhood := range neighborhoods {
+			if neighbourhood.ID == f.NeighbourhoodID {
+				neighbourhoodName = neighbourhood.Name
+			}
 		}
 
 		invoices = append(invoices, &pdf.Invoice{
-			Neighborhood:  neighbourhood.Name,
+			Neighborhood:  neighbourhoodName,
 			FamilyName:    fmt.Sprintf("%s %s %s", f.Name, f.Middlename, f.Surname),
 			FamilyMembers: f.Members,
 			Amount:        f.Members * 3,
