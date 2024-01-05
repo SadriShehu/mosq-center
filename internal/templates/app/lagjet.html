@@ -62,7 +62,30 @@
                     <td>{{.CreatedAt}}</td>
                     <td>{{.UpdatedAt}}</td>
                     <td><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.Name}}', '{{.City}}', '{{.Region}}', '{{.Country}}', '{{.PostalCode}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
-                    <td><button type="button" class="btn btn-danger" onclick="deleteNeighbourhood('{{.ID}}')"><i class="fa-solid fa-trash"></i></button></td>
+                    <td>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+
+                    <!-- Confirmation Modal -->
+                    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmo fshirjen</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>A jeni i sigurt qe deshironi te fshini kete pagese?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulo</button>
+                                    <button type="button" class="btn btn-danger" onclick="deleteNeighbourhood('{{.ID}}')">Fshije</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </tr>
                 {{end}}
             </tbody>
