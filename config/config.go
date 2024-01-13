@@ -78,13 +78,13 @@ func New() *Config {
 		},
 		TunePrayers: &TunePrayers{
 			Imsak:    GetIntOrDefault("TUNE_IMSAK", 5),
-			Fajr:     GetIntOrDefault("TUNE_FAJR", 25),
-			Sunrise:  GetIntOrDefault("TUNE_SUNRISE", -5),
-			Dhuhr:    GetIntOrDefault("TUNE_DHUHR", 3),
-			Asr:      GetIntOrDefault("TUNE_ASR", 9),
+			Fajr:     GetIntOrDefault("TUNE_FAJR", 22),
+			Sunrise:  GetIntOrDefault("TUNE_SUNRISE", -7),
+			Dhuhr:    GetIntOrDefault("TUNE_DHUHR", 1),
+			Asr:      GetIntOrDefault("TUNE_ASR", 6),
 			Sunset:   GetIntOrDefault("TUNE_SUNSET", 5),
 			Maghrib:  GetIntOrDefault("TUNE_MAGHRIB", 5),
-			Isha:     GetIntOrDefault("TUNE_ISHA", 8),
+			Isha:     GetIntOrDefault("TUNE_ISHA", 7),
 			Midnight: GetIntOrDefault("TUNE_MIDNIGHT", 90),
 		},
 	}
