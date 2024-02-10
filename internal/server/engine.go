@@ -47,7 +47,7 @@ func NewEngine(
 }
 
 func dbc(ctx context.Context, c *config.Config) *mongo.Client {
-	dbc, err := db.New(ctx, c.MongoDBURI+c.MongoUserCertPath)
+	dbc, err := db.New(ctx, c.DBConfig.MongoDBURI+c.DBConfig.MongoUserCertPath)
 	if err != nil {
 		log.Fatalf("failed to connect to the database: %v\n", err)
 	}
@@ -108,9 +108,9 @@ func prayersClient(c *config.TunePrayers) *prayers.PrayersClient {
 
 func (s *engine) Bootstrap() {
 	// Repository injection
-	pr := repository.NewPaymentsRepository(s.nosql)
-	fr := repository.NewFamiliesRepository(s.nosql)
-	nr := repository.NewNeighbourhoodsRepository(s.nosql)
+	pr := repository.NewPaymentsRepository(s.nosql, s.config.DBConfig.CollectionName)
+	fr := repository.NewFamiliesRepository(s.nosql, s.config.DBConfig.CollectionName)
+	nr := repository.NewNeighbourhoodsRepository(s.nosql, s.config.DBConfig.CollectionName)
 
 	// Service injection
 	ps := services.NewPaymentsService(pr)

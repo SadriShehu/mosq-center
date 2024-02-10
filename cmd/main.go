@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/sadrishehu/mosq-center/config"
+	"github.com/sadrishehu/mosq-center/internal/models"
 	"github.com/sadrishehu/mosq-center/internal/server"
 )
 
@@ -21,7 +22,7 @@ type Engine interface {
 }
 
 func init() {
-	gob.Register(map[string]interface{}{})
+	gob.Register(models.Profile{})
 }
 
 func main() {

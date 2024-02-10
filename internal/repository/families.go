@@ -15,9 +15,9 @@ type familiesRepository struct {
 	CDB *mongo.Collection
 }
 
-func NewFamiliesRepository(CDB *mongo.Client) *familiesRepository {
+func NewFamiliesRepository(CDB *mongo.Client, collection string) *familiesRepository {
 	return &familiesRepository{
-		CDB: CDB.Database("center-mosq").Collection("families"),
+		CDB: CDB.Database(collection).Collection("families"),
 	}
 }
 

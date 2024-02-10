@@ -15,9 +15,9 @@ type paymentsRepository struct {
 	CDB *mongo.Collection
 }
 
-func NewPaymentsRepository(CDB *mongo.Client) *paymentsRepository {
+func NewPaymentsRepository(CDB *mongo.Client, collection string) *paymentsRepository {
 	return &paymentsRepository{
-		CDB: CDB.Database("center-mosq").Collection("payments"),
+		CDB: CDB.Database(collection).Collection("payments"),
 	}
 }
 

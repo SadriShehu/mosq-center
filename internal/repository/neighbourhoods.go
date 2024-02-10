@@ -15,9 +15,9 @@ type neighbourhoodsRepository struct {
 	CDB *mongo.Collection
 }
 
-func NewNeighbourhoodsRepository(CDB *mongo.Client) *neighbourhoodsRepository {
+func NewNeighbourhoodsRepository(CDB *mongo.Client, collection string) *neighbourhoodsRepository {
 	return &neighbourhoodsRepository{
-		CDB: CDB.Database("center-mosq").Collection("neighbourhoods"),
+		CDB: CDB.Database(collection).Collection("neighbourhoods"),
 	}
 }
 

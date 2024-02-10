@@ -6,12 +6,18 @@ import (
 )
 
 type Config struct {
-	Env               string
-	Port              string
+	Env         string
+	Port        string
+	ServiceName string
+	DBConfig    *DBConfig
+	Auth        *Auth0Config
+	TunePrayers *TunePrayers
+}
+
+type DBConfig struct {
 	MongoDBURI        string
 	MongoUserCertPath string
-	Auth              *Auth0Config
-	TunePrayers       *TunePrayers
+	CollectionName    string
 }
 
 type Auth0Config struct {
@@ -63,10 +69,14 @@ func GetBoolOrFalse(key string) bool {
 
 func New() *Config {
 	return &Config{
-		Env:               GetOrDefault("ENV", "dev"),
-		Port:              ":8080",
-		MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
-		MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),
+		Env:         GetOrDefault("ENV", "dev"),
+		ServiceName: GetOrDefault("SERVICE_NAME", "mosq"),
+		Port:        ":8080",
+		DBConfig: &DBConfig{
+			MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
+			MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),
+			CollectionName:    GetOrDefault("MONGO_COLLECTION_NAME", "mosq"),
+		},
 		Auth: &Auth0Config{
 			Enable:         GetBoolOrFalse("AUTH0_ENABLE"),
 			Env:            GetOrDefault("ENV", "dev"),
