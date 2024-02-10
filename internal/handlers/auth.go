@@ -10,6 +10,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/sessions"
+	"github.com/sadrishehu/mosq-center/internal/models"
 	"golang.org/x/oauth2"
 )
 
@@ -17,6 +18,7 @@ type AuthService interface {
 	AuthCodeURL(string, ...oauth2.AuthCodeOption) string
 	Exchange(context.Context, string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 	VerifyIDToken(context.Context, *oauth2.Token) (*oidc.IDToken, error)
+	UserInfo(context.Context, oauth2.TokenSource) (*oidc.UserInfo, error)
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +69,7 @@ func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var profile map[string]interface{}
+	var profile models.Profile
 	if err = idToken.Claims(&profile); err != nil {
 		log.Printf("failed to parse claims: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

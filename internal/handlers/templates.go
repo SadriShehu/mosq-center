@@ -174,9 +174,9 @@ func (h *handler) User(w http.ResponseWriter, req *http.Request) {
 
 	var name, picture string
 	if h.AuthConfig.Enable {
-		profile := store.Values["profile"]
-		name = profile.(map[string]interface{})["name"].(string)
-		picture = profile.(map[string]interface{})["picture"].(string)
+		profile := store.Values["profile"].(models.Profile)
+		name = profile.Name
+		picture = profile.Picture
 	}
 
 	prayers, err := h.prayerTimes(ctx)
