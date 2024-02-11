@@ -233,7 +233,7 @@ resource "google_cloud_run_v2_service" "mosq_qoku" {
 
       env {
         name  = "MONGO_DB_COLLECTION"
-        value = "center-mosq"
+        value = "coki-mosq"
       }
 
       env {
