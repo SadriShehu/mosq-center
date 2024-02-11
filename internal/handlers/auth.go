@@ -77,6 +77,7 @@ func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session.Values["profile"] = profile
+	session.Values["service"] = h.AuthConfig.ServiceName
 	session.Values["access_token"] = token.AccessToken
 	if err = session.Save(r, w); err != nil {
 		log.Printf("failed to save session: %v\n", err)
