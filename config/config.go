@@ -28,6 +28,7 @@ type Auth0Config struct {
 	ClientSecret   string
 	CallbackURL    string
 	SessionsSecret string
+	ServiceName    string
 }
 
 type TunePrayers struct {
@@ -85,6 +86,7 @@ func New() *Config {
 			ClientSecret:   GetOrDefault("AUTH0_CLIENT_SECRET", "0Q4Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q"),
 			CallbackURL:    GetOrDefault("AUTH0_CALLBACK_URL", "http://localhost:8080/callback"),
 			SessionsSecret: GetOrDefault("SESSIONS_SECRET", "0Q4Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q1Q"),
+			ServiceName:    GetOrDefault("SERVICE_NAME", "mosq"),
 		},
 		TunePrayers: &TunePrayers{
 			Imsak:    GetIntOrDefault("TUNE_IMSAK", 5),
