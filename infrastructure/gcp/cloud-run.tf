@@ -208,7 +208,7 @@ resource "google_cloud_run_v2_service" "mosq_qoku" {
       env {
         name = "AUTH0_CALLBACK_URL"
         // get the cloud run url
-        value = "https://xhamia-qender.com/callback"
+        value = "https://qoku.xhamia-qender.com/callback"
       }
 
       env {
