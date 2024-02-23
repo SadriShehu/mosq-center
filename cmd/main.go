@@ -38,7 +38,7 @@ func main() {
 	log.Printf("server is starting at %s...", c.Port)
 	go engine.Run()
 
-	// Receive signal to shutdown the server.
+	// Receive signal to shut down the server.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
