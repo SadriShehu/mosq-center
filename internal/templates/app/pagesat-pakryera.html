@@ -25,12 +25,43 @@
 </div>
 <div class="container">
     <h3>Lista e familjeve papaguar per vitin <span id="yearSpan"></span></h3>
+    <script>
+        function searchFamily() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("search");
+            filter = input.value.toUpperCase();
+            table = document.querySelector(".table");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
     <div class="row g-3">
-        <div class="col-12 text-end">
+        <div class="col-lg-3 col-md-3">
+            <input id="search" type="text" class="form-control" placeholder="Kerko per familje" />
+        </div>
+        <div class="col-lg-3 col-md-3">
+            <button type="button" class="btn btn-primary" onclick="searchFamily()">
+                <i class="fas fa-search"></i> Kerko
+            </button>
+        </div>
+        <div class="col-lg-6 col-md-6 text-end">
             <button type="button" class="btn btn-primary" onclick="exportToPDF(getYearFromQueryParam(), getNeighbourhoodFromQueryParam())">
                 <i class="fas fa-file-pdf"></i> Gjenero Faturat
             </button>
         </div>
+    </div>
+    <br />
     <div class="table-responsive">
         <table class="table">
             <thead>
