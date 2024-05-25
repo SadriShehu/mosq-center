@@ -121,21 +121,22 @@ checkbox.addEventListener('change', function() {
     }
 });
 
-const searchByYearRadio = document.getElementById('searchByYear');
-const searchByFamilyRadio = document.getElementById('searchByFamily');
-const searchYearInput = document.getElementById('s_year');
-const searchFamilyInput = document.getElementById('s_family_id');
+function searchFamily() {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("search");
+    filter = input.value.toUpperCase();
+    table = document.querySelector(".table");
+    tr = table.getElementsByTagName("tr");
 
-searchByYearRadio.addEventListener('change', () => {
-    searchYearInput.style.display = 'inline-block';
-    searchFamilyInput.style.display = 'none';
-    searchYearInput.disabled = false;
-    searchFamilyInput.disabled = true;
-});
-
-searchByFamilyRadio.addEventListener('change', () => {
-    searchYearInput.style.display = 'none';
-    searchFamilyInput.style.display = 'inline-block';
-    searchYearInput.disabled = true;
-    searchFamilyInput.disabled = false;
-});
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}

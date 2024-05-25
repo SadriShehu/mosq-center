@@ -34,50 +34,32 @@
     <br />
 </div>
 <div class="container">
-    <h3>Kerko pagesat sipas vitit ose familjes</h3>
-    <form id="payments-filter-form" method="GET" action="/pagesat">
-        <div class="row g-3">
-            <div class="col-lg-3 col-md-6">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="search_type" id="searchByYear" value="year" checked>
-                    <label class="form-check-label" for="searchByYear">
-                        Kerko sipas vitit
-                    </label>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="search_type" id="searchByFamily" value="family">
-                    <label class="form-check-label" for="searchByFamily">
-                        Kerko sipas familjes
-                    </label>
-                </div>
-            </div>
+    <div class="row g-3">
+        <div class="col-6">
+            <h3>Kerko pagesat sipas vitit</h3>
         </div>
-        <br />
+        <div class="col-6">
+            <h3>Kerko pagesat sipas familjes</h3>
+        </div>
+    </div>
+    <form id="payments-filter-form" method="GET" action="/pagesat">
         <div class="row g-3">
             <div class="col-lg-3 col-md-6">
                 <input id="s_year" name="s_year" type="number" placeholder="Viti" class="form-control" />
             </div>
-        </div>
-        <div class="row g-3">
-            <div class="col-lg-3 col-md-6">
-                <select id="s_family_id" name="s_family_id" class="form-control" style="display: none;">
-                    <option value="" disabled selected>Zgjidh familjen</option>
-                    {{range .Families}}
-                    <option value="{{.ID}}" data-members="{{.Members}}">{{.Name}} {{.Middlename}} {{.Surname}}</option>
-                    {{end}}
-                </select>
-            </div>
-        </div>
-        <br />
-        <div class="row g-3">
             <div class="col-lg-3 col-md-6">
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-search"></i> Kerko
+                    <i class="fas fa-search"></i> Kerko vitin
                 </button>
             </div>
-            <br />
+            <div class="col-lg-3 col-md-3">
+                <input id="search" type="text" class="form-control" placeholder="Kerko per familje" />
+            </div>
+            <div class="col-lg-3 col-md-3">
+                <button type="button" class="btn btn-primary" onclick="searchFamily()">
+                    <i class="fas fa-search"></i> Kerko familje
+                </button>
+            </div>
         </div>
     </form>
     <br />

@@ -25,27 +25,6 @@
 </div>
 <div class="container">
     <h3>Lista e familjeve papaguar per vitin <span id="yearSpan"></span></h3>
-    <script>
-        function searchFamily() {
-            var input, filter, table, tr, td, i, txtValue;
-            input = document.getElementById("search");
-            filter = input.value.toUpperCase();
-            table = document.querySelector(".table");
-            tr = table.getElementsByTagName("tr");
-
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[0];
-                if (td) {
-                    txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
-                }
-            }
-        }
-    </script>
     <div class="row g-3">
         <div class="col-lg-3 col-md-3">
             <input id="search" type="text" class="form-control" placeholder="Kerko per familje" />
@@ -109,6 +88,14 @@
                         <div class="mb-3">
                             <label for="year" class="form-label">Viti</label>
                             <input name="year" type="number" class="form-control" id="m_year" required>
+                        </div>
+                        <div class="mb-3" id="range_year_input" style="display: none;">
+                            <label for="range_year" class="form-label">Deri në vitin</label>
+                            <input name="range_year" type="text" class="form-control" id="m_range_year">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="range_year_checkbox" onchange="toggleRangeYearInput()">
+                            <label class="form-check-label" for="range_year_checkbox">Krijo pagesë për disa vite</label>
                         </div>
                     </form>
                 </div>

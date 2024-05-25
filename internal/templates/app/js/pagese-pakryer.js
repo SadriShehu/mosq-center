@@ -48,6 +48,7 @@ function createPaymentCall() {
         family_id: document.getElementById("m_family_id").value,
         amount: parseFloat(document.getElementById("m_amount").value),
         year: parseInt(document.getElementById("m_year").value, 10),
+        range_year: parseInt(document.getElementById("m_range_year").value, 10),
     };
 
     // Send an AJAX request to the server with the payload in the request body
@@ -102,4 +103,33 @@ function exportToPDF(year, neighborhood) {
             console.error("Request failed with status code: " + xhr.status);
         }
     };
+}
+
+function searchFamily() {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("search");
+    filter = input.value.toUpperCase();
+    table = document.querySelector(".table");
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+
+function toggleRangeYearInput() {
+    var rangeYearInput = document.getElementById("range_year_input");
+    if (rangeYearInput.style.display === "none") {
+        rangeYearInput.style.display = "block";
+    } else {
+        rangeYearInput.style.display = "none";
+    }
 }
