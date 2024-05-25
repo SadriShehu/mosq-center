@@ -93,13 +93,13 @@
                     <td>{{.UpdatedAt}}</td>
                     <td><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" onclick="updateModal('{{.ID}}', '{{.FamilyID}}', '{{.Amount}}', '{{.Year}}')"><i class="fa-solid fa-pen-to-square"></i></button></td>
                     <td>
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal-{{.ID}}">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
 
                     <!-- Confirmation Modal -->
-                    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="confirmDeleteModal-{{.ID}}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
