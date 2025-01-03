@@ -35,7 +35,7 @@ type Gregorian struct {
 type Hijri struct {
 	Date    string `json:"date"`
 	Format  string `json:"format"`
-	Day     string `json:"day"`
+	Day     int    `json:"day"`
 	Weekday struct {
 		En string `json:"en"`
 		Ar string `json:"ar"`
@@ -45,7 +45,7 @@ type Hijri struct {
 		En     string `json:"en"`
 		Ar     string `json:"ar"`
 	} `json:"month"`
-	Year        string `json:"year"`
+	Year        int `json:"year"`
 	Designation struct {
 		Abbreviated string `json:"abbreviated"`
 		Expanded    string `json:"expanded"`

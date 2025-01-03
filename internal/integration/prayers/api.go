@@ -50,6 +50,8 @@ func (c *PrayersClient) GetPrayers(month, year int) (*Prayers, error) {
 		},
 	}
 
+	fmt.Println(req.URL.String())
+
 	resp, err := c.client.Do(&req)
 	if err != nil {
 		return nil, err
