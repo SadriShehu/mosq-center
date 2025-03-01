@@ -108,9 +108,10 @@ resource "google_cloud_run_v2_service" "mosq_center" {
       }
 
       resources {
+        cpu_idle = true
         limits = {
           cpu    = "1"
-          memory = "512Mi"
+          memory = "128Mi"
         }
       }
     }
@@ -242,9 +243,10 @@ resource "google_cloud_run_v2_service" "mosq_qoku" {
       }
 
       resources {
+        cpu_idle = true
         limits = {
           cpu    = "1"
-          memory = "512Mi"
+          memory = "128Mi"
         }
       }
     }
