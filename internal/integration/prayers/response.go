@@ -85,7 +85,6 @@ type Offset struct {
 type Date struct {
 	Timestamp string    `json:"timestamp"`
 	Gregorian Gregorian `json:"gregorian"`
-	Hijri     Hijri     `json:"hijri"`
 }
 
 type Data struct {
