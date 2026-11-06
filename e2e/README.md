@@ -4,8 +4,6 @@ Playwright suite for the Next.js app.
 
 - `specs/<area>.spec.ts` — new acceptance suite for the redesign
   (`docs/redesign/UX.md`). Runs by default on both projects.
-- `flows/<page>.spec.ts` — behaviour tests from the migration wave (still run by
-  default until the redesign replaces them).
 - `legacy/*.spec.ts` — the archived migration/parity suite. **Not part of the
   default run**; it targets the app at tag `migration-parity`.
 - `helpers/` — seed fixtures, selector helpers, layout assertions.
@@ -53,7 +51,7 @@ When using `next dev`, point the suite at `http://localhost:3006`.
 
 ```bash
 cd e2e
-BASE_URL=http://localhost:8086 npm test            # specs + flows, desktop + phone
+BASE_URL=http://localhost:8086 npm test            # acceptance specs, desktop + phone
 BASE_URL=http://localhost:3006 npm test            # same against next dev
 ```
 

@@ -30,6 +30,25 @@ test.describe('public /', () => {
 
     await expect(page.getByRole('link', { name: 'Kyçu', exact: true })).toHaveAttribute('href', '/login');
     await expect(page.getByRole('link', { name: 'Lagjet', exact: true })).toHaveCount(0);
+
+    const countdown = page.getByText(/^\d{2}:\d{2}:\d{2}$/);
+    const first = await countdown.textContent();
+    await expect.poll(() => countdown.textContent(), { timeout: 4_000 }).not.toBe(first);
+  });
+
+  test('prayers API failure shows the Albanian server error', async ({ page }) => {
+    await page.route('**/api/v1/public/prayers', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'boom' }),
+      }),
+    );
+
+    await page.goto('/');
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Ndodhi një gabim në server. Provoni përsëri.' }),
+    ).toBeVisible();
   });
 });
 

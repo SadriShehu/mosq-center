@@ -53,8 +53,16 @@ test('delete asks for confirmation and removes the payment', async ({ page, seed
   expect((await seed.stats(s.year)).paid_families).toBe(0);
 });
 
-test('Eksporto CSV downloads a UTF-8 file with BOM and the rows', async ({ page, seed }) => {
+test('Eksporto CSV downloads a UTF-8 file with BOM, ë/ç and amounts', async ({ page, seed }) => {
   const s = await seed.scenario({ families: 2, paid: 2 });
+  const specialName = `${seed.name('Familja')} Ëndrra Çelësi`;
+  const special = await seed.createFamily({
+    name: specialName,
+    surname: `Mbiemri ë ç ${seed.token}`,
+    members: 4,
+    neighbourhoodId: s.neighbourhoodId,
+  });
+  await seed.createPayment(special, s.year, 13.5);
   await page.goto(`/pagesat?viti=${s.year}&lagjja=${s.neighbourhoodId}`);
   await expect(rowOf(page, s.families[0])).toBeVisible();
   const download = page.waitForEvent('download');
@@ -66,4 +74,8 @@ test('Eksporto CSV downloads a UTF-8 file with BOM and the rows', async ({ page,
   const text = buf.toString('utf8');
   expect(text).toContain(s.families[0].name);
   expect(text).toContain(s.families[1].name);
+  expect(text).toContain(specialName);
+  expect(text).toContain('Ëndrra Çelësi');
+  expect(text).toContain('"4"');
+  expect(text).toContain('"13.5"');
 });

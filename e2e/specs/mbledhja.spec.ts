@@ -1,6 +1,7 @@
 import { test, expect } from '../helpers/fixtures';
 import type { Page } from '@playwright/test';
 import type { Scenario, SeededFamily } from '../helpers/seed';
+import { expectNoReload, markNoReload } from '../helpers/ui';
 
 const fullName = (f: SeededFamily) => `${f.name} ${f.middleName} ${f.surname}`;
 
@@ -18,18 +19,34 @@ async function open(page: Page, s: Scenario) {
 test('one tap pays a family and Zhbëj undoes it', async ({ page, seed }) => {
   const s = await seed.scenario({ families: 2, paid: 0 });
   const [a, b] = s.families;
+  const fee = (await seed.stats(s.year)).fee_per_member;
   await open(page, s);
+  await markNoReload(page);
 
-  await rowOf(page, a).getByRole('button', { name: /^Paguaj/ }).click();
+  const payButton = rowOf(page, a).getByRole('button', { name: /^Paguaj/ });
+  const expectedMoney = await page.evaluate(
+    (amount) => new Intl.NumberFormat('sq-AL', { style: 'currency', currency: 'EUR' }).format(amount),
+    a.members * fee,
+  );
+  expect(await payButton.textContent()).toContain(expectedMoney);
+
+  const progress = page.getByRole('progressbar');
+  await expect(progress).toHaveAttribute('aria-valuenow', '0');
+
+  await payButton.click();
   await expect(rowOf(page, a).getByText('Paguar', { exact: true })).toBeVisible();
   await expect(rowOf(page, a).getByText(/Paguar tani/)).toBeVisible();
   expect((await seed.stats(s.year)).paid_families).toBe(1);
   await expect(rowOf(page, b).getByText('Pa paguar', { exact: true })).toBeVisible();
+  await expect(progress).toHaveAttribute('aria-valuenow', '50');
+  await expectNoReload(page);
 
   // The row itself offers Zhbëj for a payment made from this screen.
   await rowOf(page, a).getByRole('button', { name: 'Zhbëj' }).click();
   await expect(rowOf(page, a).getByText('Pa paguar', { exact: true })).toBeVisible();
   expect((await seed.stats(s.year)).paid_families).toBe(0);
+  await expect(progress).toHaveAttribute('aria-valuenow', '0');
+  await expectNoReload(page);
 });
 
 test('switching year drops the just-paid row Zhbëj (it belongs to the old year)', async ({ page, seed }) => {
@@ -59,7 +76,12 @@ test('a stale row that is already paid says so instead of doing nothing', async 
   await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
   await expect(page.getByText('Kjo familje është paguar tashmë për këtë vit.')).toBeVisible();
   await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
-  expect((await seed.stats(s.year)).paid_families).toBe(1);
+  const collection = await page.request.get(
+    `/api/v1/collection?year=${s.year}&neighbourhood_id=${s.neighbourhoodId}`,
+  );
+  expect(collection.ok()).toBeTruthy();
+  const rows = (await collection.json()) as { id: string; paid: boolean }[];
+  expect(rows.find((row) => row.id === family.id)?.paid).toBe(true);
 });
 
 test('multi-select marks several families paid', async ({ page, seed }) => {
@@ -128,7 +150,12 @@ test('family name opens the sheet in place and paying remaining years updates th
   await expect(page).not.toHaveURL(/familja=/);
   await expect(page.getByRole('combobox', { name: 'Lagjja' })).toHaveValue(s.neighbourhoodId);
   await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
-  expect((await seed.stats(s.year)).paid_families).toBe(1);
+  const collection = await page.request.get(
+    `/api/v1/collection?year=${s.year}&neighbourhood_id=${s.neighbourhoodId}`,
+  );
+  expect(collection.ok()).toBeTruthy();
+  const rows = (await collection.json()) as { id: string; paid: boolean }[];
+  expect(rows.find((row) => row.id === family.id)?.paid).toBe(true);
 });
 
 test('Gjenero faturat downloads a PDF for unpaid families', async ({ page, seed }) => {
@@ -137,6 +164,40 @@ test('Gjenero faturat downloads a PDF for unpaid families', async ({ page, seed 
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Gjenero faturat' }).click();
   expect((await download).suggestedFilename()).toMatch(/\.pdf$/);
+});
+
+test('neighbourhood select filters the list and updates the URL', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 1, paid: 0 });
+  const otherName = `${seed.name('Lagje')} B`;
+  const otherId = await seed.createNeighbourhood({ name: otherName });
+  const otherFamily: SeededFamily = {
+    id: '',
+    name: `${seed.name('Familja')} B`,
+    middleName: 'Prindi',
+    surname: `Mbiemri ${seed.token}`,
+    members: 4,
+  };
+  otherFamily.id = await seed.createFamily(otherFamily);
+
+  await open(page, s);
+  await expect(rowOf(page, s.families[0])).toBeVisible();
+
+  const select = page.getByRole('combobox', { name: 'Lagjja' });
+  await select.selectOption({ label: otherName });
+  await expect(page).toHaveURL(new RegExp(`lagjja=${otherId}`));
+  await expect(rowOf(page, otherFamily)).toBeVisible();
+  await expect(rowOf(page, s.families[0])).toHaveCount(0);
+
+  await select.selectOption({ label: 'Të gjitha lagjet' });
+  await expect(page).not.toHaveURL(/lagjja=/);
+  await expect(rowOf(page, otherFamily)).toBeVisible();
+  await expect(rowOf(page, s.families[0])).toBeVisible();
+});
+
+test('shows an empty state when the neighbourhood has no families', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 0, paid: 0 });
+  await open(page, s);
+  await expect(page.getByText('Nuk ka të dhëna.')).toBeVisible();
 });
 
 test('Gjenero faturat says so when nobody is unpaid', async ({ page, seed }) => {
