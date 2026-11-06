@@ -59,6 +59,8 @@ export const sq = {
     country: 'Shteti',
     postalCode: 'Kodi postar',
     region: 'Rajoni',
+    status: 'Statusi',
+    allNeighbourhoods: 'Të gjitha lagjet',
   },
 
   collection: { collected: 'Mbledhur', expected: 'Pritet' },
