@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/sadrishehu/mosq-center/config"
 	"github.com/sadrishehu/mosq-center/internal/middleware"
-	"github.com/sadrishehu/mosq-center/internal/templates"
+	"github.com/sadrishehu/mosq-center/web"
 )
 
 type handler struct {
@@ -44,31 +44,26 @@ func New(router *chi.Mux,
 	}
 }
 
+// RegisterTemplates registers the auth routes and the embedded static
+// frontend. Admin pages sit behind the auth middleware when auth is enabled.
 func (h *handler) RegisterTemplates() {
-	fs := http.FileServer(http.FS(templates.Files))
-	h.RouterService.Handle("/app/css/styles.css", fs)
-	h.RouterService.Handle("/app/js/scripts.js", fs)
-	h.RouterService.Handle("/app/assets/favicon.ico", fs)
-	h.RouterService.Handle("/app/assets/logo.png", fs)
+	h.RouterService.Get("/login", h.Login)
+	h.RouterService.Get("/callback", h.Callback)
+	h.RouterService.Get("/logout", h.Logout)
 
-	h.RouterService.Route("/", func(r chi.Router) {
-		r.Get("/", h.Publike)
-		r.Get("/login", h.Login)
-		r.Get("/callback", h.Callback)
-		r.Get("/logout", h.Logout)
+	static := StaticHandler(web.Files)
+	protected := static
+	if h.AuthConfig.Enable {
+		protected = middleware.AuthenticateUser(h.SessionStore)(static)
+	}
 
-		r.Group(func(r chi.Router) {
-			if h.AuthConfig.Enable {
-				r.Use(middleware.AuthenticateUser(h.SessionStore))
-			}
-			r.Get("/lagjet", h.Lagjet)
-			r.Get("/familjet", h.Familjet)
-			r.Get("/pagesat", h.Pagesat)
-			r.Get("/pagesat-pakryera", h.PagesatPakryera)
-			r.Get("/user", h.User)
-			h.RouterService.Handle("/app/js/*", fs)
-		})
-	})
+	h.RouterService.Handle("/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if isAdminPath(req.URL.Path) {
+			protected.ServeHTTP(w, req)
+			return
+		}
+		static.ServeHTTP(w, req)
+	}))
 }
 
 func (h *handler) RegisterRoutesV1() {
