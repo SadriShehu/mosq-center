@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { faFloppyDisk, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -49,10 +49,11 @@ function Content() {
   const [editing, setEditing] = useState<Neighbourhood | null>(null);
   const [deleting, setDeleting] = useState<Neighbourhood | null>(null);
 
-  const { data: neighbourhoods, error } = useQuery({ queryKey: ['neighbourhoods'], queryFn: api.neighbourhoods.list });
-  const rows = neighbourhoods ?? [];
-  const { data: regionList } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
-  const regions = useMemo(() => regionList ?? [], [regionList]);
+  const { data: rows = [], error } = useQuery({
+    queryKey: ['neighbourhoods'],
+    queryFn: api.neighbourhoods.list,
+  });
+  const { data: regions = [] } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
   const region = useWatch({ control: form.control, name: 'region' });

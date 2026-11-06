@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { faFloppyDisk, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -53,13 +53,14 @@ function Content() {
   const [editing, setEditing] = useState<FamilyDetails | null>(null);
   const [deleting, setDeleting] = useState<FamilyDetails | null>(null);
 
-  const { data: familyList, error } = useQuery({ queryKey: ['families'], queryFn: api.families.details });
-  const rows = familyList ?? [];
-  const { data: neighbourhoodList } = useQuery({
+  const { data: rows = [], error } = useQuery({
+    queryKey: ['families'],
+    queryFn: api.families.details,
+  });
+  const { data: neighbourhoods = [] } = useQuery({
     queryKey: ['neighbourhoods'],
     queryFn: api.neighbourhoods.list,
   });
-  const neighbourhoods = useMemo(() => neighbourhoodList ?? [], [neighbourhoodList]);
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
 
