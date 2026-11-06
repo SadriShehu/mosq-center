@@ -27,6 +27,7 @@ export const sq = {
     undo: 'Zhbëj',
     edit: 'Ndrysho',
     delete: 'Fshi',
+    deleteFamily: 'Fshi familjen',
     cancel: 'Anulo',
     save: 'Ruaj',
     close: 'Mbyll',

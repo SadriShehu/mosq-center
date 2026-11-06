@@ -53,7 +53,7 @@ test.describe('/familjet', () => {
     await expect(sheet.getByText(String(YEAR), { exact: true })).toBeVisible();
     await expect(sheet.getByText('Pa paguar', { exact: true })).toBeVisible();
 
-    await sheet.getByRole('button', { name: 'Paguaj vitet e mbetura' }).click();
+    await sheet.getByRole('button', { name: /Paguaj vitet e mbetura/ }).click();
     await expect(sheet.getByText('Paguar', { exact: true })).toBeVisible();
 
     const response = await page.request.get(`/api/v1/collection?year=${YEAR}`);
@@ -86,7 +86,7 @@ test.describe('/familjet', () => {
     await page.goto(`/familjet?viti=${YEAR}&id=${paid.id}`);
     const sheet = page.getByRole('dialog');
     await expect(sheet).toBeVisible();
-    await sheet.getByRole('button', { name: 'Fshi', exact: true }).click();
+    await sheet.getByRole('button', { name: 'Fshi familjen', exact: true }).click();
 
     const alert = page.getByRole('alertdialog');
     await expect(alert).toBeVisible();
