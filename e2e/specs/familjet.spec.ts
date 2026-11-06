@@ -62,6 +62,40 @@ test.describe('/familjet', () => {
     expect(rows.find((row) => row.id === unpaid.id)?.paid).toBe(true);
   });
 
+  test('payment status follows the selected year', async ({ page, seed }) => {
+    const paidYear = YEAR - 1;
+    const scenario = await seed.scenario({ families: 1, members: 3, paid: 1, year: paidYear });
+    const family = scenario.families[0];
+
+    await page.goto(`/familjet?viti=${YEAR}`);
+    await expect(familyItem(page, family.name).getByText('Pa paguar', { exact: true })).toBeVisible();
+
+    await page.goto(`/familjet?viti=${paidYear}`);
+    await expect(familyItem(page, family.name).getByText('Paguar', { exact: true })).toBeVisible();
+  });
+
+  test('edits family details from the sheet', async ({ page, seed }) => {
+    const scenario = await seed.scenario({ families: 1, members: 3, paid: 0, year: YEAR });
+    const family = scenario.families[0];
+
+    await page.goto(`/familjet?viti=${YEAR}&id=${family.id}`);
+    const sheet = page.getByRole('dialog');
+    await expect(sheet.getByText('Historiku i pagesave')).toBeVisible();
+
+    await sheet.getByRole('button', { name: 'Ndrysho', exact: true }).click();
+    const dialog = page.getByRole('dialog').filter({ has: page.getByRole('heading', { name: 'Ndrysho' }) });
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel('Numri i anëtarëve', { exact: true }).fill('6');
+    await dialog.getByRole('button', { name: 'Ruaj', exact: true }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole('dialog').getByText('6', { exact: true })).toBeVisible();
+
+    const response = await page.request.get(`/api/v1/families/${family.id}`);
+    expect(response.ok()).toBeTruthy();
+    expect(((await response.json()) as { members: number }).members).toBe(6);
+  });
+
   test('adds a family in a dialog and deletes one with consequences', async ({ page, seed }) => {
     const scenario = await seed.scenario({ families: 1, members: 2, paid: 1, year: YEAR });
     const paid = scenario.families[0];
