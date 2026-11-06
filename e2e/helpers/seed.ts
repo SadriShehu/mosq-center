@@ -19,12 +19,60 @@ export function uniqueYear(token: string): number {
   return 2100 + (hash(token) % 800);
 }
 
+export const DEFAULT_FEE_PER_MEMBER = 3;
+
 export interface FamilySpec {
   name?: string;
   middleName?: string;
   surname?: string;
   members?: number;
   neighbourhoodId?: string;
+}
+
+/** GET /api/v1/stats — shape from docs/redesign/UX.md. */
+export interface StatsNeighbourhood {
+  id: string;
+  name: string;
+  families: number;
+  paid_families: number;
+  expected: number;
+  collected: number;
+}
+
+export interface Stats {
+  year: number;
+  fee_per_member: number;
+  families: number;
+  members: number;
+  expected: number;
+  collected: number;
+  paid_families: number;
+  unpaid_families: number;
+  neighbourhoods: StatsNeighbourhood[];
+}
+
+export interface SeededFamily {
+  id: string;
+  name: string;
+  middleName: string;
+  surname: string;
+  members: number;
+}
+
+export interface ScenarioOptions {
+  families?: number;
+  members?: number;
+  paid?: number;
+  year?: number;
+  feePerMember?: number;
+}
+
+export interface Scenario {
+  neighbourhoodId: string;
+  families: SeededFamily[];
+  paidFamilies: SeededFamily[];
+  year: number;
+  feePerMember: number;
 }
 
 /**
@@ -88,11 +136,53 @@ export class Seed {
     return id;
   }
 
+  async createFamilies(count: number, members = 4): Promise<SeededFamily[]> {
+    const families: SeededFamily[] = [];
+    for (let index = 0; index < count; index += 1) {
+      const family: SeededFamily = {
+        id: '',
+        name: `${this.name('Familja')} ${index + 1}`,
+        middleName: 'Prindi',
+        surname: `Mbiemri ${this.token}`,
+        members,
+      };
+      family.id = await this.createFamily(family);
+      families.push(family);
+    }
+    return families;
+  }
+
   async createPayment(familyId: string, year: number, amount = 12): Promise<void> {
     const response = await this.request.post('/api/v1/payments', {
       data: { family_id: familyId, amount, year, range_year: 0 },
     });
     expect(response.status(), 'create payment').toBe(201);
+  }
+
+  /** One neighbourhood, N families and optionally a few paid families. */
+  async scenario(options: ScenarioOptions = {}): Promise<Scenario> {
+    const count = options.families ?? 3;
+    const members = options.members ?? 4;
+    const paid = options.paid ?? 1;
+    const year = options.year ?? this.year;
+    const feePerMember = options.feePerMember ?? DEFAULT_FEE_PER_MEMBER;
+
+    const neighbourhoodId = await this.createNeighbourhood();
+    const families = await this.createFamilies(count, members);
+    const paidFamilies = families.slice(0, paid);
+
+    for (const family of paidFamilies) {
+      await this.createPayment(family.id, year, family.members * feePerMember);
+    }
+
+    return { neighbourhoodId, families, paidFamilies, year, feePerMember };
+  }
+
+  /** Expected figures straight from the new stats endpoint (UX.md API table). */
+  async stats(year: number): Promise<Stats> {
+    const response = await this.request.get(`/api/v1/stats?year=${year}`);
+    expect(response.status(), 'get stats').toBe(200);
+    return (await response.json()) as Stats;
   }
 
   familyDisplayName(spec: Required<Pick<FamilySpec, 'name' | 'middleName' | 'surname'>>): string {

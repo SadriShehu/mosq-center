@@ -2,11 +2,13 @@
   "name": "mosq-web-e2e",
   "version": "1.0.0",
   "private": true,
-  "description": "Migration parity and flow tests for the mosq-web Next.js migration",
+  "description": "Acceptance (desktop + phone) and archived migration parity tests for mosq-web",
   "scripts": {
     "test": "playwright test",
-    "test:migration": "playwright test migration",
+    "test:desktop": "playwright test --project=desktop",
+    "test:phone": "playwright test --project=phone",
     "test:flows": "playwright test flows",
+    "test:legacy": "playwright test --config playwright.legacy.config.ts",
     "report": "playwright show-report"
   },
   "devDependencies": {
