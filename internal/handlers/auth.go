@@ -22,6 +22,14 @@ type AuthService interface {
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
+	if !h.AuthConfig.Enable {
+		// No redirect: /user does not require a session, so redirecting here
+		// could loop /user <-> /login.
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(`<!doctype html><html lang="sq"><head><meta charset="utf-8"><title>Kyqu</title></head><body><p>Auth0 is disabled locally.</p><p><a href="/user">Vazhdo te /user</a></p></body></html>`))
+		return
+	}
+
 	state, err := generateRandomState()
 	if err != nil {
 		log.Printf("failed to generate random state: %v\n", err)
@@ -41,6 +49,11 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
+	if !h.AuthConfig.Enable {
+		http.Redirect(w, r, "/user", http.StatusTemporaryRedirect)
+		return
+	}
+
 	state := r.URL.Query().Get("state")
 	session, err := h.SessionStore.Get(r, "auth-store")
 	if err != nil {
@@ -89,6 +102,11 @@ func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Logout(w http.ResponseWriter, r *http.Request) {
+	if !h.AuthConfig.Enable {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
 	logoutUrl, err := url.Parse("https://" + h.AuthConfig.Domain + "/v2/logout")
 	if err != nil {
 		log.Printf("failed to logout: %v\n", err)
