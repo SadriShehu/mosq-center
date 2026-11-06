@@ -119,12 +119,13 @@ func (s *engine) Bootstrap() {
 	ns := services.NewNeighbourhoodsRepository(nr)
 	is := services.NewInvoicesService(pr, nr)
 	prs := services.NewPrayersService(s.prayersAPI)
+	rs := services.NewReportsService(pr, fr, nr, s.config.FeePerMember)
 
 	// Store injection
 	ss := sessions.NewCookieStore([]byte(s.config.Auth.SessionsSecret))
 
 	// Handler injection
-	h := handlers.New(s.router, s.auth0, ps, fs, ns, is, prs, ss, s.config.Auth)
+	h := handlers.New(s.router, s.auth0, ps, fs, ns, is, prs, rs, ss, s.config.Auth)
 
 	h.RegisterRoutesV1()
 	h.RegisterTemplates()

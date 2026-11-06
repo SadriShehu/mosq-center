@@ -9,15 +9,6 @@ import (
 	"time"
 )
 
-// adminPages are the static pages that need a session (when auth is enabled).
-var adminPages = map[string]bool{
-	"lagjet":           true,
-	"familjet":         true,
-	"pagesat":          true,
-	"pagesat-pakryera": true,
-	"user":             true,
-}
-
 // StaticHandler serves the Next.js export: /x -> x.html, / -> index.html,
 // unknown paths -> 404.html with status 404.
 func StaticHandler(files fs.FS) http.Handler {
@@ -89,12 +80,41 @@ func serveFile(w http.ResponseWriter, req *http.Request, files fs.FS, name strin
 	http.ServeContent(w, req, name, time.Time{}, bytes.NewReader(data))
 }
 
-// isAdminPath reports whether the request path belongs to an admin page.
-func isAdminPath(p string) bool {
-	seg := strings.SplitN(strings.TrimPrefix(path.Clean("/"+p), "/"), "/", 2)[0]
-	// Any extension (.html, .txt RSC payloads, ...) still belongs to the page.
-	if i := strings.Index(seg, "."); i >= 0 {
-		seg = seg[:i]
+// publicAssetExts are static assets served from the web root without a session.
+// Page payloads (.html, .txt) are deliberately not in this list.
+var publicAssetExts = map[string]bool{
+	".ico": true, ".png": true, ".svg": true, ".jpg": true, ".jpeg": true,
+	".webp": true, ".woff": true, ".woff2": true, ".webmanifest": true,
+}
+
+// isPublicPath is the allowlist of paths reachable without a session:
+// the public prayer-times page, build assets, the auth routes, the health
+// check and the public API. Everything else (including unknown routes) needs
+// a session when auth is enabled.
+func isPublicPath(p string) bool {
+	clean := path.Clean("/" + p)
+
+	switch clean {
+	case "/", "/index.html", "/index.txt", "/404.html",
+		"/login", "/callback", "/logout", "/api/v1/health":
+		return true
 	}
-	return adminPages[seg]
+
+	for _, prefix := range []string{"/_next/", "/_not-found", "/api/v1/public/"} {
+		if strings.HasPrefix(clean, prefix) {
+			return true
+		}
+	}
+
+	// Root-level files only: the home page's RSC payloads (__next.*.txt) and images.
+	if rest := strings.TrimPrefix(clean, "/"); !strings.Contains(rest, "/") {
+		if strings.HasPrefix(rest, "__next.") {
+			return true
+		}
+		if publicAssetExts[strings.ToLower(path.Ext(rest))] {
+			return true
+		}
+	}
+
+	return false
 }

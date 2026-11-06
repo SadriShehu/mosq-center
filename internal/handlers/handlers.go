@@ -18,6 +18,7 @@ type handler struct {
 	NeighbourhoodsService NeighbourhoodsService
 	InvoicesService       InvoicesService
 	PrayersService        PrayersService
+	ReportsService        ReportsService
 	SessionStore          *sessions.CookieStore
 	AuthConfig            *config.Auth0Config
 }
@@ -29,6 +30,7 @@ func New(router *chi.Mux,
 	ns NeighbourhoodsService,
 	is InvoicesService,
 	prs PrayersService,
+	rs ReportsService,
 	ss *sessions.CookieStore,
 	ac *config.Auth0Config) *handler {
 	return &handler{
@@ -39,13 +41,14 @@ func New(router *chi.Mux,
 		NeighbourhoodsService: ns,
 		InvoicesService:       is,
 		PrayersService:        prs,
+		ReportsService:        rs,
 		SessionStore:          ss,
 		AuthConfig:            ac,
 	}
 }
 
 // RegisterTemplates registers the auth routes and the embedded static
-// frontend. Admin pages sit behind the auth middleware when auth is enabled.
+// frontend. Everything outside the public allowlist sits behind the auth middleware when auth is enabled.
 func (h *handler) RegisterTemplates() {
 	h.RouterService.Get("/login", h.Login)
 	h.RouterService.Get("/callback", h.Callback)
@@ -58,11 +61,11 @@ func (h *handler) RegisterTemplates() {
 	}
 
 	h.RouterService.Handle("/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if isAdminPath(req.URL.Path) {
-			protected.ServeHTTP(w, req)
+		if isPublicPath(req.URL.Path) {
+			static.ServeHTTP(w, req)
 			return
 		}
-		static.ServeHTTP(w, req)
+		protected.ServeHTTP(w, req)
 	}))
 }
 
@@ -80,6 +83,11 @@ func (h *handler) RegisterRoutesV1() {
 			r.Get("/families/details", h.GetFamiliesDetails)
 			r.Get("/payments/details", h.GetPaymentsDetails)
 			r.Get("/payments/no-payment/details", h.GetNoPaymentDetails)
+			r.Get("/payments/recent", h.GetRecentPayments)
+			r.Post("/payments/bulk", h.BulkPayments)
+			r.Get("/stats", h.GetStats)
+			r.Get("/collection", h.GetCollection)
+			r.Get("/families/{id}/history", h.GetFamilyHistory)
 		})
 
 		r.Route("/prayers", func(r chi.Router) {
