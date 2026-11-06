@@ -73,6 +73,7 @@ export const sq = {
     recentPayments: 'Pagesat e fundit',
     nextPrayer: 'Namazi i ardhshëm',
     welcome: 'Mirësevini',
+    loadError: 'Nuk u ngarkuan të dhënat.',
     paidFamilies: 'Familjet e paguara',
     ofFamilies: (paid: number, total: number) => `${paid} nga ${total} familje`,
     forYear: (year: number) => `Pasqyra për vitin ${year}`,
