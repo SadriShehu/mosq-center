@@ -1,5 +1,5 @@
-/* Legacy pages (bootstrap) sit in the lowest cascade layer so Tailwind utilities always win. Removed in r-cleanup. */
-@import 'bootstrap/dist/css/bootstrap.min.css' layer(legacy);
+/* Bootstrap CSS is no longer loaded: its !important .bg-primary/.text-primary/.text-danger utilities
+   clobbered our tokens. Legacy pages (still importing react-bootstrap) are unstyled until rebuilt. */
 @import 'tailwindcss';
 
 /* Direction A — Emerald & Gold (docs/redesign/UX.md). Tokens are CSS variables. */
