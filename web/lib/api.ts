@@ -62,16 +62,21 @@ async function mutate(path: string, init: RequestInit): Promise<string> {
   return (await res.text()).trim();
 }
 
+/** Go encodes an empty slice as JSON null; lists are always arrays. */
+async function list<T>(path: string): Promise<T[]> {
+  return (await json<T[] | null>(path)) ?? [];
+}
+
 const body = (data: unknown): RequestInit => ({ body: JSON.stringify(data) });
 
 export const api = {
   me: () => json<Me>('/me'),
-  regions: () => json<Region[]>('/regions'),
+  regions: () => list<Region>('/regions'),
   publicPrayers: () => json<Prayers>('/public/prayers', undefined, { public: true }),
   prayers: () => json<Prayers>('/prayers'),
 
   neighbourhoods: {
-    list: () => json<Neighbourhood[]>('/neighbourhoods'),
+    list: () => list<Neighbourhood>('/neighbourhoods'),
     get: (id: string) => json<Neighbourhood>(`/neighbourhoods/${id}`),
     create: (d: NeighbourhoodInput) => mutate('/neighbourhoods', { method: 'POST', ...body(d) }),
     update: (id: string, d: NeighbourhoodInput) =>
@@ -80,8 +85,8 @@ export const api = {
   },
 
   families: {
-    list: () => json<Family[]>('/families'),
-    details: () => json<FamilyDetails[]>('/families/details'),
+    list: () => list<Family>('/families'),
+    details: () => list<FamilyDetails>('/families/details'),
     get: (id: string) => json<Family>(`/families/${id}`),
     create: (d: FamilyInput) => mutate('/families', { method: 'POST', ...body(d) }),
     update: (id: string, d: FamilyInput) => mutate(`/families/${id}`, { method: 'PUT', ...body(d) }),
@@ -89,12 +94,12 @@ export const api = {
   },
 
   payments: {
-    list: () => json<Payment[]>('/payments'),
+    list: () => list<Payment>('/payments'),
     /** familyId overrides year (same as the old /pagesat handler). */
     details: (p: { year?: number | string; family_id?: string } = {}) =>
-      json<PaymentDetails[]>(`/payments/details${qs(p)}`),
+      list<PaymentDetails>(`/payments/details${qs(p)}`),
     noPaymentDetails: (p: { year: number | string; s_neighbourhood_id?: string }) =>
-      json<FamilyDetails[]>(`/payments/no-payment/details${qs(p)}`),
+      list<FamilyDetails>(`/payments/no-payment/details${qs(p)}`),
     create: (d: PaymentInput) => mutate('/payments', { method: 'POST', ...body(d) }),
     update: (id: string, d: PaymentInput) => mutate(`/payments/${id}`, { method: 'PUT', ...body(d) }),
     remove: (id: string) => mutate(`/payments/${id}`, { method: 'DELETE' }),
