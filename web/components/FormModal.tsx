@@ -1,5 +1,6 @@
 'use client';
 import type { FormEventHandler, ReactNode } from 'react';
+import { useId } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 
 interface Props {
@@ -17,10 +18,11 @@ interface Props {
 export function FormModal({
   show, title, submitLabel = 'Ruaj', cancelLabel = 'Mbyll', busy, onHide, onSubmit, children,
 }: Props) {
+  const id = useId();
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} centered aria-labelledby={id}>
       <form onSubmit={onSubmit} noValidate>
-        <Modal.Header closeButton><Modal.Title>{title}</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title id={id}>{title}</Modal.Title></Modal.Header>
         <Modal.Body>{children}</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={onHide}>{cancelLabel}</Button>
