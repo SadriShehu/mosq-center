@@ -1,0 +1,64 @@
+package handlers
+
+import (
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"testing/fstest"
+)
+
+func TestStaticHandler(t *testing.T) {
+	files := fstest.MapFS{
+		"index.html":               {Data: []byte("INDEX")},
+		"lagjet.html":              {Data: []byte("LAGJET")},
+		"lagjet/__next.lagjet.txt": {Data: []byte("RSC")},
+		"404.html":                 {Data: []byte("NOTFOUND")},
+		"_next/static/chunks/a.js": {Data: []byte("JS")},
+		"secret/../../etc":         {Data: []byte("x")},
+	}
+	h := StaticHandler(files)
+
+	tests := []struct {
+		name, method, path string
+		status             int
+		body, cache        string
+	}{
+		{"root", "GET", "/", 200, "INDEX", "no-cache"},
+		{"clean url", "GET", "/lagjet", 200, "LAGJET", "no-cache"},
+		{"explicit html", "GET", "/lagjet.html", 200, "LAGJET", ""},
+		{"nested asset", "GET", "/lagjet/__next.lagjet.txt", 200, "RSC", ""},
+		{"immutable", "GET", "/_next/static/chunks/a.js", 200, "JS", "public, max-age=31536000, immutable"},
+		{"unknown", "GET", "/nope", 404, "NOTFOUND", ""},
+		{"directory", "GET", "/_next", 404, "NOTFOUND", ""},
+		{"traversal", "GET", "/../../etc/passwd", 404, "NOTFOUND", ""},
+		{"encoded traversal", "GET", "/%2e%2e/%2e%2e/etc/passwd", 404, "NOTFOUND", ""},
+		{"unknown api", "GET", "/api/v1/zzz", 404, "404 page not found", ""},
+		{"post", "POST", "/", 405, "", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, httptest.NewRequest(tt.method, tt.path, nil))
+			if rec.Code != tt.status {
+				t.Fatalf("status = %d, want %d", rec.Code, tt.status)
+			}
+			if tt.body != "" && !strings.Contains(rec.Body.String(), tt.body) {
+				t.Errorf("body = %q", rec.Body.String())
+			}
+			if tt.cache != "" && rec.Header().Get("Cache-Control") != tt.cache {
+				t.Errorf("cache = %q", rec.Header().Get("Cache-Control"))
+			}
+		})
+	}
+}
+
+func TestIsAdminPath(t *testing.T) {
+	for p, want := range map[string]bool{
+		"/": false, "/lagjet": true, "/lagjet.html": true, "/lagjet/x.txt": true, "/user": true,
+		"/pagesat-pakryera": true, "/_next/static/a.js": false, "/login": false, "/a/../lagjet": true,
+	} {
+		if got := isAdminPath(p); got != want {
+			t.Errorf("%s = %v, want %v", p, got, want)
+		}
+	}
+}
