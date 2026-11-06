@@ -1,0 +1,15 @@
+{
+  "name": "mosq-web-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Migration parity and flow tests for the mosq-web Next.js migration",
+  "scripts": {
+    "test": "playwright test",
+    "test:migration": "playwright test migration",
+    "test:flows": "playwright test flows",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}
