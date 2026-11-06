@@ -72,7 +72,7 @@ func New() *Config {
 	return &Config{
 		Env:         GetOrDefault("ENV", "dev"),
 		ServiceName: GetOrDefault("SERVICE_NAME", "mosq"),
-		Port:        ":8080",
+		Port:        ":" + GetOrDefault("PORT", "8080"),
 		DBConfig: &DBConfig{
 			MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
 			MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),

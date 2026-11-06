@@ -1,0 +1,295 @@
+# Board for team mosq-web. Spec for everything: docs/migration/PLAN.md
+
+# ---------------- Wave 1: three tracks in parallel ----------------
+
+[[task]]
+ref = "api"
+title = "Go API prep for the SPA (contract in PLAN.md)"
+owner = "backend"
+body = """
+Implement every row of the 'API contract' table in docs/migration/PLAN.md:
+- middleware: /api/* -> 401 JSON instead of redirect (page routes keep redirecting).
+- GET /api/v1/me, GET /api/v1/public/prayers, GET /api/v1/regions.
+- Move the join logic out of internal/handlers/templates.go into the services and expose
+  GET /api/v1/payments/details, /api/v1/families/details, /api/v1/payments/no-payment/details.
+  Missing family/neighbourhood -> empty name, never panic (templates.go:131,137 bug).
+- Keep the old HTML handlers working for now (go-embed removes them later).
+Tests: table-driven Go unit tests for the join functions (incl. missing family) and
+httptest tests for the 401 behaviour and /me with auth disabled.
+Done when: go vet ./... && go test ./... pass; curl each new endpoint on PORT=8082 and paste one sample response per endpoint in the --note.
+"""
+
+[[task]]
+ref = "core"
+title = "Scaffold web/ + layouts + shared components + typed API client"
+owner = "web-core"
+body = """
+Create web/ per PLAN.md 'Architecture': Next.js App Router + TS, bootstrap + react-bootstrap,
+fontawesome, TanStack Query, react-hook-form + zod. next.config: output 'export' only in
+production; dev rewrites to API_ORIGIN. Scripts: dev, build, lint, typecheck.
+Build:
+- lib/api.ts + lib/types.ts: typed client for every endpoint the pages need (existing CRUD
+  + the new contract rows). 401 -> window.location = '/login'.
+- AppShell (sidebar + toggle + top nav + Shpalos dropdown) and PublicShell — exact texts from
+  the 'Shared auth layout' paragraph. Port only the sidebar CSS rules.
+- AuthGuard (calls /api/v1/me), Toast provider, ConfirmDialog, FormModal, DataTable with a
+  text-search filter on a chosen column, PrayerGrid (7 cards, labels from PLAN.md), formatDate.
+- Route stubs for /, /user, /lagjet, /familjet, /pagesat, /pagesat-pakryera that render the
+  right shell + page heading, so page owners only fill them in.
+- web/README.md: how to run dev against Go.
+You code against the contract; the backend builds it in parallel. Do not edit Go code.
+Done when: npm run lint && npm run typecheck && npm run build pass and `web/out` contains
+lagjet.html etc.
+"""
+
+[[task]]
+ref = "mig"
+title = "Migration (parity) suite for all pages, green against the OLD app"
+owner = "qa"
+body = """
+Set up e2e/ (own package.json, Playwright, chromium, BASE_URL env, html reporter).
+Run the OLD app from `main` (see PLAN.md 'Local environment': git worktree add /tmp/mosq-old main;
+PORT=8081 MONGO_COLLECTION_NAME=mosq_qa go run ./cmd).
+Write e2e/migration/<page>.spec.ts for: layout nav, /, /user, /lagjet, /familjet, /pagesat,
+/pagesat-pakryera — covering every 'Must keep' item in the parity table. Text/role/label
+selectors only; each test seeds via /api/v1 with a unique suffix and cleans up.
+Note: the old app has no JSON details endpoints — seed only with the existing CRUD endpoints.
+Add e2e/README.md with the exact commands.
+Done when: `BASE_URL=http://localhost:8081 npx playwright test migration` is fully green
+(paste the summary line in the --note).
+"""
+
+[[task]]
+ref = "rev-api"
+title = "Review: api"
+owner = "reviewer"
+after = ["api"]
+body = """
+Review branch hive/mosq-web/backend vs feat/nextjs-migration (git diff feat/nextjs-migration...hive/mosq-web/backend).
+Check: matches the contract table exactly (paths, JSON field names, status codes); no nil
+panics; auth: /api/* without session -> 401, /api/v1/public/prayers works without session,
+nothing else became public; tests cover the missing-family case; go vet/test pass.
+Findings -> hive team say backend. Close only when approved.
+"""
+
+[[task]]
+ref = "rev-core"
+title = "Review: core"
+owner = "reviewer"
+after = ["core"]
+body = """
+Review hive/mosq-web/web-core vs feat/nextjs-migration.
+Check: output 'export' only in production; rewrites cover /api, /login, /callback, /logout;
+types match the PLAN.md contract field names (snake_case JSON); layout texts match the old
+layout.html exactly; no vendored styles.css; no location.reload(); 401 -> /login; lint,
+typecheck, build pass. Findings -> hive team say web-core. Close only when approved.
+"""
+
+[[task]]
+ref = "rev-mig"
+title = "Review: migration suite"
+owner = "reviewer"
+after = ["mig"]
+body = """
+Review hive/mosq-web/qa. Check: every 'Must keep' item in the PLAN.md parity table has an
+assertion; no id/class/structure selectors; no assertions on raw date strings; tests seed +
+clean up their own data and do not depend on order; nothing is skipped or marked fixme.
+Findings -> hive team say qa. Close only when approved.
+"""
+
+[[task]]
+ref = "merge-1"
+title = "Lead: merge api + core + migration suite into feat/nextjs-migration"
+owner = "lead"
+after = ["rev-api", "rev-core", "rev-mig"]
+body = "Merge the three branches, run go test + web build, then announce: everyone `git merge feat/nextjs-migration`."
+
+# ---------------- Wave 2: pages + Go embedding in parallel ----------------
+
+[[task]]
+ref = "p-home"
+title = "Page: / and /user"
+owner = "pages-crud"
+after = ["merge-1"]
+body = """
+First: git merge feat/nextjs-migration. Fill the / and /user stubs: PrayerGrid fed by
+/api/v1/public/prayers (/) and /api/v1/prayers + /api/v1/me (/user). Parity rows in PLAN.md.
+Done when: lint/typecheck/build pass and `BASE_URL=http://localhost:3004 npx playwright test migration/home migration/user migration/layout`
+passes against your new app (Go on 8084, next dev on 3004). Do not edit e2e/ — if a test looks wrong, tell qa.
+"""
+
+[[task]]
+ref = "p-lagjet"
+title = "Page: /lagjet"
+owner = "pages-crud"
+after = ["p-home"]
+body = """
+Neighbourhoods CRUD per PLAN.md parity row and old app/lagjet.html + js/lagje.js
+(region select from /api/v1/regions auto-fills postal code + city; edit modal; delete confirm).
+Done when: lint/typecheck/build pass and the lagjet migration spec passes against your new app.
+"""
+
+[[task]]
+ref = "p-familjet"
+title = "Page: /familjet"
+owner = "pages-crud"
+after = ["p-lagjet"]
+body = """
+Families CRUD per PLAN.md parity row and old app/familjet.html + js/familje.js, list from
+/api/v1/families/details. Done when: lint/typecheck/build pass and the familjet migration spec
+passes against your new app.
+"""
+
+[[task]]
+ref = "p-pagesat"
+title = "Page: /pagesat"
+owner = "pages-payments"
+after = ["merge-1"]
+body = """
+First: git merge feat/nextjs-migration. Payments page per PLAN.md parity row and old
+app/pagesat.html + js/pagese.js: create (amount = members x 3 on family select, multi-year
+range_year), filter by year via ?s_year= (keep it in the URL), client-side family search,
+edit modal, delete confirm. List from /api/v1/payments/details.
+Done when: lint/typecheck/build pass and the pagesat migration spec passes against your new app (Go 8085, next 3005).
+"""
+
+[[task]]
+ref = "p-pakryera"
+title = "Page: /pagesat-pakryera"
+owner = "pages-payments"
+after = ["p-pagesat"]
+body = """
+Unpaid families per PLAN.md parity row and old app/pagesat-pakryera.html + js/pagese-pakryer.js:
+year + neighbourhood filters in the URL (?year=&s_neighbourhood_id=), heading with the year,
+client-side search, pay modal (members x 3, multi-year range), 'Gjenero Faturat' PDF download
+via blob (404 -> toast "No payments found for year …"). List from /api/v1/payments/no-payment/details.
+Done when: lint/typecheck/build pass and the pagesat-pakryera migration spec passes against your new app.
+"""
+
+[[task]]
+ref = "embed"
+title = "Serve web/out from Go; Docker + Makefile + CI"
+owner = "backend"
+after = ["merge-1"]
+body = """
+First: git merge feat/nextjs-migration.
+- web/embed.go: //go:embed all:out (package web). Go handler: /x -> x.html, / -> index.html,
+  /_next/static/* with Cache-Control immutable, unknown -> 404.html. Keep the auth
+  middleware on the admin page routes (redirect to /login as today). API routes untouched.
+- Remove internal/templates and the HTML handlers (internal/handlers/templates.go) — the
+  JSON API stays.
+- Dockerfile: node stage builds web/out before go build. Makefile: `make web`, `make run` builds web first.
+  A placeholder so `go build` works without a web build (document it).
+- .github/workflows/pipeline.yml: on PRs run go vet/test + web lint/typecheck/build. Do not
+  change the deploy jobs or Terraform.
+Done when: docker build succeeds, and the container (PORT=8082, MONGO_COLLECTION_NAME=mosq_backend)
+serves /, /lagjet and /api/v1/health. Paste curl -I outputs in the --note.
+"""
+
+# ---------------- Per-page QA + review (run as each page lands) ----------------
+
+[[task]]
+ref = "qa-home"
+title = "QA: / and /user (migration vs new + flow tests)"
+owner = "qa"
+after = ["p-home"]
+body = """
+git merge hive/mosq-web/pages-crud into your worktree (test the page branch directly).
+Run the home/user/layout migration specs against the new app (Go 8086 + next dev 3006).
+Write e2e/flows/home.spec.ts: prayers API failure -> visible error, /user with 401 -> /login.
+Failures caused by the page -> hive team say pages-crud with the failing assertion. Close when all green.
+"""
+
+[[task]]
+ref = "qa-lagjet"
+title = "QA: /lagjet"
+owner = "qa"
+after = ["p-lagjet"]
+body = "Same as qa-home for /lagjet. Flow spec: required-field validation, list refreshes after create/edit/delete without a page reload, API error -> toast."
+
+[[task]]
+ref = "qa-familjet"
+title = "QA: /familjet"
+owner = "qa"
+after = ["p-familjet"]
+body = "Same as qa-home for /familjet. Flow spec: validation (members must be a positive int), refresh without reload, API error -> toast."
+
+[[task]]
+ref = "qa-pagesat"
+title = "QA: /pagesat"
+owner = "qa"
+after = ["p-pagesat"]
+body = "Same as qa-home for /pagesat (owner pages-payments). Flow spec: amount auto-fill = members x 3, multi-year creates one payment per year, ?s_year= survives reload, payment for a deleted family does not crash the list."
+
+[[task]]
+ref = "qa-pakryera"
+title = "QA: /pagesat-pakryera"
+owner = "qa"
+after = ["p-pakryera"]
+body = "Same as qa-home for /pagesat-pakryera (owner pages-payments). Flow spec: PDF download produces a non-empty application/pdf file, 404 -> toast, paying a family removes it from the list."
+
+[[task]]
+ref = "rev-home"
+title = "Review: / and /user"
+owner = "reviewer"
+after = ["p-home"]
+body = "Review hive/mosq-web/pages-crud (home + user commits). Check parity texts, uses shared components from web/ (no duplicates), no reload, no any-typed API data, a11y labels on inputs. Findings -> hive team say pages-crud."
+
+[[task]]
+ref = "rev-lagjet"
+title = "Review: /lagjet"
+owner = "reviewer"
+after = ["p-lagjet"]
+body = "As rev-home, for /lagjet. Also: region select auto-fill matches old js/lagje.js exactly."
+
+[[task]]
+ref = "rev-familjet"
+title = "Review: /familjet"
+owner = "reviewer"
+after = ["p-familjet"]
+body = "As rev-home, for /familjet."
+
+[[task]]
+ref = "rev-pagesat"
+title = "Review: /pagesat"
+owner = "reviewer"
+after = ["p-pagesat"]
+body = "As rev-home, for /pagesat (owner pages-payments). Also: AMOUNT_PER_MEMBER = 3 in one shared constant, range_year only sent when the checkbox is on."
+
+[[task]]
+ref = "rev-pakryera"
+title = "Review: /pagesat-pakryera"
+owner = "reviewer"
+after = ["p-pakryera"]
+body = "As rev-home, for /pagesat-pakryera (owner pages-payments). Also: blob URL revoked after download, filters read from and written to the URL."
+
+[[task]]
+ref = "rev-embed"
+title = "Review: Go embedding, Docker, CI"
+owner = "reviewer"
+after = ["embed"]
+body = "Review hive/mosq-web/backend (embed commits). Check: all:out prefix; admin page routes still behind auth; API unchanged; path traversal impossible in the static handler; Dockerfile stages; CI only adds checks (deploy untouched)."
+
+# ---------------- Wave 3: integrate + final verification ----------------
+
+[[task]]
+ref = "merge-2"
+title = "Lead: merge pages + embed into feat/nextjs-migration"
+owner = "lead"
+after = ["qa-home", "qa-lagjet", "qa-familjet", "qa-pagesat", "qa-pakryera", "rev-home", "rev-lagjet", "rev-familjet", "rev-pagesat", "rev-pakryera", "rev-embed"]
+body = "Merge pages-crud, pages-payments, backend (embed) and qa (flow specs). Resolve conflicts, run go test + web build."
+
+[[task]]
+ref = "final"
+title = "Final: full suites against the production Docker image, both tenants"
+owner = "qa"
+after = ["merge-2"]
+body = """
+git merge feat/nextjs-migration. Build the Docker image. Run it twice:
+SERVICE_NAME=center MONGO_COLLECTION_NAME=mosq_qa_center PORT=8086 and
+SERVICE_NAME=qoku MONGO_COLLECTION_NAME=mosq_qa_qoku PORT=8087.
+Run the full migration + flow suites against both (BASE_URL=http://localhost:8086 / 8087).
+Also confirm in a fresh browser context: /pagesat without a session behaves as with auth
+disabled locally (note it; real Auth0 is checked manually by the user at cutover).
+Close with both summary lines in the --note.
+"""
