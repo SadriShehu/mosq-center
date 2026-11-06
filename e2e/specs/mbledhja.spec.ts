@@ -63,6 +63,20 @@ test('paying a family that is already paid toasts instead of duplicating it', as
   expect(payments.filter((p) => p.family_id === family.id)).toHaveLength(1);
 });
 
+test('a stale row that is already paid says so instead of doing nothing', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 1, paid: 0 });
+  const [family] = s.families;
+  await open(page, s);
+
+  // Somebody else records the payment while this row is still on screen.
+  await seed.createPayment(family.id, s.year, family.members * s.feePerMember);
+
+  await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
+  await expect(page.getByText('Kjo familje është paguar tashmë.')).toBeVisible();
+  await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
+  expect((await seed.stats(s.year)).paid_families).toBe(1);
+});
+
 test('multi-select marks several families paid', async ({ page, seed }) => {
   const s = await seed.scenario({ families: 3, paid: 0 });
   await open(page, s);
