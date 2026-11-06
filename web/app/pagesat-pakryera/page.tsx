@@ -91,7 +91,7 @@ function UnpaidPage() {
       a.href = url;
       a.download = `invoice-${year}-${nbhd}.pdf`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
       toast.error(errMsg(e));
     } finally {
