@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Moon, Sun, Sunrise, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { nextPrayer } from '@/components/NextPrayerCard';
 import { PublicShell } from '@/components/Shell';
 import { errMsg } from '@/components/Toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,13 +20,6 @@ const ITEMS: { key: keyof Prayers; label: string; icon: LucideIcon }[] = [
   { key: 'Isha', label: sq.prayers.Isha, icon: Moon },
   { key: 'Midnight', label: sq.prayers.Midnight, icon: Moon },
 ];
-
-function parseMinutes(value?: string): number | null {
-  if (!value) return null;
-  const match = value.match(/(\d{1,2}):(\d{2})/);
-  if (!match) return null;
-  return Number(match[1]) * 60 + Number(match[2]);
-}
 
 function formatCountdown(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));
@@ -52,26 +46,19 @@ export default function Home() {
     };
   }, []);
 
-  const rows = ITEMS.map((item) => ({
-    ...item,
-    time: data?.[item.key] ?? '',
-    minutes: parseMinutes(data?.[item.key]),
-    icon: item.icon,
-  }));
+  const rows = ITEMS.map((item) => ({ ...item, time: data?.[item.key] ?? '' }));
 
-  const nowMinutes = now === null
+  const nowDate = now === null ? null : new Date(now);
+  const nowMinutes = nowDate === null
     ? null
-    : new Date(now).getHours() * 60 + new Date(now).getMinutes() + new Date(now).getSeconds() / 60;
-  let nextIndex = rows.findIndex((row) => nowMinutes !== null && row.minutes !== null && row.minutes > nowMinutes);
-  const tomorrow = nextIndex === -1;
-  if (nextIndex === -1) nextIndex = 0;
-  const next = rows[nextIndex];
+    : nowDate.getHours() * 60 + nowDate.getMinutes() + nowDate.getSeconds() / 60;
+  const next = data && nowMinutes !== null ? nextPrayer(data, nowMinutes) : null;
 
   let countdown: string | null = null;
-  if (now !== null && next.minutes !== null) {
+  if (now !== null && next) {
     const target = new Date(now);
     target.setHours(Math.floor(next.minutes / 60), next.minutes % 60, 0, 0);
-    if (tomorrow) target.setDate(target.getDate() + 1);
+    if (next.tomorrow) target.setDate(target.getDate() + 1);
     countdown = formatCountdown(target.getTime() - now);
   }
 
@@ -82,32 +69,31 @@ export default function Home() {
 
         {error && <p role="alert" className="text-sm text-danger">{errMsg(error)}</p>}
 
-        {isLoading ? (
+        {isLoading || !next || !data ? (
           <Skeleton className="h-36 w-full" />
         ) : (
-          data && (
-            <section className="rounded-card bg-primary p-6 text-white">
-              <p className="text-sm font-medium text-white/80">{sq.dashboard.nextPrayer}</p>
-              <p className="mt-1 font-heading text-xl font-bold">{next.label}</p>
-              <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
-                <span className="font-heading text-4xl font-extrabold tabular-nums">{next.time}</span>
+          <section className="rounded-card bg-primary p-6 text-white">
+            <p className="text-sm font-medium text-white/80">{sq.dashboard.nextPrayer}</p>
+            <h2 className="mt-1 font-heading text-xl font-bold">{sq.prayers[next.key]}</h2>
+            <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
+              <span className="font-heading text-4xl font-extrabold tabular-nums">{data[next.key]}</span>
                 {countdown && (
                   <span className="rounded-control bg-white/10 px-3 py-1 text-sm text-white/90">
                     {sq.prayers.remaining} <span className="font-semibold tabular-nums">{countdown}</span>
                   </span>
                 )}
               </div>
-            </section>
-          )
+          </section>
         )}
 
         <ul className="grid gap-2 sm:grid-cols-2">
-          {rows.map((row, index) => {
+          {rows.map((row) => {
             const Icon = row.icon;
-            const isNext = index === nextIndex;
+            const isNext = !!next && !next.tomorrow && row.key === next.key;
             return (
               <li
                 key={row.key}
+                aria-current={isNext ? 'time' : undefined}
                 className={cn(
                   'flex items-center justify-between gap-3 rounded-card border border-border bg-surface px-4 py-3',
                   isNext && 'border-primary ring-2 ring-primary/25',

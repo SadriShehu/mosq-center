@@ -5,7 +5,11 @@ const YEAR = new Date().getFullYear();
 
 /** A seeded family's row on desktop or card on phone. */
 function familyItem(page: Page, name: string) {
-  return page.locator('tr, li').filter({ hasText: name }).first();
+  return page
+    .getByRole('row')
+    .filter({ hasText: name })
+    .or(page.getByRole('listitem').filter({ hasText: name }))
+    .first();
 }
 
 async function closeSheet(page: Page) {

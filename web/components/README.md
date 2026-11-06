@@ -2,7 +2,6 @@
 
 Stack: Tailwind v4 (tokens in `app/globals.css`, direction A) · shadcn-style Radix primitives in `components/ui` · `lucide-react` icons · `sonner` toasts.
 **All copy comes from `lib/sq.ts`**; money/dates from `lib/format.ts`; the API only through `lib/api.ts` (Albanian errors by status).
-Legacy pages still use `FormModal`, `ConfirmDialog` and bootstrap (lowest cascade layer); they disappear in r-cleanup.
 
 ## Layout & shell
 | Component | Use |
