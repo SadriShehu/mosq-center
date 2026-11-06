@@ -1,5 +1,3 @@
-/* Bootstrap CSS is no longer loaded: its !important .bg-primary/.text-primary/.text-danger utilities
-   clobbered our tokens. Legacy pages (still importing react-bootstrap) are unstyled until rebuilt. */
 @import 'tailwindcss';
 
 /* Direction A — Emerald & Gold (docs/redesign/UX.md). Tokens are CSS variables. */
@@ -53,5 +51,3 @@ h1, h2, h3, h4 { font-family: var(--font-heading); }
 /* Visible focus ring everywhere (keyboard). */
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .on-dark :focus-visible { outline-color: var(--gold); }
-
-.avatar { width: 80px; height: 80px; border-radius: 50%; }
