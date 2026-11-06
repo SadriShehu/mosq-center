@@ -6,7 +6,11 @@ const percent = new Intl.NumberFormat('sq-AL', { style: 'percent', maximumFracti
 
 /** A neighbourhood row on desktop or card on phone. */
 function neighbourhoodItem(page: Page, name: string) {
-  return page.locator('tr, li').filter({ hasText: name }).first();
+  return page
+    .getByRole('row')
+    .filter({ hasText: name })
+    .or(page.getByRole('listitem').filter({ hasText: name }))
+    .first();
 }
 
 test.describe('/lagjet', () => {
@@ -53,14 +57,14 @@ test.describe('/lagjet', () => {
     await expect(row.getByText('Junik', { exact: true })).toBeVisible();
     await expect(row.getByText('Jasiq', { exact: true })).toBeVisible();
 
-    await row.getByRole('button', { name: 'Ndrysho', exact: true }).click();
+    await row.getByRole('button', { name: `Ndrysho ${created}`, exact: true }).click();
     const edit = page.getByRole('dialog');
     await edit.getByLabel('Emri', { exact: true }).fill(renamed);
     await edit.getByRole('button', { name: 'Ruaj', exact: true }).click();
     await expect(page.getByRole('dialog')).toBeHidden();
     await expect(neighbourhoodItem(page, renamed)).toBeVisible();
 
-    await neighbourhoodItem(page, renamed).getByRole('button', { name: 'Fshi', exact: true }).click();
+    await neighbourhoodItem(page, renamed).getByRole('button', { name: `Fshi ${renamed}`, exact: true }).click();
     const alert = page.getByRole('alertdialog');
     await expect(alert.getByText('A jeni të sigurt që dëshironi ta fshini këtë lagje?')).toBeVisible();
     await expect(alert.getByText(/Kjo lagje ka \d+ familje\./)).toBeVisible();

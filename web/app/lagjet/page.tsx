@@ -104,12 +104,16 @@ function Content() {
   const [editing, setEditing] = useState<Neighbourhood | null>(null);
   const [deleting, setDeleting] = useState<Neighbourhood | null>(null);
 
-  const { data: rows = [], isLoading } = useQuery({
+  const { data: rows = [], isLoading, error } = useQuery({
     queryKey: ['neighbourhoods'],
     queryFn: api.neighbourhoods.list,
   });
   const { data: regions = [] } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
-  const { data: stats } = useQuery({ queryKey: ['stats', year], queryFn: () => api.stats(year) });
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
+    queryKey: ['stats', year],
+    queryFn: () => api.stats(year),
+  });
+  const loadError = error ?? statsError;
 
   const statsById = new Map(stats?.neighbourhoods.map((s) => [s.id, s]) ?? []);
 
@@ -195,7 +199,7 @@ function Content() {
     {
       header: sq.actions.edit,
       render: (n) => (
-        <Button variant="outline" size="sm" aria-label={sq.actions.edit} onClick={() => openEdit(n)}>
+        <Button variant="outline" size="icon" aria-label={`${sq.actions.edit} ${n.name}`} onClick={() => openEdit(n)}>
           <Pencil aria-hidden />
         </Button>
       ),
@@ -203,7 +207,12 @@ function Content() {
     {
       header: sq.actions.delete,
       render: (n) => (
-        <Button variant="danger-soft" size="sm" aria-label={sq.actions.delete} onClick={() => setDeleting(n)}>
+        <Button
+          variant="danger-soft"
+          size="icon"
+          aria-label={`${sq.actions.delete} ${n.name}`}
+          onClick={() => setDeleting(n)}
+        >
           <Trash2 aria-hidden />
         </Button>
       ),
@@ -226,8 +235,10 @@ function Content() {
         rows={rows}
         rowKey={(n) => n.id}
         searchText={(n) => `${n.name} ${n.region} ${n.city}`}
-        loading={isLoading}
-        empty={(
+        loading={isLoading || statsLoading}
+        empty={loadError ? (
+          <EmptyState title={errMsg(loadError)} />
+        ) : (
           <EmptyState title={sq.empty.list}>
             <Button onClick={openAdd}><Plus aria-hidden /> {sq.actions.addNeighbourhood}</Button>
           </EmptyState>
