@@ -31,9 +31,17 @@ export function formWith(page: Page, control: Locator) {
   return page.locator('form').filter({ has: control });
 }
 
-/** The open modal, by its title. Both old Bootstrap and react-bootstrap expose role dialog. */
+/**
+ * The open modal, located by its title. The old Bootstrap modal exposes the
+ * title as the dialog's accessible name; react-bootstrap does not, so match the
+ * title text inside the dialog instead.
+ */
 export function dialogFor(page: Page, title: string) {
-  return page.getByRole('dialog', { name: title });
+  return page
+    .getByRole('dialog')
+    .filter({ has: page.getByText(title, { exact: true }) })
+    .filter({ visible: true })
+    .first();
 }
 
 /** Every prayer label is present and at least seven times are rendered. */
@@ -111,6 +119,21 @@ export async function expectPublicLayout(page: Page) {
     '/login',
   );
   await expect(page.getByRole('link', { name: 'Lagjet', exact: true })).toHaveCount(0);
+}
+
+/** Marks the current document so a full reload can be detected later. */
+export async function markNoReload(page: Page) {
+  await page.evaluate(() => {
+    (window as unknown as { __qaNoReload?: boolean }).__qaNoReload = true;
+  });
+}
+
+/** Fails if the document was reloaded since markNoReload(). */
+export async function expectNoReload(page: Page) {
+  const alive = await page.evaluate(
+    () => (window as unknown as { __qaNoReload?: boolean }).__qaNoReload === true,
+  );
+  expect(alive, 'the page must refresh without a full reload').toBe(true);
 }
 
 export async function expectTableHeaders(page: Page, headers: string[]) {
