@@ -1,4 +1,6 @@
+import { sq } from './sq.ts';
 import type {
+  BulkPaymentInput, BulkPaymentResult, CollectionRow, FamilyHistory, Stats,
   Family, FamilyDetails, FamilyInput, Me, Neighbourhood, NeighbourhoodInput, Payment,
   PaymentDetails, PaymentInput, Prayers, Region,
 } from './types';
@@ -24,7 +26,16 @@ function qs(params?: Record<string, string | number | undefined | null>): string
   return s ? `?${s}` : '';
 }
 
-async function errorMessage(res: Response): Promise<string> {
+/** User-facing Albanian message by HTTP status. Server text only goes to the console. */
+export function messageForStatus(status: number): string {
+  if (status === 0) return sq.errors.network;
+  if (status === 400 || status === 422) return sq.errors.badRequest;
+  if (status === 404) return sq.errors.notFound;
+  if (status >= 500) return sq.errors.server;
+  return sq.errors.unknown;
+}
+
+async function serverText(res: Response): Promise<string> {
   const text = await res.text().catch(() => '');
   try {
     const j = JSON.parse(text);
@@ -32,21 +43,30 @@ async function errorMessage(res: Response): Promise<string> {
   } catch {
     /* plain text body */
   }
-  return text.trim() || `Request failed (${res.status})`;
+  return text.trim();
 }
 
 /** 401 on a protected call sends the browser to /login (Go owns auth). */
 async function request(path: string, init?: RequestInit, opts: { public?: boolean } = {}): Promise<Response> {
-  const res = await fetch(`${BASE}${path}`, {
-    credentials: 'same-origin',
-    ...init,
-    headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...init?.headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      credentials: 'same-origin',
+      ...init,
+      headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...init?.headers },
+    });
+  } catch (e) {
+    console.error('network error', path, e);
+    throw new ApiError(0, messageForStatus(0));
+  }
   if (res.status === 401 && !opts.public && typeof window !== 'undefined') {
     window.location.assign('/login');
     return new Promise<Response>(() => {}); // never resolves; page is navigating away
   }
-  if (!res.ok) throw new ApiError(res.status, await errorMessage(res));
+  if (!res.ok) {
+    console.error(`API ${res.status} ${path}:`, await serverText(res));
+    throw new ApiError(res.status, messageForStatus(res.status));
+  }
   return res;
 }
 
@@ -70,6 +90,17 @@ async function list<T>(path: string): Promise<T[]> {
 const body = (data: unknown): RequestInit => ({ body: JSON.stringify(data) });
 
 export const api = {
+  stats: (year?: number | string) => json<Stats>(`/stats${qs({ year })}`),
+  /** neighbourhoodId optional (all neighbourhoods when omitted). */
+  collection: (year: number | string, neighbourhoodId?: string) =>
+    list<CollectionRow>(`/collection${qs({ year, neighbourhood_id: neighbourhoodId })}`),
+  familyHistory: (id: string) => json<FamilyHistory>(`/families/${id}/history`),
+  recentPayments: (limit = 10) => list<PaymentDetails>(`/payments/recent${qs({ limit })}`),
+  /** Amount is computed server-side (members x fee). Returns the created ids. */
+  payBulk: async (d: BulkPaymentInput): Promise<BulkPaymentResult> => {
+    const res = await json<BulkPaymentResult | null>('/payments/bulk', { method: 'POST', ...body(d) });
+    return res ?? { ids: [] };
+  },
   me: () => json<Me>('/me'),
   regions: () => list<Region>('/regions'),
   publicPrayers: () => json<Prayers>('/public/prayers', undefined, { public: true }),

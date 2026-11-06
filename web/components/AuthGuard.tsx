@@ -20,7 +20,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   if (!data) return null;
   return (
     <MeCtx.Provider value={data}>
-      <AppShell>{children}</AppShell>
+      <AppShell user={data}>{children}</AppShell>
     </MeCtx.Provider>
   );
 }
