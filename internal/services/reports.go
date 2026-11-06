@@ -283,7 +283,9 @@ func (s *reportsService) FamilyHistory(ctx context.Context, familyID string) (*m
 
 // BulkPay records a payment (members x fee) for every family and year in the
 // range. Family-years that are already paid are skipped, so repeating a
-// request is safe. Nothing is written if any family id is unknown.
+// request is safe. Nothing is written if any family id is unknown. There is no
+// transaction: a store error part-way leaves earlier rows in place and returns
+// an error, and retrying completes the rest because paid family-years are skipped.
 func (s *reportsService) BulkPay(ctx context.Context, req *models.BulkPaymentsRequest) (*models.BulkPaymentsResponse, error) {
 	switch {
 	case len(req.FamilyIDs) == 0:
@@ -291,7 +293,7 @@ func (s *reportsService) BulkPay(ctx context.Context, req *models.BulkPaymentsRe
 	case len(req.FamilyIDs) > maxBulkFamilies:
 		return nil, fmt.Errorf("%w: too many families", ErrInvalid)
 	case req.Year < 1900 || req.Year > 3000:
-		return nil, fmt.Errorf("%w: year is required", ErrInvalid)
+		return nil, fmt.Errorf("%w: invalid year", ErrInvalid)
 	case req.RangeYear != 0 && req.RangeYear < req.Year:
 		return nil, fmt.Errorf("%w: range_year must be >= year", ErrInvalid)
 	case req.RangeYear-req.Year >= maxBulkYears:

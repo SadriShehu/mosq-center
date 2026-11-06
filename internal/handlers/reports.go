@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -29,7 +30,7 @@ func serviceError(w http.ResponseWriter, req *http.Request, err error) {
 	case errors.Is(err, services.ErrNotFound):
 		apiError(w, req, http.StatusNotFound, "not found")
 	case errors.Is(err, services.ErrInvalid):
-		apiError(w, req, http.StatusBadRequest, err.Error())
+		apiError(w, req, http.StatusBadRequest, strings.TrimPrefix(err.Error(), services.ErrInvalid.Error()+": "))
 	default:
 		internalError(w, req, err)
 	}

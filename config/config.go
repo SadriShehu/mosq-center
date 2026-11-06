@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 )
@@ -72,8 +73,13 @@ func GetBoolOrFalse(key string) bool {
 
 // GetFloatOrDefault reads a positive float env var, falling back to the default.
 func GetFloatOrDefault(key string, defaultValue float64) float64 {
-	v, err := strconv.ParseFloat(GetOrDefault(key, ""), 64)
+	raw := GetOrDefault(key, "")
+	if raw == "" {
+		return defaultValue
+	}
+	v, err := strconv.ParseFloat(raw, 64)
 	if err != nil || v <= 0 {
+		log.Printf("invalid %s=%q, using default %v\n", key, raw, defaultValue)
 		return defaultValue
 	}
 	return v
