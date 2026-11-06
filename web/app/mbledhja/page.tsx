@@ -14,7 +14,7 @@ import { StatusBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api } from '@/lib/api';
 import { formatDay, formatMoney, formatPercent, ratio } from '@/lib/format';
 import { useMediaQuery, useYear } from '@/lib/hooks';
@@ -22,6 +22,8 @@ import { sq } from '@/lib/sq';
 import type { CollectionRow } from '@/lib/types';
 
 type Tab = 'all' | 'unpaid' | 'paid';
+/** `singleFamilyId` is set only for a one-tap row pay (not a bulk mark). */
+type PayArgs = { ids: string[]; singleFamilyId?: string };
 
 const fullName = (f: CollectionRow) => [f.name, f.middle_name, f.surname].filter(Boolean).join(' ');
 
@@ -40,6 +42,8 @@ function Collection() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<Set<string>>(new Set());
   const [exporting, setExporting] = useState(false);
+  /** family id -> payment id paid from this screen, so the row can offer Zhbëj. */
+  const [justPaid, setJustPaid] = useState<Map<string, string>>(new Map());
 
   const neighbourhoods = useQuery({ queryKey: ['neighbourhoods'], queryFn: api.neighbourhoods.list });
   const collection = useQuery({
@@ -47,6 +51,7 @@ function Collection() {
     queryFn: () => api.collection(year, nbhd || undefined),
   });
   const rows = useMemo(() => collection.data ?? [], [collection.data]);
+  const loadError = collection.error ?? neighbourhoods.error;
 
   const refresh = () => {
     for (const k of ['collection', 'stats', 'payments', 'family-history']) {
@@ -81,15 +86,30 @@ function Collection() {
   );
 
   const payFamilies = useMutation({
-    mutationFn: (ids: string[]) => api.payBulk({ family_ids: ids, year }),
-    onSuccess: async (res) => {
-      setSelected(new Set());
+    mutationFn: ({ ids }: PayArgs) => api.payBulk({ family_ids: ids, year }),
+    onSuccess: async (res, vars) => {
+      setSelected((prev) => {
+        if (!vars.singleFamilyId) return new Set();
+        const next = new Set(prev);
+        next.delete(vars.singleFamilyId);
+        return next;
+      });
+      if (vars.singleFamilyId && res.ids[0]) {
+        setJustPaid((prev) => new Map(prev).set(vars.singleFamilyId as string, res.ids[0]));
+      }
       refresh();
-      if (res.skipped.length > 0) toast.info(sq.messages.alreadyPaid(res.skipped.length));
+      if (res.skipped.length > 0) toast.info(sq.messages.alreadyPaid);
       if (res.ids.length === 0) return;
       toastUndo(sq.messages.paid, async () => {
         try {
           await Promise.all(res.ids.map((id) => api.payments.remove(id)));
+          setJustPaid((prev) => {
+            const next = new Map(prev);
+            for (const [family, payment] of next) {
+              if (res.ids.includes(payment)) next.delete(family);
+            }
+            return next;
+          });
           toast.info(sq.messages.undone);
         } catch (e) {
           toast.error(errMsg(e));
@@ -102,7 +122,7 @@ function Collection() {
 
   const payOne = (id: string) => {
     setBusy((b) => new Set(b).add(id));
-    payFamilies.mutate([id], {
+    payFamilies.mutate({ ids: [id], singleFamilyId: id }, {
       onSettled: () =>
         setBusy((b) => {
           const n = new Set(b);
@@ -110,6 +130,21 @@ function Collection() {
           return n;
         }),
     });
+  };
+
+  const undoOne = async (family: string, payment: string) => {
+    try {
+      await api.payments.remove(payment);
+      setJustPaid((prev) => {
+        const next = new Map(prev);
+        next.delete(family);
+        return next;
+      });
+      toast.info(sq.messages.undone);
+      refresh();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
   };
 
   const unpaidSelected = rows.filter((r) => !r.paid && selected.has(r.id)).map((r) => r.id);
@@ -161,22 +196,45 @@ function Collection() {
     },
     {
       header: sq.actions.pay,
-      render: (f) =>
-        f.paid ? (
-          <span className="text-sm text-muted">{formatDay(f.payment?.created_at)}</span>
-        ) : (
-          <Button
-            size={phone ? 'default' : 'sm'}
-            disabled={busy.has(f.id)}
-            aria-label={`${sq.actions.pay} ${formatMoney(f.expected_amount)} — ${fullName(f)}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              payOne(f.id);
-            }}
-          >
-            {sq.actions.pay} {formatMoney(f.expected_amount)}
-          </Button>
-        ),
+      render: (f) => {
+        if (!f.paid) {
+          return (
+            <Button
+              size={phone ? 'default' : 'sm'}
+              disabled={busy.has(f.id)}
+              aria-label={`${sq.actions.pay} ${formatMoney(f.expected_amount)} — ${fullName(f)}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                payOne(f.id);
+              }}
+            >
+              {sq.actions.pay} {formatMoney(f.expected_amount)}
+            </Button>
+          );
+        }
+        const recentPayment = justPaid.get(f.id);
+        const date = f.payment ? formatDay(f.payment.created_at) : '';
+        if (recentPayment) {
+          return (
+            <div className="flex flex-wrap items-center gap-1 text-sm">
+              <span className="font-medium text-primary">
+                {sq.status.paid} tani · {date}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  undoOne(f.id, recentPayment);
+                }}
+              >
+                {sq.actions.undo}
+              </Button>
+            </div>
+          );
+        }
+        return <span className="text-sm text-muted">{sq.status.paid} · {date}</span>;
+      },
     },
   ];
 
@@ -203,7 +261,7 @@ function Collection() {
             <FileText aria-hidden /> {sq.actions.generateInvoices}
           </Button>
           {!phone && unpaidSelected.length > 0 && (
-            <Button disabled={payFamilies.isPending} onClick={() => payFamilies.mutate(unpaidSelected)}>
+            <Button disabled={payFamilies.isPending} onClick={() => payFamilies.mutate({ ids: unpaidSelected })}>
               {markPaidLabel}
             </Button>
           )}
@@ -228,30 +286,47 @@ function Collection() {
           <TabsTrigger value="unpaid">{sq.tabs.unpaid}</TabsTrigger>
           <TabsTrigger value="paid">{sq.tabs.paid}</TabsTrigger>
         </TabsList>
+        <TabsContent value={tab}>
+          {loadError ? (
+            <div role="alert" className="rounded-card border border-border bg-surface p-6 text-center">
+              <p className="text-sm text-danger">{errMsg(loadError)}</p>
+              <Button
+                variant="outline"
+                className="mt-3"
+                onClick={() => {
+                  void collection.refetch();
+                  void neighbourhoods.refetch();
+                }}
+              >
+                {sq.actions.retry}
+              </Button>
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              rows={shown}
+              rowKey={(f) => f.id}
+              searchText={fullName}
+              loading={collection.isLoading}
+              selected={selected}
+              onSelectedChange={setSelected}
+              rowLabel={fullName}
+              empty={
+                <EmptyState title={sq.empty.list} icon={Users}>
+                  <Button asChild variant="outline"><Link href="/familjet">{sq.actions.addFamily}</Link></Button>
+                </EmptyState>
+              }
+            />
+          )}
+        </TabsContent>
       </Tabs>
-
-      <DataTable
-        columns={columns}
-        rows={shown}
-        rowKey={(f) => f.id}
-        searchText={fullName}
-        loading={collection.isLoading}
-        selected={selected}
-        onSelectedChange={setSelected}
-        rowLabel={fullName}
-        empty={
-          <EmptyState title={sq.empty.list} icon={Users}>
-            <Button asChild variant="outline"><Link href="/familjet">{sq.actions.addFamily}</Link></Button>
-          </EmptyState>
-        }
-      />
 
       {phone && unpaidSelected.length > 0 && (
         <div className="on-dark fixed inset-x-0 bottom-0 z-30 border-t border-sidebar-active bg-sidebar p-3 shadow-lg">
           <Button
             className="w-full bg-gold text-sidebar hover:bg-gold hover:opacity-90"
             disabled={payFamilies.isPending}
-            onClick={() => payFamilies.mutate(unpaidSelected)}
+            onClick={() => payFamilies.mutate({ ids: unpaidSelected })}
           >
             {markPaidLabel}
           </Button>

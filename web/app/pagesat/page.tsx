@@ -55,6 +55,7 @@ function Ledger() {
     queryKey: ['payments', 'details', year],
     queryFn: () => api.payments.details({ year }),
   });
+  const loadError = payments.error ?? neighbourhoods.error;
 
   const nbhdName = neighbourhoods.data?.find((n) => n.id === nbhdId)?.name;
   const rows = useMemo(
@@ -157,13 +158,29 @@ function Ledger() {
         </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        rows={rows}
-        rowKey={(p) => p.id}
-        searchText={(p) => p.family_name}
-        loading={payments.isLoading}
-      />
+      {loadError ? (
+        <div role="alert" className="rounded-card border border-border bg-surface p-6 text-center">
+          <p className="text-sm text-danger">{errMsg(loadError)}</p>
+          <Button
+            variant="outline"
+            className="mt-3"
+            onClick={() => {
+              void payments.refetch();
+              void neighbourhoods.refetch();
+            }}
+          >
+            {sq.actions.retry}
+          </Button>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          rows={rows}
+          rowKey={(p) => p.id}
+          searchText={(p) => p.family_name}
+          loading={payments.isLoading}
+        />
+      )}
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>
