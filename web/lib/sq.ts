@@ -1,9 +1,10 @@
 /**
  * Every user-facing Albanian string (docs/redesign/UX.md glossary). Import from here;
- * never hardcode copy in components. Brand stays "Xhamia Qender" until the spelling is confirmed.
+ * never hardcode copy in components. `brand` is only the fallback: the shells and the
+ * <title> prefer the tenant's brand_name from GET /api/v1/public/config.
  */
 export const sq = {
-  brand: 'Xhamia Qender',
+  brand: 'Xhamia Qendër',
 
   nav: {
     home: 'Fillimi',
@@ -68,6 +69,20 @@ export const sq = {
     recentPayments: 'Pagesat e fundit',
     nextPrayer: 'Namazi i ardhshëm',
     welcome: 'Mirësevini',
+    paidFamilies: 'Familjet e paguara',
+    ofFamilies: (paid: number, total: number) => `${paid} nga ${total} familje`,
+    forYear: (year: number) => `Pasqyra për vitin ${year}`,
+    noNeighbourhoodsTitle: 'Nuk ka lagje ende',
+    noNeighbourhoodsHint: 'Shtoni lagjen e parë për të filluar mbledhjen.',
+    noPaymentsTitle: 'Nuk ka pagesa ende',
+    noPaymentsHint: 'Pagesat e regjistruara do të shfaqen këtu.',
+    openCollection: 'Hap mbledhjen',
+    in: 'pas',
+    hourShort: 'orë',
+    minuteShort: 'min',
+    tomorrow: 'nesër',
+    paidOf: (paid: number, total: number) => `${paid}/${total}`,
+    progressOf: (name: string) => `Përparimi i lagjes ${name}`,
   },
   history: { title: 'Historiku i pagesave' },
 
