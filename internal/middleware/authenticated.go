@@ -2,30 +2,41 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
+
+// deny rejects the request: API calls get a 401 JSON body, page routes are
+// redirected to /logout.
+func deny(w http.ResponseWriter, req *http.Request, reason string) {
+	w.Header().Set("X-Reason", reason)
+	if strings.HasPrefix(req.URL.Path, "/api/") {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"error":"unauthorized"}`))
+		return
+	}
+	http.Redirect(w, req, "/logout", http.StatusSeeOther)
+}
 
 func AuthenticateUser(store *sessions.CookieStore) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			session, err := store.Get(req, "auth-store")
 			if err != nil {
-				w.Header().Set("X-Reason", "Unable to get session")
-				http.Redirect(w, req, "/logout", http.StatusSeeOther)
+				deny(w, req, "Unable to get session")
 				return
 			}
 
 			if session.Values["profile"] == nil {
-				w.Header().Set("X-Reason", "User is not authenticated")
-				http.Redirect(w, req, "/logout", http.StatusSeeOther)
+				deny(w, req, "User is not authenticated")
 				return
 			}
 
 			if session.Values["service"] == nil {
-				w.Header().Set("X-Reason", "User is not authenticated")
-				http.Redirect(w, req, "/logout", http.StatusSeeOther)
+				deny(w, req, "User is not authenticated")
 				return
 			}
 
@@ -37,8 +48,7 @@ func AuthenticateUser(store *sessions.CookieStore) func(next http.Handler) http.
 				}
 			}
 
-			w.Header().Set("X-Reason", "User is not authorized")
-			http.Redirect(w, req, "/logout", http.StatusSeeOther)
+			deny(w, req, "User is not authorized")
 		})
 	}
 }
