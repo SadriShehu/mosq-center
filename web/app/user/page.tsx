@@ -8,7 +8,7 @@ function Content() {
     <div className="container">
       <br />
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {me.picture && <img className="avatar" src={me.picture} alt="" />}
+      <img className="avatar" src={me.picture} alt="Profili" />
       <h2>Miresevini {me.name}</h2>
       <p> Jeni kyqur me sukses </p>
       <hr />
