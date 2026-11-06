@@ -105,6 +105,8 @@ export const sq = {
 
   messages: {
     paid: 'Pagesa u regjistrua.',
+    alreadyPaid: (n: number) =>
+      n === 1 ? 'Kjo familje është paguar tashmë.' : `${n} familje ishin paguar tashmë.`,
     created: 'U krijua me sukses.',
     updated: 'U ruajt me sukses.',
     deleted: 'U fshi me sukses.',

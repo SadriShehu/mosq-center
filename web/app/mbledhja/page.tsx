@@ -85,6 +85,7 @@ function Collection() {
     onSuccess: async (res) => {
       setSelected(new Set());
       refresh();
+      if (res.skipped.length > 0) toast.info(sq.messages.alreadyPaid(res.skipped.length));
       if (res.ids.length === 0) return;
       toastUndo(sq.messages.paid, async () => {
         try {
@@ -246,8 +247,12 @@ function Collection() {
       />
 
       {phone && unpaidSelected.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface p-3 shadow-lg">
-          <Button className="w-full" disabled={payFamilies.isPending} onClick={() => payFamilies.mutate(unpaidSelected)}>
+        <div className="on-dark fixed inset-x-0 bottom-0 z-30 border-t border-sidebar-active bg-sidebar p-3 shadow-lg">
+          <Button
+            className="w-full bg-gold text-sidebar hover:bg-gold hover:opacity-90"
+            disabled={payFamilies.isPending}
+            onClick={() => payFamilies.mutate(unpaidSelected)}
+          >
             {markPaidLabel}
           </Button>
         </div>
