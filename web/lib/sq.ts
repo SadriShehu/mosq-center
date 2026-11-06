@@ -59,6 +59,7 @@ export const sq = {
     country: 'Shteti',
     postalCode: 'Kodi postar',
     region: 'Rajoni',
+    status: 'Statusi',
   },
 
   collection: { collected: 'Mbledhur', expected: 'Pritet' },
@@ -119,5 +120,6 @@ export const sq = {
     server: 'Ndodhi një gabim në server. Provoni përsëri.',
     unknown: 'Ndodhi një gabim. Provoni përsëri.',
     required: 'Kjo fushë është e detyrueshme.',
+    positive: 'Numri duhet të jetë pozitiv.',
   },
 } as const;
