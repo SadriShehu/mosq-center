@@ -70,6 +70,8 @@ exist because the old app gives no other handle:
   year), so the dialog's amount and year number inputs are addressed in order
   after scoping to the dialog.
 - **Two "Kerko" buttons** (`/pagesat-pakryera`): the filter submit and the
-  client-side search button share the same name; the search button is scoped to
-  the toolbar that also holds the search input and "Gjenero Faturat".
+  client-side search button share the same name. The search button is scoped to
+  the toolbar that also holds the search input and "Gjenero Faturat"; that
+  toolbar is found with `locator('div').filter(...).last()` (a tag-based
+  container + positional exception, also listed here).
 
