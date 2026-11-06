@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/sadrishehu/mosq-center/internal/models"
 )
@@ -28,7 +28,7 @@ func JoinPayments(
 		var members int
 
 		if fam, ok := familyByID[p.FamilyID]; ok && fam != nil {
-			familyName = fmt.Sprintf("%s %s %s", fam.Name, fam.Middlename, fam.Surname)
+			familyName = fullName(fam.Name, fam.Middlename, fam.Surname)
 			members = fam.Members
 			if n, ok := neighByID[fam.NeighbourhoodID]; ok && n != nil {
 				neighName = n.Name
@@ -63,4 +63,15 @@ func JoinFamilies(
 	}
 
 	return out
+}
+
+// fullName joins the non-empty parts with single spaces.
+func fullName(parts ...string) string {
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return strings.Join(out, " ")
 }
