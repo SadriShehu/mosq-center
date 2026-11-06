@@ -47,22 +47,6 @@ test('one tap pays a family and Zhbëj undoes it', async ({ page, seed }) => {
   await expectNoReload(page);
 });
 
-test('paying a family that is already paid toasts instead of duplicating it', async ({ page, seed }) => {
-  const s = await seed.scenario({ families: 1, paid: 0 });
-  const family = s.families[0];
-  await open(page, s);
-
-  // Pay behind the UI's back so its Paguaj button is stale.
-  await seed.createPayment(family.id, s.year, family.members * s.feePerMember);
-  await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
-
-  await expect(page.getByText('Kjo familje është paguar tashmë për këtë vit.')).toBeVisible();
-  expect((await seed.stats(s.year)).paid_families).toBe(1);
-
-  const payments = (await (await page.request.get('/api/v1/payments')).json()) as { family_id: string }[];
-  expect(payments.filter((p) => p.family_id === family.id)).toHaveLength(1);
-});
-
 test('a stale row that is already paid says so instead of doing nothing', async ({ page, seed }) => {
   const s = await seed.scenario({ families: 1, paid: 0 });
   const [family] = s.families;
