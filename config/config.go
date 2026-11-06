@@ -6,15 +6,20 @@ import (
 	"strconv"
 )
 
+// DefaultBrandName is used when BRAND_NAME is not set.
+const DefaultBrandName = "Xhamia Qendër"
+
 type Config struct {
 	Env         string
 	Port        string
 	ServiceName string
 	// FeePerMember is the yearly fee per family member (FEE_PER_MEMBER, default 3).
 	FeePerMember float64
-	DBConfig     *DBConfig
-	Auth         *Auth0Config
-	TunePrayers  *TunePrayers
+	// BrandName is the display name of this tenant (BRAND_NAME).
+	BrandName   string
+	DBConfig    *DBConfig
+	Auth        *Auth0Config
+	TunePrayers *TunePrayers
 }
 
 type DBConfig struct {
@@ -88,6 +93,7 @@ func GetFloatOrDefault(key string, defaultValue float64) float64 {
 func New() *Config {
 	return &Config{
 		FeePerMember: GetFloatOrDefault("FEE_PER_MEMBER", 3),
+		BrandName:    GetOrDefault("BRAND_NAME", DefaultBrandName),
 		Env:          GetOrDefault("ENV", "dev"),
 		ServiceName:  GetOrDefault("SERVICE_NAME", "mosq"),
 		Port:         ":" + GetOrDefault("PORT", "8080"),
