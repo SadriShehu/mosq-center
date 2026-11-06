@@ -247,8 +247,10 @@ resource "google_cloud_run_v2_service" "mosq_qoku" {
         value = "qoku"
       }
 
-      # TODO: set BRAND_NAME for this tenant once the user has named it.
-      # Until then the app falls back to the default brand name.
+      env {
+        name  = "BRAND_NAME"
+        value = "Xhamia Qoku"
+      }
 
       resources {
         cpu_idle = true

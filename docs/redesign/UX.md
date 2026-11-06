@@ -58,7 +58,7 @@ Krijuar më · Ndryshuar më · Ndrysho · Fshi · Anulo · Ruaj · Konfirmo fsh
 Eksporto CSV · Familjet e papaguara · Përparimi sipas lagjeve · Pagesat e fundit · Namazi i ardhshëm ·
 Kohët e namazit · Sabahu · Lindja e Diellit · Dreka · Ikindia · Akshami · Jacia · Pjesa e tretë e natës ·
 Qyteti · Fshati · Shteti · Kodi postar · Mirësevini · Kyçu · Dil · Profili · Fillimi.
-Brand name: **Xhamia Qendër** (user-confirmed). Per tenant from env `BRAND_NAME` (default "Xhamia Qendër") via `GET /api/v1/public/config` → `{"brand_name"}`; the shells show it, `sq.brand` is the fallback.
+Brand name: **Xhamia Qendër** for center, **Xhamia Qoku** for qoku (user-confirmed). Per tenant from env `BRAND_NAME` (default "Xhamia Qendër") via `GET /api/v1/public/config` → `{"brand_name"}`; the shells show it, `sq.brand` is the fallback.
 
 ## API additions (backend; JSON responses, tests required)
 
