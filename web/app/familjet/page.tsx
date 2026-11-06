@@ -20,7 +20,10 @@ const schema = z.object({
   name: z.string().trim().min(1, 'Emri eshte i detyrueshem'),
   middle_name: z.string().optional(),
   surname: z.string().trim().min(1, 'Mbiemri eshte i detyrueshem'),
-  members: z.number().int().positive('Numri i antareve duhet te jete pozitiv'),
+  members: z
+    .number({ error: 'Numri i antareve duhet te jete pozitiv' })
+    .int('Numri i antareve duhet te jete i plote')
+    .positive('Numri i antareve duhet te jete pozitiv'),
   neighbourhood_id: z.string().min(1, 'Zgjidh lagjen'),
 });
 
