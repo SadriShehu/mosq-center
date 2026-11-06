@@ -2,6 +2,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { Moon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { errMsg } from '@/components/Toast';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
@@ -42,7 +44,11 @@ function countdown(diffMin: number): string {
 
 /** Next prayer (large), with today's other times underneath. Uses the session `/prayers` endpoint. */
 export function NextPrayerCard() {
-  const { data } = useQuery({ queryKey: ['prayers', true], queryFn: api.prayers, staleTime: 5 * 60_000 });
+  const { data, error, isError, refetch } = useQuery({
+    queryKey: ['prayers', true],
+    queryFn: api.prayers,
+    staleTime: 5 * 60_000,
+  });
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     const tick = () => setNow(new Date());
@@ -54,6 +60,16 @@ export function NextPrayerCard() {
     };
   }, []);
 
+  if (isError)
+    return (
+      <Card>
+        <p className="text-sm font-medium text-muted">{sq.dashboard.nextPrayer}</p>
+        <p className="mt-1 text-sm text-danger">{errMsg(error)}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => void refetch()}>
+          {sq.actions.retry}
+        </Button>
+      </Card>
+    );
   if (!data || !now) return <Card><Skeleton className="h-28 w-full" /></Card>;
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const next = nextPrayer(data, nowMin);

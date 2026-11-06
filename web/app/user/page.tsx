@@ -34,10 +34,14 @@ function Content() {
         <p className="text-muted">{sq.dashboard.forYear(year)}</p>
       </div>
 
-      {stats.error && <p role="alert" className="text-danger">{errMsg(stats.error)}</p>}
-
       <section aria-label={sq.dashboard.forYear(year)} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {s ? (
+        {stats.isError ? (
+          <div className="sm:col-span-2 xl:col-span-3">
+            <EmptyState title={sq.dashboard.loadError} description={errMsg(stats.error)}>
+              <Button variant="outline" onClick={() => void stats.refetch()}>{sq.actions.retry}</Button>
+            </EmptyState>
+          </div>
+        ) : s ? (
           <>
             <StatCard
               label={sq.collection.collected}
@@ -80,7 +84,9 @@ function Content() {
       <div className="grid gap-6 lg:grid-cols-3">
         <section aria-labelledby="dash-progress" className="space-y-3 lg:col-span-2">
           <h2 id="dash-progress" className="font-heading text-lg font-bold">{sq.dashboard.progressByNeighbourhood}</h2>
-          {!s ? (
+          {stats.isError ? (
+            <p className="text-sm text-muted">{errMsg(stats.error)}</p>
+          ) : !s ? (
             <Skeleton className="h-40 w-full" />
           ) : s.neighbourhoods.length === 0 ? (
             <EmptyState title={sq.dashboard.noNeighbourhoodsTitle} description={sq.dashboard.noNeighbourhoodsHint}>
@@ -116,7 +122,11 @@ function Content() {
           <NextPrayerCard />
           <section aria-labelledby="dash-recent" className="space-y-3">
             <h2 id="dash-recent" className="font-heading text-lg font-bold">{sq.dashboard.recentPayments}</h2>
-            {recent.isLoading ? (
+            {recent.isError ? (
+              <EmptyState title={sq.dashboard.loadError} description={errMsg(recent.error)}>
+                <Button variant="outline" onClick={() => void recent.refetch()}>{sq.actions.retry}</Button>
+              </EmptyState>
+            ) : recent.isLoading ? (
               <Skeleton className="h-40 w-full" />
             ) : (recent.data?.length ?? 0) === 0 ? (
               <EmptyState title={sq.dashboard.noPaymentsTitle} description={sq.dashboard.noPaymentsHint}>

@@ -17,6 +17,24 @@ async function loadWithStats(page: Page, url: string, year: number): Promise<Sta
 }
 
 test.describe('Fillimi (/user dashboard)', () => {
+  test('shows Albanian error states with retry when queries fail', async ({ page }) => {
+    await page.route('**/api/v1/stats?*', (route) => route.abort());
+    await page.route('**/api/v1/payments/recent?*', (route) => route.abort());
+    await page.route('**/api/v1/prayers', (route) => route.abort());
+    await page.goto('/user');
+
+    const kpis = page.getByRole('region', { name: /Pasqyra për vitin/ });
+    await expect(kpis.getByText('Nuk u ngarkuan të dhënat.')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Pagesat e fundit' }).getByText('Nuk u ngarkuan të dhënat.')).toBeVisible();
+    await expect(page.getByText('Namazi i ardhshëm')).toBeVisible();
+    await expect(page.getByText('Nuk ka pagesa ende')).toHaveCount(0);
+
+    // Retry recovers the KPIs once the API answers again.
+    await page.unroute('**/api/v1/stats?*');
+    await kpis.getByRole('button', { name: 'Provoni përsëri' }).click();
+    await expect(kpis.getByText('Mbledhur', { exact: true })).toBeVisible();
+  });
+
   test('KPIs, progress and links match /api/v1/stats', async ({ page, seed }) => {
     // 3 families x 4 members, 1 paid
     const sc = await seed.scenario({ families: 3, members: 4, paid: 1 });
