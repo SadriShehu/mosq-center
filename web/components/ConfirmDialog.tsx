@@ -1,4 +1,5 @@
 'use client';
+import { useId } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 
 interface Props {
@@ -15,9 +16,10 @@ interface Props {
 export function ConfirmDialog({
   show, title = 'Konfirmo', message, confirmLabel = 'Fshi', cancelLabel = 'Anulo', busy, onConfirm, onCancel,
 }: Props) {
+  const id = useId();
   return (
-    <Modal show={show} onHide={onCancel} centered>
-      <Modal.Header closeButton><Modal.Title>{title}</Modal.Title></Modal.Header>
+    <Modal show={show} onHide={onCancel} centered aria-labelledby={id}>
+      <Modal.Header closeButton><Modal.Title id={id}>{title}</Modal.Title></Modal.Header>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onCancel}>{cancelLabel}</Button>

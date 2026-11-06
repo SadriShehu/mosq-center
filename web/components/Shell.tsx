@@ -55,18 +55,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         <>
           <li className="nav-item active"><Link className="nav-link" href="/user">Fillimi</Link></li>
           <Dropdown as="li" className="nav-item" align="end">
-            <Dropdown.Toggle as="a" role="button" href="#" className="nav-link" id="navbarDropdown" onClick={(e: React.MouseEvent) => e.preventDefault()}>
+            <Dropdown.Toggle as="a" role="button" href="#" className="nav-link" id="navbarDropdown">
               Shpalos
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              <Dropdown.Item as={Link} href="/user"><FontAwesomeIcon icon={faUser} /> Profili</Dropdown.Item>
+              <Link className="dropdown-item" href="/user"><FontAwesomeIcon icon={faUser} /> Profili</Link>
               <Dropdown.Divider />
-              <Dropdown.Item
+              <a
+                className="dropdown-item"
                 href="/logout"
                 onClick={() => { document.cookie = 'auth-store=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'; }}
               >
                 <FontAwesomeIcon icon={faDoorOpen} /> Dil
-              </Dropdown.Item>
+              </a>
             </Dropdown.Menu>
           </Dropdown>
         </>
