@@ -74,6 +74,18 @@ func (h *handler) RegisterTemplates() {
 func (h *handler) RegisterRoutesV1() {
 	h.RouterService.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", h.HealthCheck)
+		r.Get("/public/prayers", h.GetPrayers)
+
+		r.Group(func(r chi.Router) {
+			if h.AuthConfig.Enable {
+				r.Use(middleware.AuthenticateUser(h.SessionStore))
+			}
+			r.Get("/me", h.Me)
+			r.Get("/regions", h.GetRegions)
+			r.Get("/families/details", h.GetFamiliesDetails)
+			r.Get("/payments/details", h.GetPaymentsDetails)
+			r.Get("/payments/no-payment/details", h.GetNoPaymentDetails)
+		})
 
 		r.Route("/prayers", func(r chi.Router) {
 			if h.AuthConfig.Enable {

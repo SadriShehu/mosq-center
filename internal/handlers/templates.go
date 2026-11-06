@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/sadrishehu/mosq-center/internal/integration/prayers"
 	"github.com/sadrishehu/mosq-center/internal/models"
+	"github.com/sadrishehu/mosq-center/internal/services"
 	"github.com/sadrishehu/mosq-center/internal/templates"
 )
 
@@ -115,29 +116,7 @@ func (h *handler) Pagesat(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var payments []*models.PaymentsTemplate
-	for _, payment := range p {
-		paymentTemplate := &models.PaymentsTemplate{}
-
-		var fam *models.FamiliesResponse
-		for _, family := range f {
-			if family.ID == payment.FamilyID {
-				fam = family
-			}
-		}
-
-		var neigh *models.NeighbourhoodResponse
-		for _, neighbourhood := range n {
-			if neighbourhood.ID == fam.NeighbourhoodID {
-				neigh = neighbourhood
-			}
-		}
-
-		familyName := fmt.Sprintf("%s %s %s", fam.Name, fam.Middlename, fam.Surname)
-		paymentTemplate.MapTemplate(payment, fam.ID, familyName, fam.Members, neigh.Name)
-
-		payments = append(payments, paymentTemplate)
-	}
+	payments := services.JoinPayments(p, f, n)
 
 	paymentsParams := templates.PagesatParams{
 		Payments: payments,

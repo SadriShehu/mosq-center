@@ -63,3 +63,9 @@ type FamiliesTemplate struct {
 	Family        *FamiliesResponse
 	Neighbourhood string
 }
+
+// FamiliesDetails is a family plus the name of its neighbourhood.
+type FamiliesDetails struct {
+	FamiliesResponse
+	NeighbourhoodName string `json:"neighbourhood_name"`
+}
