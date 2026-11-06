@@ -14,7 +14,7 @@ import { FormModal } from '@/components/FormModal';
 import { errMsg, useToast } from '@/components/Toast';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
-import type { Neighbourhood, NeighbourhoodInput } from '@/lib/types';
+import type { Neighbourhood } from '@/lib/types';
 
 const CITIES: Record<string, string[]> = {
   Junik: ['Junik', 'Jasiq', 'Gjocaj'],
@@ -66,8 +66,7 @@ function Content() {
   }
 
   const create = useMutation({
-    mutationFn: (values: FormValues) =>
-      api.neighbourhoods.create({ ...values, country: 'Kosove' } as NeighbourhoodInput),
+    mutationFn: (values: FormValues) => api.neighbourhoods.create({ ...values, country: 'Kosove' }),
     onSuccess: () => {
       form.reset(EMPTY);
       qc.invalidateQueries({ queryKey: ['neighbourhoods'] });
@@ -76,8 +75,10 @@ function Content() {
   });
 
   const update = useMutation({
-    mutationFn: (values: FormValues) =>
-      api.neighbourhoods.update(editing!.id, values as NeighbourhoodInput),
+    mutationFn: (values: FormValues) => {
+      if (!editing) return Promise.reject(new Error('Nuk ka lagje per ndryshim'));
+      return api.neighbourhoods.update(editing.id, values);
+    },
     onSuccess: () => {
       setEditing(null);
       qc.invalidateQueries({ queryKey: ['neighbourhoods'] });

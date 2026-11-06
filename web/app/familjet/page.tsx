@@ -14,7 +14,7 @@ import { FormModal } from '@/components/FormModal';
 import { errMsg, useToast } from '@/components/Toast';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
-import type { FamilyDetails, FamilyInput } from '@/lib/types';
+import type { FamilyDetails } from '@/lib/types';
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Emri eshte i detyrueshem'),
@@ -61,7 +61,7 @@ function Content() {
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
 
   const create = useMutation({
-    mutationFn: (values: FormValues) => api.families.create(values as FamilyInput),
+    mutationFn: (values: FormValues) => api.families.create(values),
     onSuccess: () => {
       form.reset(EMPTY);
       qc.invalidateQueries({ queryKey: ['families'] });
@@ -70,7 +70,10 @@ function Content() {
   });
 
   const update = useMutation({
-    mutationFn: (values: FormValues) => api.families.update(editing!.id, values as FamilyInput),
+    mutationFn: (values: FormValues) => {
+      if (!editing) return Promise.reject(new Error('Nuk ka familje per ndryshim'));
+      return api.families.update(editing.id, values);
+    },
     onSuccess: () => {
       setEditing(null);
       qc.invalidateQueries({ queryKey: ['families'] });
