@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,6 +16,11 @@ import (
 func apiError(w http.ResponseWriter, req *http.Request, status int, msg string) {
 	render.Status(req, status)
 	render.JSON(w, req, map[string]string{"error": msg})
+}
+
+func internalError(w http.ResponseWriter, req *http.Request, err error) {
+	log.Printf("request %s failed: %v\n", req.URL.Path, err)
+	apiError(w, req, http.StatusInternalServerError, "internal error")
 }
 
 // Me returns the profile of the signed-in user.
@@ -51,12 +57,12 @@ func (h *handler) GetFamiliesDetails(w http.ResponseWriter, req *http.Request) {
 
 	f, err := h.FamiliesService.GetAllFamilies(ctx)
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 
@@ -94,18 +100,18 @@ func (h *handler) GetPaymentsDetails(w http.ResponseWriter, req *http.Request) {
 		p, err = h.PaymentsService.GetPaymentsByYear(ctx, yearInt)
 	}
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 
 	f, err := h.FamiliesService.GetAllFamilies(ctx)
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 
@@ -135,12 +141,12 @@ func (h *handler) GetNoPaymentDetails(w http.ResponseWriter, req *http.Request) 
 
 	f, err := h.PaymentsService.NoPayment(ctx, yearInt, neighbourhoodID)
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 	n, err := h.NeighbourhoodsService.GetAllNeighbourhoods(ctx)
 	if err != nil {
-		apiError(w, req, http.StatusInternalServerError, err.Error())
+		internalError(w, req, err)
 		return
 	}
 
