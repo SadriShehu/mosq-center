@@ -52,3 +52,24 @@ BASE_URL=http://localhost:3006 npm run test:flows       # new app only
 
 The HTML report is written to `e2e/playwright-report/` (`npm run report`).
 Traces, screenshots and videos are kept on failure under `e2e/test-results/`.
+
+## Selector conventions
+
+Selectors are role/label/text based, never ids, classes or CSS. Forms are
+separated by a control they contain (`formWith`) and dialogs by their title
+(`dialogFor`). The only positional selectors are documented exceptions that
+exist because the old app gives no other handle:
+
+- **Row action buttons** (`lagjet`, `familjet`, `pagesat`): the old edit/delete
+  buttons are icon-only with no accessible name, so the first button in a row is
+  edit and the second is delete.
+- **Sidebar toggle**: the old button is icon-only; it is the first button inside
+  the top `navigation` landmark.
+- **Pay dialog inputs** (`/pagesat-pakryera`): the old labels are broken
+  (`for="amount"` has no matching control, `for="year"` points at the filter
+  year), so the dialog's amount and year number inputs are addressed in order
+  after scoping to the dialog.
+- **Two "Kerko" buttons** (`/pagesat-pakryera`): the filter submit and the
+  client-side search button share the same name; the search button is scoped to
+  the toolbar that also holds the search input and "Gjenero Faturat".
+

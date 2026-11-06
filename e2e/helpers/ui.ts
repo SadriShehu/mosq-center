@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 /** Finds a <select> by one of the option labels it renders. */
 export function comboboxWithOption(page: Page, optionName: string) {
@@ -24,6 +24,16 @@ export const PRAYER_LABELS = [
  */
 export function visibleText(page: Page, text: string | RegExp) {
   return page.getByText(text).filter({ visible: true }).first();
+}
+
+/** A form located by a control it contains (keeps create/filter forms apart). */
+export function formWith(page: Page, control: Locator) {
+  return page.locator('form').filter({ has: control });
+}
+
+/** The open modal, by its title. Both old Bootstrap and react-bootstrap expose role dialog. */
+export function dialogFor(page: Page, title: string) {
+  return page.getByRole('dialog', { name: title });
 }
 
 /** Every prayer label is present and at least seven times are rendered. */
@@ -71,7 +81,9 @@ export async function expectSidebarToggle(page: Page) {
   const before = await logo.boundingBox();
   expect(before, 'sidebar should be expanded before toggling').not.toBeNull();
 
-  await page.getByRole('button').first().click();
+  // The old toggle button is icon-only and has no accessible name; scope it to
+  // the top navigation (it is the first button there) instead of page-wide.
+  await page.getByRole('navigation').getByRole('button').first().click();
 
   await expect
     .poll(
@@ -107,15 +119,16 @@ export async function expectTableHeaders(page: Page, headers: string[]) {
   }
 }
 
-/** Closes the open Bootstrap modal and waits for its heading to disappear. */
+/**
+ * Closes the open modal. The lookup is scoped to the dialog so a toast's own
+ * close button can never be clicked instead.
+ */
 export async function closeModal(page: Page, heading: string) {
-  const closeButton = page
-    .getByRole('button', { name: 'Close', exact: true })
-    .filter({ visible: true })
-    .first();
+  const dialog = dialogFor(page, heading);
+  const closeButton = dialog.getByRole('button', { name: 'Close', exact: true });
 
   if ((await closeButton.count()) > 0) {
-    await closeButton.click();
+    await closeButton.first().click();
   } else {
     await page.keyboard.press('Escape');
   }

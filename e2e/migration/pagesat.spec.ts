@@ -2,9 +2,9 @@ import { test, expect } from '../helpers/fixtures';
 import { rowFor } from '../helpers/seed';
 import {
   closeModal,
-  comboboxWithOption,
   expectAdminLayout,
   expectTableHeaders,
+  formWith,
   visibleText,
 } from '../helpers/ui';
 
@@ -42,43 +42,38 @@ test.describe('/pagesat', () => {
     await expect(page.getByRole('heading', { name: 'Lista e pagesave' })).toBeVisible();
     await expectTableHeaders(page, HEADERS);
 
-    const rangeYear = page.getByPlaceholder('Deri ne vitin', { exact: true });
+    const createForm = formWith(page, page.getByPlaceholder('Shuma per pagese'));
+    const filterForm = formWith(page, page.getByRole('button', { name: 'Kerko vitin' }));
+
+    const rangeYear = createForm.getByPlaceholder('Deri ne vitin', { exact: true });
     await expect(rangeYear).toBeHidden();
-    const multiYear = page.getByRole('checkbox', { name: 'Krijo pagese per disa vite' });
+    const multiYear = createForm.getByRole('checkbox', { name: 'Krijo pagese per disa vite' });
     await multiYear.check();
     await expect(rangeYear).toBeVisible();
     await multiYear.uncheck();
     await expect(rangeYear).toBeHidden();
 
-    await comboboxWithOption(page, displayName)
-      .first()
-      .selectOption({ label: displayName });
+    await createForm.getByRole('combobox').selectOption({ label: displayName });
 
-    const amount = page.getByPlaceholder('Shuma per pagese');
+    const amount = createForm.getByPlaceholder('Shuma per pagese');
     await expect(amount).toHaveValue('12');
 
-    await page.getByPlaceholder('Viti', { exact: true }).first().fill(String(seed.year));
+    await createForm.getByPlaceholder('Viti', { exact: true }).fill(String(seed.year));
     const created = page.waitForResponse(
       (response) =>
         response.url().includes('/api/v1/payments') &&
         response.request().method() === 'POST' &&
         response.status() === 201,
     );
-    // The old app reloads after the POST; the new app does not. Wait for that
-    // reload before touching the filter form, or it wipes the filter request.
-    const reloaded = page
-      .waitForEvent('framenavigated', { timeout: 4_000 })
-      .catch(() => null);
-    await page.getByRole('button', { name: 'Ruaj' }).click();
+    await createForm.getByRole('button', { name: 'Ruaj' }).click();
     await created;
-    if (await reloaded) {
-      await page.waitForLoadState('load');
-    }
+    // Old app reloads the page, new app resets the form; both leave the family
+    // select empty once the mutation has been applied.
+    await expect(createForm.getByRole('combobox')).toHaveValue('');
 
     // Filter through the form so the year stays in the URL as the old page does.
-    await expect(page.getByRole('heading', { name: 'Krijo Pagese' })).toBeVisible();
-    await page.getByPlaceholder('Viti', { exact: true }).nth(1).fill(String(seed.year));
-    await page.getByRole('button', { name: 'Kerko vitin' }).click();
+    await filterForm.getByPlaceholder('Viti', { exact: true }).fill(String(seed.year));
+    await filterForm.getByRole('button', { name: 'Kerko vitin' }).click();
     await expect(page).toHaveURL(new RegExp(`s_year=${seed.year}`));
 
     const row = rowFor(page, family.name);
