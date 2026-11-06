@@ -14,6 +14,7 @@ import (
 	"github.com/sadrishehu/mosq-center/internal/handlers"
 	"github.com/sadrishehu/mosq-center/internal/integration/auth0"
 	"github.com/sadrishehu/mosq-center/internal/integration/prayers"
+	appmw "github.com/sadrishehu/mosq-center/internal/middleware"
 	"github.com/sadrishehu/mosq-center/internal/repository"
 	"github.com/sadrishehu/mosq-center/internal/services"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -74,7 +75,7 @@ func auth(c *config.Auth0Config) *auth0.Authenticator {
 func router() *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Recoverer)
+	r.Use(appmw.Recoverer)
 	r.Use(middleware.Logger)
 	ch := cors.New(cors.Options{
 		AllowedOrigins:     []string{"*"},
