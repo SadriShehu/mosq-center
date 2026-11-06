@@ -1,256 +1,319 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { faFloppyDisk, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Button } from 'react-bootstrap';
-import { useForm, useWatch } from 'react-hook-form';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Suspense, useState } from 'react';
+import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { AuthGuard } from '@/components/AuthGuard';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DataTable, type Column } from '@/components/DataTable';
-import { FormModal } from '@/components/FormModal';
+import { EmptyState } from '@/components/EmptyState';
 import { errMsg, useToast } from '@/components/Toast';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import { api } from '@/lib/api';
-import { formatDate } from '@/lib/format';
-import type { Neighbourhood } from '@/lib/types';
+import { formatMoney, formatPercent, ratio } from '@/lib/format';
+import { useYear } from '@/lib/hooks';
+import { sq } from '@/lib/sq';
+import type { Neighbourhood, Region } from '@/lib/types';
 
-const CITIES: Record<string, string[]> = {
+const VILLAGES: Record<string, string[]> = {
   Junik: ['Junik', 'Jasiq', 'Gjocaj'],
   Gjakove: ['Gjakove', 'Batushe', 'Dobrosh', 'Molliq', 'Rracaj'],
 };
 
 const schema = z.object({
-  name: z.string().trim().min(1, 'Emri i lagjes eshte i detyrueshem'),
-  region: z.string().min(1, 'Zgjidh qytetin'),
+  name: z.string().trim().min(1, sq.errors.required),
+  region: z.string().min(1, sq.errors.required),
   city: z.string().optional(),
-  country: z.string().optional(),
   postal_code: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-const EMPTY: FormValues = { name: '', region: '', city: '', country: 'Kosove', postal_code: '' };
+const EMPTY: FormValues = { name: '', region: '', city: '', postal_code: '' };
 
-const COLUMNS: Column<Neighbourhood>[] = [
-  { header: 'Emri i lagjes', render: (n) => n.name },
-  { header: 'Qyteti', render: (n) => n.region },
-  { header: 'Fshati', render: (n) => n.city },
-  { header: 'Shteti', render: (n) => n.country },
-  { header: 'Kodi Postal', render: (n) => n.postal_code },
-  { header: 'Krijuar me', render: (n) => formatDate(n.created_at) },
-  { header: 'Ndryshuar me', render: (n) => formatDate(n.updated_at) },
-];
-
-function Content() {
-  const qc = useQueryClient();
-  const toast = useToast();
-  const [editing, setEditing] = useState<Neighbourhood | null>(null);
-  const [deleting, setDeleting] = useState<Neighbourhood | null>(null);
-
-  const { data: rows = [], error } = useQuery({
-    queryKey: ['neighbourhoods'],
-    queryFn: api.neighbourhoods.list,
-  });
-  const { data: regions = [] } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
-
-  const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+function NeighbourhoodFields({
+  form, regions, villages, idPrefix, country,
+}: {
+  form: UseFormReturn<FormValues>;
+  regions: Region[];
+  villages: string[];
+  idPrefix: string;
+  country: string;
+}) {
   const { errors } = form.formState;
-  const region = useWatch({ control: form.control, name: 'region' });
-  const cities = region ? CITIES[region] ?? [] : [];
 
   function onRegionChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const name = e.target.value;
     form.setValue('region', name);
-    form.setValue('postal_code', regions.find((r) => r.name === name)?.zip ?? '');
     form.setValue('city', '');
+    form.setValue('postal_code', regions.find((r) => r.name === name)?.zip ?? '');
   }
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="sm:col-span-2">
+        <Label htmlFor={`${idPrefix}-name`}>{sq.fields.name}</Label>
+        <Input id={`${idPrefix}-name`} {...form.register('name')} />
+        {errors.name && <p role="alert" className="mt-1 text-sm text-danger">{errors.name.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor={`${idPrefix}-region`}>{sq.fields.city}</Label>
+        <Select id={`${idPrefix}-region`} {...form.register('region', { onChange: onRegionChange })}>
+          <option value="" disabled>{sq.fields.selectCity}</option>
+          {regions.map((r) => (
+            <option key={r.name} value={r.name}>{r.name}</option>
+          ))}
+        </Select>
+        {errors.region && <p role="alert" className="mt-1 text-sm text-danger">{errors.region.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor={`${idPrefix}-village`}>{sq.fields.village}</Label>
+        <Select id={`${idPrefix}-village`} {...form.register('city')}>
+          <option value="" disabled>{sq.fields.selectVillage}</option>
+          {villages.map((v) => (
+            <option key={v} value={v}>{v}</option>
+          ))}
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor={`${idPrefix}-postal`}>{sq.fields.postalCode}</Label>
+        <Input id={`${idPrefix}-postal`} {...form.register('postal_code')} />
+      </div>
+      <div>
+        <Label htmlFor={`${idPrefix}-country`}>{sq.fields.country}</Label>
+        <Input id={`${idPrefix}-country`} value={country} disabled readOnly />
+      </div>
+    </div>
+  );
+}
+
+function Content() {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [year] = useYear();
+  const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<Neighbourhood | null>(null);
+  const [deleting, setDeleting] = useState<Neighbourhood | null>(null);
+
+  const { data: rows = [], isLoading, error } = useQuery({
+    queryKey: ['neighbourhoods'],
+    queryFn: api.neighbourhoods.list,
+  });
+  const { data: regions = [] } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
+    queryKey: ['stats', year],
+    queryFn: () => api.stats(year),
+  });
+  const loadError = error ?? statsError;
+
+  const statsById = new Map(stats?.neighbourhoods.map((s) => [s.id, s]) ?? []);
+
+  const addForm = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+  const editForm = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+  const addRegion = useWatch({ control: addForm.control, name: 'region' });
+  const editRegion = useWatch({ control: editForm.control, name: 'region' });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['neighbourhoods'] });
+    qc.invalidateQueries({ queryKey: ['stats'] });
+    qc.invalidateQueries({ queryKey: ['collection'] });
+    qc.invalidateQueries({ queryKey: ['families'] });
+  };
 
   const create = useMutation({
     mutationFn: (values: FormValues) => api.neighbourhoods.create({ ...values, country: 'Kosove' }),
     onSuccess: () => {
-      form.reset(EMPTY);
-      qc.invalidateQueries({ queryKey: ['neighbourhoods'] });
+      setAddOpen(false);
+      addForm.reset(EMPTY);
+      invalidate();
+      toast.success(sq.messages.created);
     },
     onError: (e) => toast.error(errMsg(e)),
   });
 
   const update = useMutation({
     mutationFn: (values: FormValues) => {
-      if (!editing) return Promise.reject(new Error('Nuk ka lagje per ndryshim'));
-      return api.neighbourhoods.update(editing.id, values);
+      if (!editing) return Promise.reject(new Error(sq.errors.unknown));
+      return api.neighbourhoods.update(editing.id, { ...values, country: editing.country || 'Kosove' });
     },
     onSuccess: () => {
       setEditing(null);
-      qc.invalidateQueries({ queryKey: ['neighbourhoods'] });
+      invalidate();
+      toast.success(sq.messages.updated);
     },
     onError: (e) => toast.error(errMsg(e)),
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => api.neighbourhoods.remove(id),
+    mutationFn: () => {
+      if (!deleting) return Promise.reject(new Error(sq.errors.unknown));
+      return api.neighbourhoods.remove(deleting.id);
+    },
     onSuccess: () => {
       setDeleting(null);
-      qc.invalidateQueries({ queryKey: ['neighbourhoods'] });
+      invalidate();
+      toast.success(sq.messages.deleted);
     },
     onError: (e) => toast.error(errMsg(e)),
   });
 
-  const editForm = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
-  const { errors: editErrors } = editForm.formState;
+  function openAdd() {
+    addForm.reset(EMPTY);
+    setAddOpen(true);
+  }
 
   function openEdit(n: Neighbourhood) {
     editForm.reset({
       name: n.name,
       region: n.region,
       city: n.city,
-      country: n.country,
       postal_code: n.postal_code,
     });
     setEditing(n);
   }
 
   const columns: Column<Neighbourhood>[] = [
-    ...COLUMNS,
+    { header: sq.fields.neighbourhood, primary: true, render: (n) => n.name },
+    { header: sq.fields.city, render: (n) => n.region },
+    { header: sq.fields.village, render: (n) => n.city },
+    { header: sq.fields.families, render: (n) => statsById.get(n.id)?.families ?? 0 },
     {
-      header: 'Ndrysho',
+      header: sq.status.paid,
+      render: (n) => {
+        const s = statsById.get(n.id);
+        if (!s) return '—';
+        return `${formatPercent(ratio(s.paid_families, s.families))} (${s.paid_families}/${s.families})`;
+      },
+    },
+    { header: sq.collection.collected, render: (n) => formatMoney(statsById.get(n.id)?.collected ?? 0) },
+    { header: sq.collection.expected, render: (n) => formatMoney(statsById.get(n.id)?.expected ?? 0) },
+    {
+      header: sq.actions.edit,
       render: (n) => (
-        <Button variant="success" size="sm" aria-label="Ndrysho" onClick={() => openEdit(n)}>
-          <FontAwesomeIcon icon={faPenToSquare} />
+        <Button variant="outline" size="icon" aria-label={`${sq.actions.edit} ${n.name}`} onClick={() => openEdit(n)}>
+          <Pencil aria-hidden />
         </Button>
       ),
     },
     {
-      header: 'Fshi',
+      header: sq.actions.delete,
       render: (n) => (
-        <Button variant="danger" size="sm" aria-label="Fshi" onClick={() => setDeleting(n)}>
-          <FontAwesomeIcon icon={faTrash} />
+        <Button
+          variant="danger-soft"
+          size="icon"
+          aria-label={`${sq.actions.delete} ${n.name}`}
+          onClick={() => setDeleting(n)}
+        >
+          <Trash2 aria-hidden />
         </Button>
       ),
     },
   ];
 
+  const deletingFamilies = deleting ? statsById.get(deleting.id)?.families ?? 0 : 0;
+
   return (
-    <>
-      <div className="container">
-        <br />
-        <h1>Krijo Lagje</h1>
-        <form onSubmit={form.handleSubmit((v) => create.mutate(v))} noValidate>
-          <div className="row g-3">
-            <div className="col-lg-2 col-md-6">
-              <input
-                {...form.register('name')}
-                type="text"
-                placeholder="Emri i lagjes"
-                aria-label="Emri i lagjes"
-                className="form-control"
-              />
-              {errors.name && <div className="text-danger small" role="alert">{errors.name.message}</div>}
-            </div>
-            <div className="col-lg-2 col-md-6">
-              <select {...form.register('region', { onChange: onRegionChange })} aria-label="Qyteti" className="form-control">
-                <option value="" disabled>Zgjidh Qytetin</option>
-                {regions.map((r) => (
-                  <option key={r.name} value={r.name}>{r.name}</option>
-                ))}
-              </select>
-              {errors.region && <div className="text-danger small" role="alert">{errors.region.message}</div>}
-            </div>
-            <div className="col-lg-2 col-md-6">
-              <select {...form.register('city')} aria-label="Fshati" className="form-control">
-                <option value="" disabled>Zgjidh Fshatin</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div className="col-lg-2 col-md-6">
-              <input
-                {...form.register('postal_code')}
-                type="text"
-                placeholder="Kodi Postal"
-                aria-label="Kodi Postal"
-                className="form-control"
-              />
-            </div>
-            <div className="col-lg-2 col-md-6">
-              <input
-                type="text"
-                value="Kosove"
-                disabled
-                readOnly
-                aria-label="Shteti"
-                className="form-control"
-              />
-            </div>
-            <div className="col-lg-2 col-md-6">
-              <Button type="submit" variant="success" disabled={create.isPending}>
-                <FontAwesomeIcon icon={faFloppyDisk} /> Ruaj
-              </Button>
-            </div>
-          </div>
-        </form>
-        <br />
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-extrabold">{sq.nav.neighbourhoods}</h1>
+        <Button onClick={openAdd}>
+          <Plus aria-hidden /> {sq.actions.addNeighbourhood}
+        </Button>
       </div>
 
-      <div className="container">
-        <h3>Lista e lagjeve</h3>
-        {error && <p className="text-danger">{errMsg(error)}</p>}
-        <div className="table-responsive">
-          <DataTable columns={columns} rows={rows} rowKey={(n) => n.id} />
-        </div>
-      </div>
-
-      <FormModal
-        show={editing !== null}
-        title="Ndrysho Lagjen"
-        submitLabel="Ruaj"
-        busy={update.isPending}
-        onHide={() => setEditing(null)}
-        onSubmit={editForm.handleSubmit((v) => update.mutate(v))}
-      >
-        <div className="mb-3">
-          <label htmlFor="m_name" className="form-label">Emri i lagjes</label>
-          <input {...editForm.register('name')} id="m_name" type="text" className="form-control" />
-          {editErrors.name && <div className="text-danger small" role="alert">{editErrors.name.message}</div>}
-        </div>
-        <div className="mb-3">
-          <label htmlFor="m_region" className="form-label">Qyteti</label>
-          <input {...editForm.register('region')} id="m_region" type="text" className="form-control" />
-          {editErrors.region && <div className="text-danger small" role="alert">{editErrors.region.message}</div>}
-        </div>
-        <div className="mb-3">
-          <label htmlFor="m_city" className="form-label">Fshati</label>
-          <input {...editForm.register('city')} id="m_city" type="text" className="form-control" />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="m_country" className="form-label">Shteti</label>
-          <input {...editForm.register('country')} id="m_country" type="text" className="form-control" />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="m_postal_code" className="form-label">Kodi Postal</label>
-          <input {...editForm.register('postal_code')} id="m_postal_code" type="text" className="form-control" />
-        </div>
-      </FormModal>
-
-      <ConfirmDialog
-        show={deleting !== null}
-        title="Konfirmo fshirjen"
-        message="A jeni i sigurt qe deshironi te fshini kete lagje?"
-        confirmLabel="Fshije"
-        busy={remove.isPending}
-        onCancel={() => setDeleting(null)}
-        onConfirm={() => deleting && remove.mutate(deleting.id)}
+      <DataTable
+        columns={columns}
+        rows={rows}
+        rowKey={(n) => n.id}
+        searchText={(n) => `${n.name} ${n.region} ${n.city}`}
+        loading={isLoading || statsLoading}
+        empty={loadError ? (
+          <EmptyState title={errMsg(loadError)} />
+        ) : (
+          <EmptyState title={sq.empty.list}>
+            <Button onClick={openAdd}><Plus aria-hidden /> {sq.actions.addNeighbourhood}</Button>
+          </EmptyState>
+        )}
       />
-    </>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <form onSubmit={addForm.handleSubmit((v) => create.mutate(v))} noValidate>
+            <DialogHeader>
+              <DialogTitle>{sq.actions.addNeighbourhood}</DialogTitle>
+              <DialogDescription>{sq.fields.selectCity}</DialogDescription>
+            </DialogHeader>
+            <NeighbourhoodFields
+              form={addForm}
+              regions={regions}
+              villages={VILLAGES[addRegion] ?? []}
+              idPrefix="add"
+              country="Kosove"
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddOpen(false)}>{sq.actions.cancel}</Button>
+              <Button type="submit" disabled={create.isPending}>{sq.actions.save}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null); }}>
+        <DialogContent>
+          <form onSubmit={editForm.handleSubmit((v) => update.mutate(v))} noValidate>
+            <DialogHeader>
+              <DialogTitle>{sq.actions.edit}</DialogTitle>
+            </DialogHeader>
+            <NeighbourhoodFields
+              form={editForm}
+              regions={regions}
+              villages={VILLAGES[editRegion] ?? []}
+              idPrefix="edit"
+              country={editing?.country || 'Kosove'}
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditing(null)}>{sq.actions.cancel}</Button>
+              <Button type="submit" disabled={update.isPending}>{sq.actions.save}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deleting !== null} onOpenChange={(open) => { if (!open) setDeleting(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{sq.actions.confirmDelete}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {sq.messages.confirmDelete('lagje')} {sq.messages.deleteNeighbourhoodConsequence(deletingFamilies)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{sq.actions.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => remove.mutate()} disabled={remove.isPending}>
+              {sq.actions.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
 
 export default function Page() {
   return (
     <AuthGuard>
-      <Content />
+      <Suspense fallback={null}>
+        <Content />
+      </Suspense>
     </AuthGuard>
   );
 }

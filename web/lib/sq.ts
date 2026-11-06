@@ -62,6 +62,9 @@ export const sq = {
     country: 'Shteti',
     postalCode: 'Kodi postar',
     region: 'Rajoni',
+    families: 'Familjet',
+    selectCity: 'Zgjidh Qytetin',
+    selectVillage: 'Zgjidh Fshatin',
     status: 'Statusi',
     allNeighbourhoods: 'Të gjitha lagjet',
   },
@@ -100,6 +103,7 @@ export const sq = {
     Maghrib: 'Akshami',
     Isha: 'Jacia',
     Midnight: 'Pjesa e tretë e natës',
+    remaining: 'Kohë e mbetur',
   },
 
   command: {
@@ -131,6 +135,7 @@ export const sq = {
       `A jeni të sigurt që dëshironi ta fshini këtë ${what}?`,
     noInvoices: (year: number | string) => `Nuk ka fatura për t'u gjeneruar për vitin ${year}.`,
     deleteFamilyConsequence: (n: number) => `Kjo fshin edhe ${n} pagesa.`,
+    deleteNeighbourhoodConsequence: (n: number) => `Kjo lagje ka ${n} familje.`,
   },
 
   errors: {

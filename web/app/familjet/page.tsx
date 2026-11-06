@@ -42,17 +42,18 @@ function Content() {
   function setOpenId(id?: string) {
     const next = new URLSearchParams(params.toString());
     if (id) next.set('id', id); else next.delete('id');
-    router.replace(`${pathname}?${next.toString()}`);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }
 
-  const { data: rows = [], isLoading } = useQuery({
+  const { data: rows = [], isLoading, error } = useQuery({
     queryKey: ['collection', year, filter],
     queryFn: () => api.collection(year, filter || undefined),
   });
-  const { data: neighbourhoods = [] } = useQuery({
+  const { data: neighbourhoods = [], error: neighbourhoodsError } = useQuery({
     queryKey: ['neighbourhoods'],
     queryFn: api.neighbourhoods.list,
   });
+  const loadError = error ?? neighbourhoodsError;
 
   const addForm = useForm<FamilyFormValues>({
     resolver: zodResolver(familySchema),
@@ -73,7 +74,22 @@ function Content() {
   });
 
   const columns: Column<CollectionRow>[] = [
-    { header: sq.fields.name, primary: true, render: (f) => fullName(f) },
+    {
+      header: sq.fields.name,
+      primary: true,
+      render: (f) => (
+        <button
+          type="button"
+          className="rounded-control text-left font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          onClick={(event) => {
+            event.stopPropagation();
+            setOpenId(f.id);
+          }}
+        >
+          {fullName(f)}
+        </button>
+      ),
+    },
     { header: sq.fields.neighbourhood, render: (f) => f.neighbourhood_name },
     { header: sq.fields.members, render: (f) => f.members },
     { header: sq.fields.status, render: (f) => <StatusBadge paid={f.paid} /> },
@@ -110,7 +126,9 @@ function Content() {
         searchText={(f) => `${fullName(f)} ${f.neighbourhood_name}`}
         loading={isLoading}
         onRowClick={(f) => setOpenId(f.id)}
-        empty={(
+        empty={loadError ? (
+          <EmptyState title={errMsg(loadError)} />
+        ) : (
           <EmptyState title={sq.empty.list}>
             <Button onClick={openAdd}><Plus aria-hidden /> {sq.actions.addFamily}</Button>
           </EmptyState>
