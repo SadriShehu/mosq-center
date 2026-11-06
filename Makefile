@@ -26,6 +26,7 @@ docker-db-stop: ## Stop docker db
 	@echo "Stopping docker db"
 	@docker-compose -f docker-compose.yml down
 
+.PHONY: web
 web: ## Build the Next.js static export into web/out (embedded by Go)
 	@cd web && npm ci && npm run build
 
