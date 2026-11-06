@@ -53,15 +53,13 @@ function Content() {
   const [editing, setEditing] = useState<FamilyDetails | null>(null);
   const [deleting, setDeleting] = useState<FamilyDetails | null>(null);
 
-  const { data: rows, error } = useQuery({
+  const { data: rows = [], error } = useQuery({
     queryKey: ['families'],
     queryFn: api.families.details,
-    initialData: [],
   });
-  const { data: neighbourhoods } = useQuery({
+  const { data: neighbourhoods = [] } = useQuery({
     queryKey: ['neighbourhoods'],
     queryFn: api.neighbourhoods.list,
-    initialData: [],
   });
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });

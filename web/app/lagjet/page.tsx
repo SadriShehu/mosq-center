@@ -49,16 +49,11 @@ function Content() {
   const [editing, setEditing] = useState<Neighbourhood | null>(null);
   const [deleting, setDeleting] = useState<Neighbourhood | null>(null);
 
-  const { data: rows, error } = useQuery({
+  const { data: rows = [], error } = useQuery({
     queryKey: ['neighbourhoods'],
     queryFn: api.neighbourhoods.list,
-    initialData: [],
   });
-  const { data: regions } = useQuery({
-    queryKey: ['regions'],
-    queryFn: api.regions,
-    initialData: [],
-  });
+  const { data: regions = [] } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
   const region = useWatch({ control: form.control, name: 'region' });
