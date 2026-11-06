@@ -54,6 +54,12 @@ async function json<T>(path: string, init?: RequestInit, opts?: { public?: boole
   return (text ? JSON.parse(text) : null) as T;
 }
 
+/** Mutations: Go replies with plain text (e.g. a bare uuid, or '[id id]' for payments), not JSON. */
+async function mutate(path: string, init: RequestInit): Promise<string> {
+  const res = await request(path, init);
+  return (await res.text()).trim();
+}
+
 const body = (data: unknown): RequestInit => ({ body: JSON.stringify(data) });
 
 export const api = {
@@ -65,19 +71,19 @@ export const api = {
   neighbourhoods: {
     list: () => json<Neighbourhood[]>('/neighbourhoods'),
     get: (id: string) => json<Neighbourhood>(`/neighbourhoods/${id}`),
-    create: (d: NeighbourhoodInput) => json<unknown>('/neighbourhoods', { method: 'POST', ...body(d) }),
+    create: (d: NeighbourhoodInput) => mutate('/neighbourhoods', { method: 'POST', ...body(d) }),
     update: (id: string, d: NeighbourhoodInput) =>
-      json<unknown>(`/neighbourhoods/${id}`, { method: 'PUT', ...body(d) }),
-    remove: (id: string) => json<unknown>(`/neighbourhoods/${id}`, { method: 'DELETE' }),
+      mutate(`/neighbourhoods/${id}`, { method: 'PUT', ...body(d) }),
+    remove: (id: string) => mutate(`/neighbourhoods/${id}`, { method: 'DELETE' }),
   },
 
   families: {
     list: () => json<Family[]>('/families'),
     details: () => json<FamilyDetails[]>('/families/details'),
     get: (id: string) => json<Family>(`/families/${id}`),
-    create: (d: FamilyInput) => json<unknown>('/families', { method: 'POST', ...body(d) }),
-    update: (id: string, d: FamilyInput) => json<unknown>(`/families/${id}`, { method: 'PUT', ...body(d) }),
-    remove: (id: string) => json<unknown>(`/families/${id}`, { method: 'DELETE' }),
+    create: (d: FamilyInput) => mutate('/families', { method: 'POST', ...body(d) }),
+    update: (id: string, d: FamilyInput) => mutate(`/families/${id}`, { method: 'PUT', ...body(d) }),
+    remove: (id: string) => mutate(`/families/${id}`, { method: 'DELETE' }),
   },
 
   payments: {
@@ -87,9 +93,9 @@ export const api = {
       json<PaymentDetails[]>(`/payments/details${qs(p)}`),
     noPaymentDetails: (p: { year: number | string; s_neighbourhood_id?: string }) =>
       json<FamilyDetails[]>(`/payments/no-payment/details${qs(p)}`),
-    create: (d: PaymentInput) => json<unknown>('/payments', { method: 'POST', ...body(d) }),
-    update: (id: string, d: PaymentInput) => json<unknown>(`/payments/${id}`, { method: 'PUT', ...body(d) }),
-    remove: (id: string) => json<unknown>(`/payments/${id}`, { method: 'DELETE' }),
+    create: (d: PaymentInput) => mutate('/payments', { method: 'POST', ...body(d) }),
+    update: (id: string, d: PaymentInput) => mutate(`/payments/${id}`, { method: 'PUT', ...body(d) }),
+    remove: (id: string) => mutate(`/payments/${id}`, { method: 'DELETE' }),
   },
 
   /** Returns the PDF blob, or null when there is nothing to invoice (404). */
