@@ -56,14 +56,27 @@ func TestStaticHandler(t *testing.T) {
 	}
 }
 
-func TestIsAdminPath(t *testing.T) {
-	for p, want := range map[string]bool{
-		"/": false, "/lagjet": true, "/lagjet.html": true, "/lagjet/x.txt": true, "/user": true,
-		"/lagjet.txt": true, "/pagesat-pakryera.txt": true, "/user.txt": true, "/familjet.txt": true, "/pagesat.html": true, "/index.txt": false,
-		"/pagesat-pakryera": true, "/_next/static/a.js": false, "/login": false, "/a/../lagjet": true,
-	} {
-		if got := isAdminPath(p); got != want {
-			t.Errorf("%s = %v, want %v", p, got, want)
+func TestIsPublicPath(t *testing.T) {
+	tests := map[string]bool{
+		// public
+		"/": true, "/index.html": true, "/index.txt": true, "/404.html": true,
+		"/_next/static/chunks/a.js": true, "/_not-found.html": true,
+		"/__next.__PAGE__.txt": true, "/__next._tree.txt": true,
+		"/favicon.ico": true, "/logo.png": true,
+		"/login": true, "/callback": true, "/logout": true,
+		"/api/v1/health": true, "/api/v1/public/prayers": true,
+		// protected
+		"/mbledhja": false, "/mbledhja.html": false, "/mbledhja.txt": false,
+		"/lagjet": false, "/lagjet.txt": false, "/lagjet/__next.lagjet.txt": false,
+		"/familjet": false, "/pagesat": false, "/pagesat-pakryera": false, "/user": false, "/user.txt": false,
+		"/unknown-route": false, "/nope/deeper": false, "/robots.txt": false,
+		"/api/v1/me": false, "/api/v1/families": false, "/api/v1/stats": false, "/api/v1/zzz": false,
+		"/api/v1/publicity": false, "/a/../mbledhja": false, "/_next/../mbledhja": false,
+		"/sub/logo.png": false,
+	}
+	for p, want := range tests {
+		if got := isPublicPath(p); got != want {
+			t.Errorf("isPublicPath(%q) = %v, want %v", p, got, want)
 		}
 	}
 }
@@ -77,7 +90,7 @@ func TestAdminTxtBehindAuth(t *testing.T) {
 	}
 	h.RegisterTemplates()
 
-	for _, p := range []string{"/lagjet", "/lagjet.txt", "/lagjet.html", "/user.txt", "/pagesat-pakryera.txt"} {
+	for _, p := range []string{"/lagjet", "/lagjet.txt", "/lagjet.html", "/user.txt", "/pagesat-pakryera.txt", "/mbledhja", "/mbledhja.txt", "/unknown-route"} {
 		rec := httptest.NewRecorder()
 		r.ServeHTTP(rec, httptest.NewRequest("GET", p, nil))
 		if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/logout" {

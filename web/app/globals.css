@@ -1,13 +1,57 @@
-/* Sidebar rules ported from the old styles.css (Start Bootstrap Simple Sidebar). */
-#wrapper { overflow-x: hidden; }
-#sidebar-wrapper { min-height: 100vh; margin-left: -15rem; transition: margin 0.25s ease-out; }
-#sidebar-wrapper .sidebar-heading { padding: 0.875rem 1.25rem; font-size: 1.2rem; }
-#sidebar-wrapper .list-group { width: 15rem; }
-#page-content-wrapper { min-width: 100vw; }
-body.sb-sidenav-toggled #wrapper #sidebar-wrapper { margin-left: 0; }
-@media (min-width: 768px) {
-  #sidebar-wrapper { margin-left: 0; }
-  #page-content-wrapper { min-width: 0; width: 100%; }
-  body.sb-sidenav-toggled #wrapper #sidebar-wrapper { margin-left: -15rem; }
+/* Legacy pages (bootstrap) sit in the lowest cascade layer so Tailwind utilities always win. Removed in r-cleanup. */
+@import 'bootstrap/dist/css/bootstrap.min.css' layer(legacy);
+@import 'tailwindcss';
+
+/* Direction A — Emerald & Gold (docs/redesign/UX.md). Tokens are CSS variables. */
+:root {
+  --ground: #f3f6f4;
+  --surface: #ffffff;
+  --border: #dce5e0;
+  --text: #13241c;
+  --muted: #52645a;
+  --primary: #0f6b4c;
+  --primary-hover: #0a4f38;
+  --sidebar: #0e3b2c;
+  --sidebar-active: #1a5240;
+  --sidebar-text: #e6efea;
+  --sidebar-muted: #a9c2b6;
+  --gold: #d4a84a;
+  --gold-ink: #8a6212;
+  --gold-soft: #f6eedb;
+  --danger: #a03b22;
+  --danger-soft: #fbe9e4;
+  --success-soft: #e3eee8;
 }
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-soft: var(--gold-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success-soft: var(--success-soft);
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --font-heading: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+html, body { background: var(--ground); color: var(--text); font-family: var(--font-sans); }
+h1, h2, h3, h4 { font-family: var(--font-heading); }
+
+/* Visible focus ring everywhere (keyboard). */
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.on-dark :focus-visible { outline-color: var(--gold); }
+
 .avatar { width: 80px; height: 80px; border-radius: 50%; }

@@ -34,3 +34,27 @@ export interface Prayers {
   Maghrib: string; Isha: string; Imsak: string; Midnight: string;
   Firstthird: string; Lastthird: string;
 }
+
+/* ---- redesign endpoints (docs/redesign/UX.md "API additions") ---- */
+export interface NeighbourhoodStats {
+  id: string; name: string; families: number; paid_families: number; expected: number; collected: number;
+}
+export interface Stats {
+  year: number; fee_per_member: number; families: number; members: number; expected: number;
+  collected: number; paid_families: number; unpaid_families: number; neighbourhoods: NeighbourhoodStats[];
+}
+
+export interface CollectionPayment { id: string; amount: number; created_at: string }
+export interface CollectionRow extends FamilyDetails {
+  expected_amount: number; paid: boolean; payment: CollectionPayment | null;
+}
+
+export interface HistoryYear { year: number; paid: boolean; payment_id: string }
+export interface FamilyHistory {
+  family: FamilyDetails; payments: Payment[]; years: HistoryYear[];
+}
+
+export interface BulkPaymentInput { family_ids: string[]; year: number; range_year?: number }
+export interface BulkSkipped { family_id: string; year: number }
+/** `ids` = payments created (undo deletes these); `skipped` = already paid, left untouched (idempotent). */
+export interface BulkPaymentResult { ids: string[]; skipped: BulkSkipped[] }
