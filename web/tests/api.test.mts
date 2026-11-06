@@ -33,3 +33,14 @@ test('error status throws ApiError with message', async () => {
   mock(400, 'bad year', 'text/plain');
   await assert.rejects(api.payments.list(), /bad year/);
 });
+
+test('null body on list calls becomes []', async () => {
+  mock(200, 'null', 'application/json');
+  assert.deepEqual(await api.neighbourhoods.list(), []);
+  assert.deepEqual(await api.families.list(), []);
+  assert.deepEqual(await api.families.details(), []);
+  assert.deepEqual(await api.payments.list(), []);
+  assert.deepEqual(await api.payments.details({ year: 2024 }), []);
+  assert.deepEqual(await api.payments.noPaymentDetails({ year: 2024 }), []);
+  assert.deepEqual(await api.regions(), []);
+});
