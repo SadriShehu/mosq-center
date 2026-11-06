@@ -107,6 +107,11 @@ resource "google_cloud_run_v2_service" "mosq_center" {
         value = "center"
       }
 
+      env {
+        name  = "BRAND_NAME"
+        value = "Xhamia Qendër"
+      }
+
       resources {
         cpu_idle = true
         limits = {
@@ -240,6 +245,11 @@ resource "google_cloud_run_v2_service" "mosq_qoku" {
       env {
         name  = "SERVICE_NAME"
         value = "qoku"
+      }
+
+      env {
+        name  = "BRAND_NAME"
+        value = "Xhamia Qoku"
       }
 
       resources {

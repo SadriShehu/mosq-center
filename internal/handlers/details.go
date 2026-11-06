@@ -152,3 +152,8 @@ func (h *handler) GetNoPaymentDetails(w http.ResponseWriter, req *http.Request) 
 
 	render.JSON(w, req, services.JoinFamilies(f, n))
 }
+
+// GetPublicConfig returns tenant settings the public pages need.
+func (h *handler) GetPublicConfig(w http.ResponseWriter, req *http.Request) {
+	render.JSON(w, req, map[string]string{"brand_name": h.BrandName})
+}

@@ -21,6 +21,7 @@ type handler struct {
 	ReportsService        ReportsService
 	SessionStore          *sessions.CookieStore
 	AuthConfig            *config.Auth0Config
+	BrandName             string
 }
 
 func New(router *chi.Mux,
@@ -32,7 +33,8 @@ func New(router *chi.Mux,
 	prs PrayersService,
 	rs ReportsService,
 	ss *sessions.CookieStore,
-	ac *config.Auth0Config) *handler {
+	ac *config.Auth0Config,
+	brandName string) *handler {
 	return &handler{
 		RouterService:         router,
 		Auth0:                 auth0,
@@ -44,6 +46,7 @@ func New(router *chi.Mux,
 		ReportsService:        rs,
 		SessionStore:          ss,
 		AuthConfig:            ac,
+		BrandName:             brandName,
 	}
 }
 
@@ -73,6 +76,7 @@ func (h *handler) RegisterRoutesV1() {
 	h.RouterService.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", h.HealthCheck)
 		r.Get("/public/prayers", h.GetPrayers)
+		r.Get("/public/config", h.GetPublicConfig)
 
 		r.Group(func(r chi.Router) {
 			if h.AuthConfig.Enable {
