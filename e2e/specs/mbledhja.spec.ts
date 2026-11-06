@@ -35,12 +35,14 @@ test('one tap pays a family and Zhbëj undoes it', async ({ page, seed }) => {
 
   await payButton.click();
   await expect(rowOf(page, a).getByText('Paguar', { exact: true })).toBeVisible();
+  await expect(rowOf(page, a).getByText(/Paguar tani/)).toBeVisible();
   expect((await seed.stats(s.year)).paid_families).toBe(1);
   await expect(rowOf(page, b).getByText('Pa paguar', { exact: true })).toBeVisible();
   await expect(progress).toHaveAttribute('aria-valuenow', '50');
   await expectNoReload(page);
 
-  await page.getByRole('button', { name: 'Zhbëj' }).click();
+  // The row itself offers Zhbëj for a payment made from this screen.
+  await rowOf(page, a).getByRole('button', { name: 'Zhbëj' }).click();
   await expect(rowOf(page, a).getByText('Pa paguar', { exact: true })).toBeVisible();
   expect((await seed.stats(s.year)).paid_families).toBe(0);
   await expect(progress).toHaveAttribute('aria-valuenow', '0');
@@ -56,7 +58,7 @@ test('a stale row that is already paid says so instead of doing nothing', async 
   await seed.createPayment(family.id, s.year, family.members * s.feePerMember);
 
   await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
-  await expect(page.getByText('Kjo familje është paguar tashmë.')).toBeVisible();
+  await expect(page.getByText('Kjo familje është paguar tashmë për këtë vit.')).toBeVisible();
   await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
   expect((await seed.stats(s.year)).paid_families).toBe(1);
 });
