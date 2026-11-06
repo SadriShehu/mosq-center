@@ -36,7 +36,7 @@ test.describe('/lagjet', () => {
     await expect(row.getByText(await money(neighbourhood!.expected), { exact: true })).toBeVisible();
     await expect(row.getByText(String(neighbourhood!.families), { exact: true })).toBeVisible();
 
-    await row.getByRole('button', { name: 'Fshi', exact: true }).click();
+    await row.getByRole('button', { name: `Fshi ${seed.neighbourhoodName}`, exact: true }).click();
     const alert = page.getByRole('alertdialog');
     await expect(alert.getByText('Kjo lagje ka 2 familje.')).toBeVisible();
     await alert.getByRole('button', { name: 'Anulo', exact: true }).click();

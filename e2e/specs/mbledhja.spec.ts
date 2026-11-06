@@ -76,7 +76,12 @@ test('a stale row that is already paid says so instead of doing nothing', async 
   await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
   await expect(page.getByText('Kjo familje është paguar tashmë për këtë vit.')).toBeVisible();
   await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
-  expect((await seed.stats(s.year)).paid_families).toBe(1);
+  const collection = await page.request.get(
+    `/api/v1/collection?year=${s.year}&neighbourhood_id=${s.neighbourhoodId}`,
+  );
+  expect(collection.ok()).toBeTruthy();
+  const rows = (await collection.json()) as { id: string; paid: boolean }[];
+  expect(rows.find((row) => row.id === family.id)?.paid).toBe(true);
 });
 
 test('multi-select marks several families paid', async ({ page, seed }) => {
@@ -145,7 +150,12 @@ test('family name opens the sheet in place and paying remaining years updates th
   await expect(page).not.toHaveURL(/familja=/);
   await expect(page.getByRole('combobox', { name: 'Lagjja' })).toHaveValue(s.neighbourhoodId);
   await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
-  expect((await seed.stats(s.year)).paid_families).toBe(1);
+  const collection = await page.request.get(
+    `/api/v1/collection?year=${s.year}&neighbourhood_id=${s.neighbourhoodId}`,
+  );
+  expect(collection.ok()).toBeTruthy();
+  const rows = (await collection.json()) as { id: string; paid: boolean }[];
+  expect(rows.find((row) => row.id === family.id)?.paid).toBe(true);
 });
 
 test('Gjenero faturat downloads a PDF for unpaid families', async ({ page, seed }) => {
