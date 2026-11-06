@@ -27,6 +27,7 @@ export const sq = {
     undo: 'Zhbëj',
     edit: 'Ndrysho',
     delete: 'Fshi',
+    deleteFamily: 'Fshi familjen',
     cancel: 'Anulo',
     save: 'Ruaj',
     close: 'Mbyll',
@@ -121,5 +122,6 @@ export const sq = {
     server: 'Ndodhi një gabim në server. Provoni përsëri.',
     unknown: 'Ndodhi një gabim. Provoni përsëri.',
     required: 'Kjo fushë është e detyrueshme.',
+    positive: 'Numri duhet të jetë pozitiv.',
   },
 } as const;
