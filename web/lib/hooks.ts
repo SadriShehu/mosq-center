@@ -1,6 +1,9 @@
 'use client';
+import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { api } from './api';
+import { sq } from './sq';
 
 /** SSR-safe media query (false on the server / first paint). */
 export function useMediaQuery(query: string): boolean {
@@ -13,6 +16,25 @@ export function useMediaQuery(query: string): boolean {
     [query],
   );
   return useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => false);
+}
+
+/**
+ * Tenant brand from GET /api/v1/public/config (one cached fetch per session),
+ * falling back to `sq.brand` while loading or on error. Also keeps <title> in sync.
+ */
+export function useBrand(): string {
+  const pathname = usePathname();
+  const { data } = useQuery({
+    queryKey: ['public', 'config'],
+    queryFn: api.publicConfig,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+  const brand = data?.brand_name?.trim() || sq.brand;
+  useEffect(() => {
+    document.title = brand;
+  }, [brand, pathname]);
+  return brand;
 }
 
 /** The shared year (`?viti=`, default = current year). Must render under <Suspense>. */

@@ -2,7 +2,7 @@ import { sq } from './sq.ts';
 import type {
   BulkPaymentInput, BulkPaymentResult, CollectionRow, FamilyHistory, Stats,
   Family, FamilyDetails, FamilyInput, Me, Neighbourhood, NeighbourhoodInput, Payment,
-  PaymentDetails, PaymentInput, Prayers, Region,
+  PaymentDetails, PaymentInput, Prayers, PublicConfig, Region,
 } from './types';
 
 export class ApiError extends Error {
@@ -104,6 +104,7 @@ export const api = {
   me: () => json<Me>('/me'),
   regions: () => list<Region>('/regions'),
   publicPrayers: () => json<Prayers>('/public/prayers', undefined, { public: true }),
+  publicConfig: () => json<PublicConfig>('/public/config', undefined, { public: true }),
   prayers: () => json<Prayers>('/prayers'),
 
   neighbourhoods: {
