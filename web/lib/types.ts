@@ -1,4 +1,6 @@
 export interface Me { name: string; email: string; picture: string }
+/** Tenant settings from GET /api/v1/public/config. */
+export interface PublicConfig { brand_name: string }
 export interface Region { name: string; zip: string }
 
 export interface Neighbourhood {
