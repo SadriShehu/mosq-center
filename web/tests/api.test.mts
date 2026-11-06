@@ -49,7 +49,13 @@ test('new endpoints: stats, collection, history, bulk, recent', async () => {
   assert.deepEqual(await api.collection(2026), []);
   assert.deepEqual(await api.recentPayments(), []);
   mock(201, '{"ids":["a","b"]}', 'application/json');
-  assert.deepEqual((await api.payBulk({ family_ids: ['x'], year: 2026 })).ids, ['a', 'b']);
+  const r = await api.payBulk({ family_ids: ['x'], year: 2026 });
+  assert.deepEqual(r.ids, ['a', 'b']);
+  assert.deepEqual(r.skipped, []);
+  mock(201, '{"ids":null,"skipped":[{"family_id":"x","year":2026}]}', 'application/json');
+  const r2 = await api.payBulk({ family_ids: ['x'], year: 2026 });
+  assert.deepEqual(r2.ids, []);
+  assert.deepEqual(r2.skipped, [{ family_id: 'x', year: 2026 }]);
 });
 
 test('null body on list calls becomes []', async () => {

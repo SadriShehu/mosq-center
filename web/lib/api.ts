@@ -96,10 +96,10 @@ export const api = {
     list<CollectionRow>(`/collection${qs({ year, neighbourhood_id: neighbourhoodId })}`),
   familyHistory: (id: string) => json<FamilyHistory>(`/families/${id}/history`),
   recentPayments: (limit = 10) => list<PaymentDetails>(`/payments/recent${qs({ limit })}`),
-  /** Amount is computed server-side (members x fee). Returns the created ids. */
+  /** Amount is computed server-side (members x fee). Returns created ids + skipped (already paid) pairs. */
   payBulk: async (d: BulkPaymentInput): Promise<BulkPaymentResult> => {
-    const res = await json<BulkPaymentResult | null>('/payments/bulk', { method: 'POST', ...body(d) });
-    return res ?? { ids: [] };
+    const res = await json<Partial<BulkPaymentResult> | null>('/payments/bulk', { method: 'POST', ...body(d) });
+    return { ids: res?.ids ?? [], skipped: res?.skipped ?? [] };
   },
   me: () => json<Me>('/me'),
   regions: () => list<Region>('/regions'),

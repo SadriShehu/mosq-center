@@ -55,4 +55,6 @@ export interface FamilyHistory {
 }
 
 export interface BulkPaymentInput { family_ids: string[]; year: number; range_year?: number }
-export interface BulkPaymentResult { ids: string[] }
+export interface BulkSkipped { family_id: string; year: number }
+/** `ids` = payments created (undo deletes these); `skipped` = already paid, left untouched (idempotent). */
+export interface BulkPaymentResult { ids: string[]; skipped: BulkSkipped[] }
