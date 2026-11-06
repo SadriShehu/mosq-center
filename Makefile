@@ -26,6 +26,16 @@ docker-db-stop: ## Stop docker db
 	@echo "Stopping docker db"
 	@docker-compose -f docker-compose.yml down
 
-run: ## Run the application
+web: ## Build the Next.js static export into web/out (embedded by Go)
+	@cd web && npm ci && npm run build
+
+run: web ## Build the frontend, then run the application
 	@echo "Running the application"
 	@$(GO) run $(APP_CMD)
+
+run-api: ## Run only the Go server (uses whatever is already in web/out)
+	@$(GO) run $(APP_CMD)
+
+check: ## Run all checks (same as CI)
+	@go vet ./... && go test ./...
+	@cd web && npm run lint && npm run typecheck && npm run build
