@@ -21,8 +21,6 @@
   --danger: #a03b22;
   --danger-soft: #fbe9e4;
   --success-soft: #e3eee8;
-  --radius-control: 10px;
-  --radius-card: 14px;
 }
 
 @theme inline {
@@ -43,8 +41,8 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-success-soft: var(--success-soft);
-  --radius-control: var(--radius-control);
-  --radius-card: var(--radius-card);
+  --radius-control: 10px;
+  --radius-card: 14px;
   --font-heading: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
