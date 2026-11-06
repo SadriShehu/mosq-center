@@ -9,9 +9,11 @@ type Config struct {
 	Env         string
 	Port        string
 	ServiceName string
-	DBConfig    *DBConfig
-	Auth        *Auth0Config
-	TunePrayers *TunePrayers
+	// FeePerMember is the yearly fee per family member (FEE_PER_MEMBER, default 3).
+	FeePerMember float64
+	DBConfig     *DBConfig
+	Auth         *Auth0Config
+	TunePrayers  *TunePrayers
 }
 
 type DBConfig struct {
@@ -68,11 +70,21 @@ func GetBoolOrFalse(key string) bool {
 	return ok
 }
 
+// GetFloatOrDefault reads a positive float env var, falling back to the default.
+func GetFloatOrDefault(key string, defaultValue float64) float64 {
+	v, err := strconv.ParseFloat(GetOrDefault(key, ""), 64)
+	if err != nil || v <= 0 {
+		return defaultValue
+	}
+	return v
+}
+
 func New() *Config {
 	return &Config{
-		Env:         GetOrDefault("ENV", "dev"),
-		ServiceName: GetOrDefault("SERVICE_NAME", "mosq"),
-		Port:        ":" + GetOrDefault("PORT", "8080"),
+		FeePerMember: GetFloatOrDefault("FEE_PER_MEMBER", 3),
+		Env:          GetOrDefault("ENV", "dev"),
+		ServiceName:  GetOrDefault("SERVICE_NAME", "mosq"),
+		Port:         ":" + GetOrDefault("PORT", "8080"),
 		DBConfig: &DBConfig{
 			MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
 			MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),
