@@ -63,6 +63,7 @@ function Content() {
   });
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+  const { errors } = form.formState;
 
   const create = useMutation({
     mutationFn: (values: FormValues) => api.families.create(values),
@@ -95,6 +96,7 @@ function Content() {
   });
 
   const editForm = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+  const { errors: editErrors } = editForm.formState;
 
   function openEdit(f: FamilyDetails) {
     editForm.reset({
@@ -141,6 +143,7 @@ function Content() {
                 aria-label="Emri"
                 className="form-control"
               />
+              {errors.name && <div className="text-danger small" role="alert">{errors.name.message}</div>}
             </div>
             <div className="col-lg-2 col-md-6">
               <input
@@ -159,6 +162,7 @@ function Content() {
                 aria-label="Mbiemri"
                 className="form-control"
               />
+              {errors.surname && <div className="text-danger small" role="alert">{errors.surname.message}</div>}
             </div>
             <div className="col-lg-2 col-md-6">
               <input
@@ -168,6 +172,7 @@ function Content() {
                 aria-label="Numri i anetareve"
                 className="form-control"
               />
+              {errors.members && <div className="text-danger small" role="alert">{errors.members.message}</div>}
             </div>
             <div className="col-lg-2 col-md-6">
               <select
@@ -180,6 +185,9 @@ function Content() {
                   <option key={n.id} value={n.id}>{n.name}</option>
                 ))}
               </select>
+              {errors.neighbourhood_id && (
+                <div className="text-danger small" role="alert">{errors.neighbourhood_id.message}</div>
+              )}
             </div>
             <div className="col-lg-2 col-md-6">
               <Button type="submit" variant="success" disabled={create.isPending}>
@@ -210,6 +218,7 @@ function Content() {
         <div className="mb-3">
           <label htmlFor="m_name" className="form-label">Emri</label>
           <input {...editForm.register('name')} id="m_name" type="text" className="form-control" />
+          {editErrors.name && <div className="text-danger small" role="alert">{editErrors.name.message}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="m_middlename" className="form-label">Prindi</label>
@@ -218,10 +227,12 @@ function Content() {
         <div className="mb-3">
           <label htmlFor="m_surname" className="form-label">Mbiemri</label>
           <input {...editForm.register('surname')} id="m_surname" type="text" className="form-control" />
+          {editErrors.surname && <div className="text-danger small" role="alert">{editErrors.surname.message}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="m_members" className="form-label">Anetaret</label>
           <input {...editForm.register('members', { valueAsNumber: true })} id="m_members" type="number" className="form-control" />
+          {editErrors.members && <div className="text-danger small" role="alert">{editErrors.members.message}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="m_neighbourhood_id" className="form-label">Lagje</label>

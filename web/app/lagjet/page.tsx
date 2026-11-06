@@ -56,6 +56,7 @@ function Content() {
   const { data: regions = [] } = useQuery({ queryKey: ['regions'], queryFn: api.regions });
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+  const { errors } = form.formState;
   const region = useWatch({ control: form.control, name: 'region' });
   const cities = region ? CITIES[region] ?? [] : [];
 
@@ -97,6 +98,7 @@ function Content() {
   });
 
   const editForm = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
+  const { errors: editErrors } = editForm.formState;
 
   function openEdit(n: Neighbourhood) {
     editForm.reset({
@@ -144,6 +146,7 @@ function Content() {
                 aria-label="Emri i lagjes"
                 className="form-control"
               />
+              {errors.name && <div className="text-danger small" role="alert">{errors.name.message}</div>}
             </div>
             <div className="col-lg-2 col-md-6">
               <select {...form.register('region', { onChange: onRegionChange })} aria-label="Qyteti" className="form-control">
@@ -152,6 +155,7 @@ function Content() {
                   <option key={r.name} value={r.name}>{r.name}</option>
                 ))}
               </select>
+              {errors.region && <div className="text-danger small" role="alert">{errors.region.message}</div>}
             </div>
             <div className="col-lg-2 col-md-6">
               <select {...form.register('city')} aria-label="Fshati" className="form-control">
@@ -209,10 +213,12 @@ function Content() {
         <div className="mb-3">
           <label htmlFor="m_name" className="form-label">Emri i lagjes</label>
           <input {...editForm.register('name')} id="m_name" type="text" className="form-control" />
+          {editErrors.name && <div className="text-danger small" role="alert">{editErrors.name.message}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="m_region" className="form-label">Qyteti</label>
           <input {...editForm.register('region')} id="m_region" type="text" className="form-control" />
+          {editErrors.region && <div className="text-danger small" role="alert">{editErrors.region.message}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="m_city" className="form-label">Fshati</label>
