@@ -28,6 +28,7 @@ export const sq = {
     undo: 'Zhbëj',
     edit: 'Ndrysho',
     delete: 'Fshi',
+    deleteFamily: 'Fshi familjen',
     cancel: 'Anulo',
     save: 'Ruaj',
     close: 'Mbyll',
@@ -36,6 +37,7 @@ export const sq = {
     payRemainingYears: 'Paguaj vitet e mbetura',
     exportCsv: 'Eksporto CSV',
     payForSeveralYears: 'Paguaj për disa vite',
+    retry: 'Provoni përsëri',
   },
 
   status: { paid: 'Paguar', unpaid: 'Pa paguar' },
@@ -60,6 +62,8 @@ export const sq = {
     country: 'Shteti',
     postalCode: 'Kodi postar',
     region: 'Rajoni',
+    status: 'Statusi',
+    allNeighbourhoods: 'Të gjitha lagjet',
   },
 
   collection: { collected: 'Mbledhur', expected: 'Pritet' },
@@ -117,6 +121,7 @@ export const sq = {
 
   messages: {
     paid: 'Pagesa u regjistrua.',
+    alreadyPaid: 'Kjo familje është paguar tashmë për këtë vit.',
     created: 'U krijua me sukses.',
     updated: 'U ruajt me sukses.',
     deleted: 'U fshi me sukses.',
@@ -134,5 +139,6 @@ export const sq = {
     server: 'Ndodhi një gabim në server. Provoni përsëri.',
     unknown: 'Ndodhi një gabim. Provoni përsëri.',
     required: 'Kjo fushë është e detyrueshme.',
+    positive: 'Numri duhet të jetë pozitiv.',
   },
 } as const;

@@ -1,0 +1,131 @@
+import { test, expect } from '../helpers/fixtures';
+import type { Page } from '@playwright/test';
+import type { Scenario, SeededFamily } from '../helpers/seed';
+
+const fullName = (f: SeededFamily) => `${f.name} ${f.middleName} ${f.surname}`;
+
+/** A family's row (table) or card (phone), found by its visible name. */
+function rowOf(page: Page, f: SeededFamily) {
+  const isPhone = (page.viewportSize()?.width ?? 1280) < 640;
+  return page.getByRole(isPhone ? 'listitem' : 'row').filter({ hasText: fullName(f) });
+}
+
+async function open(page: Page, s: Scenario) {
+  await page.goto(`/mbledhja?viti=${s.year}&lagjja=${s.neighbourhoodId}`);
+  await expect(page.getByRole('heading', { name: 'Mbledhja' })).toBeVisible();
+}
+
+test('one tap pays a family and Zhbëj undoes it', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 2, paid: 0 });
+  const [a, b] = s.families;
+  await open(page, s);
+
+  await rowOf(page, a).getByRole('button', { name: /^Paguaj/ }).click();
+  await expect(rowOf(page, a).getByText('Paguar', { exact: true })).toBeVisible();
+  await expect(rowOf(page, a).getByText(/Paguar tani/)).toBeVisible();
+  expect((await seed.stats(s.year)).paid_families).toBe(1);
+  await expect(rowOf(page, b).getByText('Pa paguar', { exact: true })).toBeVisible();
+
+  // The row itself offers Zhbëj for a payment made from this screen.
+  await rowOf(page, a).getByRole('button', { name: 'Zhbëj' }).click();
+  await expect(rowOf(page, a).getByText('Pa paguar', { exact: true })).toBeVisible();
+  expect((await seed.stats(s.year)).paid_families).toBe(0);
+});
+
+test('a stale row that is already paid says so instead of doing nothing', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 1, paid: 0 });
+  const [family] = s.families;
+  await open(page, s);
+
+  // Somebody else records the payment while this row is still on screen.
+  await seed.createPayment(family.id, s.year, family.members * s.feePerMember);
+
+  await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
+  await expect(page.getByText('Kjo familje është paguar tashmë për këtë vit.')).toBeVisible();
+  await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
+  expect((await seed.stats(s.year)).paid_families).toBe(1);
+});
+
+test('multi-select marks several families paid', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 3, paid: 0 });
+  await open(page, s);
+
+  await page.getByRole('checkbox', { name: `Zgjidh ${fullName(s.families[0])}` }).check();
+  await page.getByRole('checkbox', { name: `Zgjidh ${fullName(s.families[1])}` }).check();
+  await page.getByRole('button', { name: 'Shëno të paguara (2)' }).click();
+
+  await expect(rowOf(page, s.families[0]).getByText('Paguar', { exact: true })).toBeVisible();
+  await expect(rowOf(page, s.families[1]).getByText('Paguar', { exact: true })).toBeVisible();
+  await expect(rowOf(page, s.families[2]).getByText('Pa paguar', { exact: true })).toBeVisible();
+  const stats = await seed.stats(s.year);
+  expect(stats.paid_families).toBe(2);
+  // amount is members x fee, computed by the server
+  expect(stats.collected).toBe(2 * s.families[0].members * s.feePerMember);
+});
+
+test('tabs split paid and unpaid families', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 3, paid: 1 });
+  const [paid, unpaid] = [s.families[0], s.families[1]];
+  await open(page, s);
+
+  await page.getByRole('tab', { name: 'Pa paguar', exact: true }).click();
+  await expect(rowOf(page, unpaid)).toBeVisible();
+  await expect(rowOf(page, paid)).toHaveCount(0);
+
+  await page.getByRole('tab', { name: 'Paguar', exact: true }).click();
+  await expect(rowOf(page, paid)).toBeVisible();
+  await expect(rowOf(page, unpaid)).toHaveCount(0);
+
+  await page.getByRole('tab', { name: 'Të gjitha', exact: true }).click();
+  await expect(rowOf(page, paid)).toBeVisible();
+  await expect(rowOf(page, unpaid)).toBeVisible();
+});
+
+test('search narrows the list by family name', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 3, paid: 0 });
+  await open(page, s);
+
+  await page.getByRole('searchbox', { name: 'Kërko' }).fill(s.families[1].name);
+  await expect(rowOf(page, s.families[1])).toBeVisible();
+  await expect(rowOf(page, s.families[0])).toHaveCount(0);
+});
+
+test('family name opens the sheet in place and paying remaining years updates the row', async ({ page, seed }) => {
+  // The sheet pays the years its history covers; use the server's current year so
+  // the selected collection year is one of them.
+  const s = await seed.scenario({ families: 1, paid: 0, year: new Date().getFullYear() });
+  const family = s.families[0];
+  await open(page, s);
+
+  await rowOf(page, family).getByRole('button', { name: fullName(family), exact: true }).click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`familja=${family.id}`));
+  // Still on /mbledhja: the list and its filters are kept behind the panel.
+  expect(new URL(page.url()).pathname).toBe('/mbledhja');
+
+  await sheet.getByRole('button', { name: /Paguaj vitet e mbetura/ }).click();
+  await expect(sheet.getByText('Paguar', { exact: true })).toBeVisible();
+
+  await sheet.getByRole('button', { name: 'Mbyll' }).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page).not.toHaveURL(/familja=/);
+  await expect(page.getByRole('combobox', { name: 'Lagjja' })).toHaveValue(s.neighbourhoodId);
+  await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
+  expect((await seed.stats(s.year)).paid_families).toBe(1);
+});
+
+test('Gjenero faturat downloads a PDF for unpaid families', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 2, paid: 0 });
+  await open(page, s);
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Gjenero faturat' }).click();
+  expect((await download).suggestedFilename()).toMatch(/\.pdf$/);
+});
+
+test('Gjenero faturat says so when nobody is unpaid', async ({ page, seed }) => {
+  const s = await seed.scenario({ families: 1, paid: 1 });
+  await open(page, s);
+  await page.getByRole('button', { name: 'Gjenero faturat' }).click();
+  await expect(page.getByText(`Nuk ka fatura për t'u gjeneruar për vitin ${s.year}.`)).toBeVisible();
+});
