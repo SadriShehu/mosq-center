@@ -14,13 +14,14 @@ import { DataTable, type Column } from '@/components/DataTable';
 import { FormModal } from '@/components/FormModal';
 import { errMsg, useToast } from '@/components/Toast';
 import { api } from '@/lib/api';
+import { AMOUNT_PER_MEMBER } from '@/lib/constants';
 import { formatDate } from '@/lib/format';
 import type { Family, PaymentDetails } from '@/lib/types';
 
-const AMOUNT_PER_MEMBER = 3;
-
 const num = (msg: string) =>
   z.preprocess((v) => (v === '' || v == null ? undefined : Number(v)), z.number({ error: msg }));
+
+const RANGE_MSG = 'Viti final duhet të jetë i barabartë ose më i madh se viti';
 
 const createSchema = z.object({
   family_id: z.string().min(1, 'Zgjidh familjen'),
@@ -30,11 +31,18 @@ const createSchema = z.object({
     (v) => (v === '' || v == null ? undefined : Number(v)),
     z.number().int().optional(),
   ),
+}).refine((d) => d.range_year == null || d.range_year >= d.year, {
+  path: ['range_year'],
+  message: RANGE_MSG,
 });
 type CreateForm = z.input<typeof createSchema>;
 type CreateOut = z.output<typeof createSchema>;
 
-const editSchema = createSchema.omit({ range_year: true });
+const editSchema = z.object({
+  family_id: z.string().min(1, 'Zgjidh familjen'),
+  amount: num('Shuma është e detyrueshme').pipe(z.number().positive('Shuma duhet të jetë pozitive')),
+  year: num('Viti është i detyrueshëm').pipe(z.number().int().min(1900, 'Viti nuk është i vlefshëm')),
+});
 type EditForm = z.input<typeof editSchema>;
 type EditOut = z.output<typeof editSchema>;
 
@@ -201,6 +209,7 @@ function PaymentsPage() {
                   {...createForm.register('range_year')}
                 />
               )}
+              {multi && err(ce.range_year?.message)}
             </div>
             <div className="col-lg-3 col-md-6">
               <button type="submit" className="btn btn-success" disabled={create.isPending}>

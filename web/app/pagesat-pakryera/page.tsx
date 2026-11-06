@@ -13,10 +13,9 @@ import { DataTable, type Column } from '@/components/DataTable';
 import { FormModal } from '@/components/FormModal';
 import { errMsg, useToast } from '@/components/Toast';
 import { api } from '@/lib/api';
+import { AMOUNT_PER_MEMBER } from '@/lib/constants';
 import { formatDate } from '@/lib/format';
 import type { FamilyDetails } from '@/lib/types';
-
-const AMOUNT_PER_MEMBER = 3;
 
 const optNum = z.preprocess(
   (v) => (v === '' || v == null ? undefined : Number(v)),
@@ -29,6 +28,9 @@ const paySchema = z.object({
   amount: payNum('Shuma është e detyrueshme').pipe(z.number().positive('Shuma duhet të jetë pozitive')),
   year: payNum('Viti është i detyrueshëm').pipe(z.number().int().min(1900, 'Viti nuk është i vlefshëm')),
   range_year: optNum,
+}).refine((d) => d.range_year == null || d.range_year >= d.year, {
+  path: ['range_year'],
+  message: 'Viti final duhet të jetë i barabartë ose më i madh se viti',
 });
 type PayIn = z.input<typeof paySchema>;
 type PayOut = z.output<typeof paySchema>;
@@ -223,6 +225,7 @@ function UnpaidPage() {
           <div className="mb-3">
             <label htmlFor="m_range_year" className="form-label">Deri në vitin</label>
             <input id="m_range_year" type="number" className="form-control" {...form.register('range_year')} />
+            {err(errors.range_year?.message)}
           </div>
         )}
         <div className="mb-3 form-check">
