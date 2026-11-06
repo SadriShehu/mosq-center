@@ -101,6 +101,7 @@ export const sq = {
     Maghrib: 'Akshami',
     Isha: 'Jacia',
     Midnight: 'Pjesa e tretë e natës',
+    remaining: 'Kohë e mbetur',
   },
 
   command: {
