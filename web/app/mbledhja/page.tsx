@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { formatDay, formatMoney, formatPercent, ratio } from '@/lib/format';
 import { useMediaQuery, useYear } from '@/lib/hooks';
 import { sq } from '@/lib/sq';
@@ -26,6 +26,16 @@ type Tab = 'all' | 'unpaid' | 'paid';
 type PayArgs = { ids: string[]; singleFamilyId?: string };
 
 const fullName = (f: CollectionRow) => [f.name, f.middle_name, f.surname].filter(Boolean).join(' ');
+
+/** Undo may race with the toast action: deleting an already-deleted payment is a no-op. */
+async function deletePayment(id: string) {
+  try {
+    await api.payments.remove(id);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return;
+    throw e;
+  }
+}
 
 function Collection() {
   const [year] = useYear();
@@ -42,8 +52,9 @@ function Collection() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<Set<string>>(new Set());
   const [exporting, setExporting] = useState(false);
-  /** family id -> payment id paid from this screen, so the row can offer Zhbëj. */
+  /** `${familyId}:${year}` -> payment id paid from this screen this year, for the row Zhbëj. */
   const [justPaid, setJustPaid] = useState<Map<string, string>>(new Map());
+  const paidKey = (family: string) => `${family}:${year}`;
 
   const neighbourhoods = useQuery({ queryKey: ['neighbourhoods'], queryFn: api.neighbourhoods.list });
   const collection = useQuery({
@@ -95,18 +106,18 @@ function Collection() {
         return next;
       });
       if (vars.singleFamilyId && res.ids[0]) {
-        setJustPaid((prev) => new Map(prev).set(vars.singleFamilyId as string, res.ids[0]));
+        setJustPaid((prev) => new Map(prev).set(paidKey(vars.singleFamilyId as string), res.ids[0]));
       }
       refresh();
       if (res.skipped.length > 0) toast.info(sq.messages.alreadyPaid);
       if (res.ids.length === 0) return;
       toastUndo(sq.messages.paid, async () => {
         try {
-          await Promise.all(res.ids.map((id) => api.payments.remove(id)));
+          await Promise.all(res.ids.map(deletePayment));
           setJustPaid((prev) => {
             const next = new Map(prev);
-            for (const [family, payment] of next) {
-              if (res.ids.includes(payment)) next.delete(family);
+            for (const [key, payment] of next) {
+              if (res.ids.includes(payment)) next.delete(key);
             }
             return next;
           });
@@ -134,10 +145,10 @@ function Collection() {
 
   const undoOne = async (family: string, payment: string) => {
     try {
-      await api.payments.remove(payment);
+      await deletePayment(payment);
       setJustPaid((prev) => {
         const next = new Map(prev);
-        next.delete(family);
+        next.delete(paidKey(family));
         return next;
       });
       toast.info(sq.messages.undone);
@@ -212,7 +223,7 @@ function Collection() {
             </Button>
           );
         }
-        const recentPayment = justPaid.get(f.id);
+        const recentPayment = justPaid.get(paidKey(f.id));
         const date = f.payment ? formatDay(f.payment.created_at) : '';
         if (recentPayment) {
           return (

@@ -32,6 +32,22 @@ test('one tap pays a family and Zhbëj undoes it', async ({ page, seed }) => {
   expect((await seed.stats(s.year)).paid_families).toBe(0);
 });
 
+test('switching year drops the just-paid row Zhbëj (it belongs to the old year)', async ({ page, seed }) => {
+  const current = new Date().getFullYear();
+  const s = await seed.scenario({ families: 1, paid: 0, year: current });
+  const family = s.families[0];
+  await seed.createPayment(family.id, current - 1, family.members * s.feePerMember);
+  await open(page, s);
+
+  await rowOf(page, family).getByRole('button', { name: /^Paguaj/ }).click();
+  await expect(rowOf(page, family).getByText(/Paguar tani/)).toBeVisible();
+
+  await page.getByRole('combobox', { name: 'Viti' }).selectOption(String(current - 1));
+  await expect(rowOf(page, family).getByText(/^Paguar · /)).toBeVisible();
+  await expect(rowOf(page, family).getByText(/Paguar tani/)).toHaveCount(0);
+  await expect(rowOf(page, family).getByRole('button', { name: 'Zhbëj' })).toHaveCount(0);
+});
+
 test('a stale row that is already paid says so instead of doing nothing', async ({ page, seed }) => {
   const s = await seed.scenario({ families: 1, paid: 0 });
   const [family] = s.families;
