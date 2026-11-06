@@ -60,34 +60,34 @@ export const api = {
   me: () => json<Me>('/me'),
   regions: () => json<Region[]>('/regions'),
   publicPrayers: () => json<Prayers>('/public/prayers', undefined, { public: true }),
-  prayers: () => json<Prayers>('/prayers/'),
+  prayers: () => json<Prayers>('/prayers'),
 
   neighbourhoods: {
-    list: () => json<Neighbourhood[]>('/neighbourhoods/'),
+    list: () => json<Neighbourhood[]>('/neighbourhoods'),
     get: (id: string) => json<Neighbourhood>(`/neighbourhoods/${id}`),
-    create: (d: NeighbourhoodInput) => json<unknown>('/neighbourhoods/', { method: 'POST', ...body(d) }),
+    create: (d: NeighbourhoodInput) => json<unknown>('/neighbourhoods', { method: 'POST', ...body(d) }),
     update: (id: string, d: NeighbourhoodInput) =>
       json<unknown>(`/neighbourhoods/${id}`, { method: 'PUT', ...body(d) }),
     remove: (id: string) => json<unknown>(`/neighbourhoods/${id}`, { method: 'DELETE' }),
   },
 
   families: {
-    list: () => json<Family[]>('/families/'),
+    list: () => json<Family[]>('/families'),
     details: () => json<FamilyDetails[]>('/families/details'),
     get: (id: string) => json<Family>(`/families/${id}`),
-    create: (d: FamilyInput) => json<unknown>('/families/', { method: 'POST', ...body(d) }),
+    create: (d: FamilyInput) => json<unknown>('/families', { method: 'POST', ...body(d) }),
     update: (id: string, d: FamilyInput) => json<unknown>(`/families/${id}`, { method: 'PUT', ...body(d) }),
     remove: (id: string) => json<unknown>(`/families/${id}`, { method: 'DELETE' }),
   },
 
   payments: {
-    list: () => json<Payment[]>('/payments/'),
+    list: () => json<Payment[]>('/payments'),
     /** familyId overrides year (same as the old /pagesat handler). */
     details: (p: { year?: number | string; family_id?: string } = {}) =>
       json<PaymentDetails[]>(`/payments/details${qs(p)}`),
     noPaymentDetails: (p: { year: number | string; s_neighbourhood_id?: string }) =>
       json<FamilyDetails[]>(`/payments/no-payment/details${qs(p)}`),
-    create: (d: PaymentInput) => json<unknown>('/payments/', { method: 'POST', ...body(d) }),
+    create: (d: PaymentInput) => json<unknown>('/payments', { method: 'POST', ...body(d) }),
     update: (id: string, d: PaymentInput) => json<unknown>(`/payments/${id}`, { method: 'PUT', ...body(d) }),
     remove: (id: string) => json<unknown>(`/payments/${id}`, { method: 'DELETE' }),
   },
