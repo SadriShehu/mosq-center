@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { api } from '../lib/api.ts';
+import { formatMoney, formatPercent } from '../lib/format.ts';
 
 function mock(status: number, body: string, contentType?: string) {
   globalThis.fetch = (async () =>
@@ -29,9 +30,32 @@ test('JSON list is parsed', async () => {
   assert.equal(rows[0].id, '1');
 });
 
-test('error status throws ApiError with message', async () => {
+test('error statuses map to Albanian messages (server text stays out of the message)', async () => {
+  console.error = () => {};
   mock(400, 'bad year', 'text/plain');
-  await assert.rejects(api.payments.list(), /bad year/);
+  await assert.rejects(api.payments.list(), { message: 'Të dhënat nuk janë të sakta.', status: 400 });
+  mock(404, 'x');
+  await assert.rejects(api.families.get('1'), { message: 'Nuk u gjet.' });
+  mock(503, 'boom');
+  await assert.rejects(api.families.list(), { message: 'Ndodhi një gabim në server. Provoni përsëri.' });
+  globalThis.fetch = (async () => { throw new TypeError('fetch failed'); }) as typeof fetch;
+  await assert.rejects(api.families.list(), { message: 'Nuk ka lidhje me serverin. Provoni përsëri.', status: 0 });
+});
+
+test('new endpoints: stats, collection, history, bulk, recent', async () => {
+  mock(200, '{"year":2026,"fee_per_member":3,"neighbourhoods":[]}', 'application/json');
+  assert.equal((await api.stats(2026)).fee_per_member, 3);
+  mock(200, 'null', 'application/json');
+  assert.deepEqual(await api.collection(2026), []);
+  assert.deepEqual(await api.recentPayments(), []);
+  mock(201, '{"ids":["a","b"]}', 'application/json');
+  const r = await api.payBulk({ family_ids: ['x'], year: 2026 });
+  assert.deepEqual(r.ids, ['a', 'b']);
+  assert.deepEqual(r.skipped, []);
+  mock(201, '{"ids":null,"skipped":[{"family_id":"x","year":2026}]}', 'application/json');
+  const r2 = await api.payBulk({ family_ids: ['x'], year: 2026 });
+  assert.deepEqual(r2.ids, []);
+  assert.deepEqual(r2.skipped, [{ family_id: 'x', year: 2026 }]);
 });
 
 test('null body on list calls becomes []', async () => {
@@ -43,4 +67,11 @@ test('null body on list calls becomes []', async () => {
   assert.deepEqual(await api.payments.details({ year: 2024 }), []);
   assert.deepEqual(await api.payments.noPaymentDetails({ year: 2024 }), []);
   assert.deepEqual(await api.regions(), []);
+});
+
+test('format helpers', () => {
+  assert.match(formatMoney(12), /12/);
+  assert.match(formatMoney(12), /€/);
+  assert.match(formatPercent(0.5), /50/);
+  assert.match(formatPercent(0 / 0), /0/);
 });
