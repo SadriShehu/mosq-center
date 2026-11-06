@@ -4,6 +4,7 @@ import {
   comboboxWithOption,
   dialogFor,
   expectNoReload,
+  fieldError,
   formWith,
   markNoReload,
 } from '../helpers/ui';
@@ -15,8 +16,8 @@ test.describe('/lagjet flows (new app)', () => {
     const createForm = formWith(page, page.getByPlaceholder('Emri i lagjes'));
     await createForm.getByRole('button', { name: 'Ruaj' }).click();
 
-    await expect(page.getByText('Emri i lagjes eshte i detyrueshem')).toBeVisible();
-    await expect(page.getByText('Zgjidh qytetin')).toBeVisible();
+    await expect(fieldError(page, 'Emri i lagjes eshte i detyrueshem')).toBeVisible();
+    await expect(fieldError(page, 'Zgjidh qytetin')).toBeVisible();
   });
 
   test('create, edit and delete refresh the list without a page reload', async ({

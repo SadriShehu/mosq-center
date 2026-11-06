@@ -4,6 +4,7 @@ import {
   comboboxWithOption,
   dialogFor,
   expectNoReload,
+  fieldError,
   formWith,
   markNoReload,
 } from '../helpers/ui';
@@ -20,10 +21,10 @@ test.describe('/familjet flows (new app)', () => {
     const createForm = familyForm(page);
     await createForm.getByRole('button', { name: 'Ruaj' }).click();
 
-    await expect(page.getByText('Emri eshte i detyrueshem')).toBeVisible();
-    await expect(page.getByText('Mbiemri eshte i detyrueshem')).toBeVisible();
-    await expect(page.getByText('Numri i antareve duhet te jete pozitiv')).toBeVisible();
-    await expect(page.getByText('Zgjidh lagjen')).toBeVisible();
+    await expect(fieldError(page, 'Emri eshte i detyrueshem')).toBeVisible();
+    await expect(fieldError(page, 'Mbiemri eshte i detyrueshem')).toBeVisible();
+    await expect(fieldError(page, 'Numri i antareve duhet te jete pozitiv')).toBeVisible();
+    await expect(fieldError(page, 'Zgjidh lagjen')).toBeVisible();
 
     await createForm.getByPlaceholder('Emri', { exact: true }).fill(seed.name('Familja'));
     await createForm.getByPlaceholder('Mbiemri', { exact: true }).fill(`Mbiemri ${seed.token}`);
@@ -33,7 +34,7 @@ test.describe('/familjet flows (new app)', () => {
     });
     await createForm.getByRole('button', { name: 'Ruaj' }).click();
 
-    await expect(page.getByText('Numri i antareve duhet te jete pozitiv')).toBeVisible();
+    await expect(fieldError(page, 'Numri i antareve duhet te jete pozitiv')).toBeVisible();
   });
 
   test('create, edit and delete refresh the list without a page reload', async ({

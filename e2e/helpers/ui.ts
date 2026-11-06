@@ -121,6 +121,18 @@ export async function expectPublicLayout(page: Page) {
   await expect(page.getByRole('link', { name: 'Lagjet', exact: true })).toHaveCount(0);
 }
 
+/**
+ * A field-level validation error, matched by its exact text inside a role=alert
+ * container (some messages are substrings of option labels or of each other).
+ */
+export function fieldError(page: Page, message: string) {
+  const escaped = message.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return page
+    .getByRole('alert')
+    .filter({ hasText: new RegExp(`^${escaped}$`) })
+    .first();
+}
+
 /** Marks the current document so a full reload can be detected later. */
 export async function markNoReload(page: Page) {
   await page.evaluate(() => {
