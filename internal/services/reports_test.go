@@ -236,17 +236,20 @@ func TestBulkPay(t *testing.T) {
 		req         models.BulkPaymentsRequest
 		wantErr     error
 		wantCreated int
+		wantSkipped []models.SkippedPayment
 	}{
-		{"single year", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2026}, nil, 1},
-		{"two families", models.BulkPaymentsRequest{FamilyIDs: []string{"f2", "f3"}, Year: 2026}, nil, 2},
-		{"range", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2024, RangeYear: 2026}, nil, 3},
-		{"already paid is skipped", models.BulkPaymentsRequest{FamilyIDs: []string{"f1", "f2"}, Year: 2026}, nil, 1},
-		{"duplicate ids once", models.BulkPaymentsRequest{FamilyIDs: []string{"f2", "f2"}, Year: 2026}, nil, 1},
-		{"no families", models.BulkPaymentsRequest{Year: 2026}, ErrInvalid, 0},
-		{"no year", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}}, ErrInvalid, 0},
-		{"bad range", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2026, RangeYear: 2025}, ErrInvalid, 0},
-		{"huge range", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2000, RangeYear: 2999}, ErrInvalid, 0},
-		{"unknown family writes nothing", models.BulkPaymentsRequest{FamilyIDs: []string{"f2", "nope"}, Year: 2026}, ErrNotFound, 0},
+		{"single year", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2026}, nil, 1, nil},
+		{"two families", models.BulkPaymentsRequest{FamilyIDs: []string{"f2", "f3"}, Year: 2026}, nil, 2, nil},
+		{"range", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2024, RangeYear: 2026}, nil, 3, nil},
+		{"already paid is skipped", models.BulkPaymentsRequest{FamilyIDs: []string{"f1", "f2"}, Year: 2026}, nil, 1, []models.SkippedPayment{{FamilyID: "f1", Year: 2026}}},
+		{"everything skipped", models.BulkPaymentsRequest{FamilyIDs: []string{"f1"}, Year: 2025, RangeYear: 2026}, nil, 0, []models.SkippedPayment{{FamilyID: "f1", Year: 2025}, {FamilyID: "f1", Year: 2026}}},
+		{"range partly skipped", models.BulkPaymentsRequest{FamilyIDs: []string{"f1"}, Year: 2026, RangeYear: 2027}, nil, 1, []models.SkippedPayment{{FamilyID: "f1", Year: 2026}}},
+		{"duplicate ids once", models.BulkPaymentsRequest{FamilyIDs: []string{"f2", "f2"}, Year: 2026}, nil, 1, nil},
+		{"no families", models.BulkPaymentsRequest{Year: 2026}, ErrInvalid, 0, nil},
+		{"no year", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}}, ErrInvalid, 0, nil},
+		{"bad range", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2026, RangeYear: 2025}, ErrInvalid, 0, nil},
+		{"huge range", models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2000, RangeYear: 2999}, ErrInvalid, 0, nil},
+		{"unknown family writes nothing", models.BulkPaymentsRequest{FamilyIDs: []string{"f2", "nope"}, Year: 2026}, ErrNotFound, 0, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -260,6 +263,14 @@ func TestBulkPay(t *testing.T) {
 				t.Fatalf("created %d, want %d", len(p.created), tt.wantCreated)
 			}
 			if err == nil {
+				if got.Skipped == nil || len(got.Skipped) != len(tt.wantSkipped) {
+					t.Fatalf("skipped = %v, want %v", got.Skipped, tt.wantSkipped)
+				}
+				for i, sk := range got.Skipped {
+					if *sk != tt.wantSkipped[i] {
+						t.Errorf("skipped[%d] = %+v", i, sk)
+					}
+				}
 				if got.IDs == nil || len(got.IDs) != tt.wantCreated {
 					t.Errorf("ids = %v", got.IDs)
 				}
@@ -278,7 +289,7 @@ func TestBulkPay(t *testing.T) {
 		req := &models.BulkPaymentsRequest{FamilyIDs: []string{"f2"}, Year: 2026}
 		s.BulkPay(ctx, req)
 		got, _ := s.BulkPay(ctx, req)
-		if len(got.IDs) != 0 || len(p.created) != 1 {
+		if len(got.IDs) != 0 || len(got.Skipped) != 1 || len(p.created) != 1 {
 			t.Errorf("second call created more: %v", got.IDs)
 		}
 	})

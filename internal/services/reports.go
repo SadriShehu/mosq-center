@@ -337,9 +337,11 @@ func (s *reportsService) BulkPay(ctx context.Context, req *models.BulkPaymentsRe
 	}
 
 	ids := []string{}
+	skipped := []*models.SkippedPayment{}
 	for _, fam := range targets {
 		for y := req.Year; y <= last; y++ {
 			if paid[fmt.Sprintf("%s/%d", fam.ID, y)] {
+				skipped = append(skipped, &models.SkippedPayment{FamilyID: fam.ID, Year: y})
 				continue
 			}
 			p := &models.Payments{}
@@ -351,7 +353,7 @@ func (s *reportsService) BulkPay(ctx context.Context, req *models.BulkPaymentsRe
 		}
 	}
 
-	return &models.BulkPaymentsResponse{IDs: ids}, nil
+	return &models.BulkPaymentsResponse{IDs: ids, Skipped: skipped}, nil
 }
 
 // Recent returns the newest payments first, joined with family data.

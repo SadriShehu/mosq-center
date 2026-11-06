@@ -60,7 +60,15 @@ type BulkPaymentsRequest struct {
 	RangeYear int      `json:"range_year"`
 }
 
-// BulkPaymentsResponse lists the ids of the payments that were created.
+// SkippedPayment is a family-year that already had a payment and was not duplicated.
+type SkippedPayment struct {
+	FamilyID string `json:"family_id"`
+	Year     int    `json:"year"`
+}
+
+// BulkPaymentsResponse lists the payments that were created and the
+// family-years that were skipped because they were already paid.
 type BulkPaymentsResponse struct {
-	IDs []string `json:"ids"`
+	IDs     []string          `json:"ids"`
+	Skipped []*SkippedPayment `json:"skipped"`
 }

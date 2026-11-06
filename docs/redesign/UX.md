@@ -66,8 +66,8 @@ Brand name stays "Xhamia Qender" until the user confirms the spelling.
 |---|---|
 | `GET /api/v1/stats?year=Y` | `{year, fee_per_member, families, members, expected, collected, paid_families, unpaid_families, neighbourhoods:[{id,name,families,paid_families,expected,collected}]}` |
 | `GET /api/v1/collection?year=Y&neighbourhood_id=N` (N optional) | `[{...FamiliesResponse, neighbourhood_name, expected_amount, paid, payment: {id, amount, created_at} \| null}]` |
-| `GET /api/v1/families/{id}/history` | `{family: FamiliesResponse + neighbourhood_name, payments: [PaymentsResponse], years: [{year, paid, payment_id}]}` for every year from the earliest payment (or current year) to the current year |
-| `POST /api/v1/payments/bulk` | body `{family_ids:[…], year, range_year?}`; amount = members × fee server-side; `201 {"ids":[…]}` |
+| `GET /api/v1/families/{id}/history` | `{family: FamiliesResponse + neighbourhood_name, payments: [PaymentsResponse], years: [{year, paid, payment_id}]}` for every year from the earliest payment (or current year) to the current year, or to the latest paid year if that is later (e.g. after paying future years); `payment_id` is `null` when unpaid |
+| `POST /api/v1/payments/bulk` | body `{family_ids:[…], year, range_year?}`; amount = members × fee server-side; always `201 {"ids":[…], "skipped":[{"family_id","year"}]}` (both always arrays). Family-years that already have a payment are not duplicated: they are listed in `skipped` (so repeating a request or a double tap is safe). If everything is skipped it is still `201` with `ids: []`. Unknown family id → `404`, nothing written. Invalid input → `400` |
 | `GET /api/v1/payments/recent?limit=10` | `[PaymentDetails]` newest first |
 
 - Fee: env `FEE_PER_MEMBER` (default 3), used by stats/collection/bulk and returned by stats. The frontend never hardcodes it.
