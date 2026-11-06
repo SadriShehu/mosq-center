@@ -1,9 +1,10 @@
 /**
  * Every user-facing Albanian string (docs/redesign/UX.md glossary). Import from here;
- * never hardcode copy in components. Brand stays "Xhamia Qender" until the spelling is confirmed.
+ * never hardcode copy in components. `brand` is only the fallback: the shells and the
+ * <title> prefer the tenant's brand_name from GET /api/v1/public/config.
  */
 export const sq = {
-  brand: 'Xhamia Qender',
+  brand: 'Xhamia Qendër',
 
   nav: {
     home: 'Fillimi',

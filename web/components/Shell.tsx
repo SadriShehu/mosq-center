@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
-import { useYear } from '@/lib/hooks';
+import { useBrand, useYear } from '@/lib/hooks';
 import { sq } from '@/lib/sq';
 import type { Me } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -22,12 +22,12 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/pagesat', label: sq.nav.payments, icon: ReceiptText },
 ];
 
-function Brand() {
+function Brand({ brand }: { brand: string }) {
   return (
     <div className="flex items-center gap-3 px-4 py-5">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/favicon.ico" alt="" width={36} height={36} className="rounded-control bg-gold-soft p-1" />
-      <span className="font-heading text-base font-extrabold text-sidebar-text">{sq.brand}</span>
+      <span className="font-heading text-base font-extrabold text-sidebar-text">{brand}</span>
     </div>
   );
 }
@@ -105,6 +105,7 @@ function UserMenu({ user }: { user: Me }) {
 }
 
 function Frame({ user, children }: { user: Me; children: ReactNode }) {
+  const brand = useBrand();
   const [year, setYear] = useYear();
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
@@ -127,15 +128,15 @@ function Frame({ user, children }: { user: Me; children: ReactNode }) {
       </a>
 
       <aside className="on-dark fixed inset-y-0 left-0 hidden w-64 flex-col bg-sidebar lg:flex">
-        <Brand />
+        <Brand brand={brand} />
         <NavLinks year={year} />
       </aside>
 
       <Sheet open={drawer} onOpenChange={setDrawer}>
         <SheetContent side="left" className="on-dark gap-0 bg-sidebar p-0 text-sidebar-text" closeClassName="text-sidebar-text hover:bg-sidebar-active">
           <SheetTitle className="sr-only">{sq.nav.menu}</SheetTitle>
-          <SheetDescription className="sr-only">{sq.brand}</SheetDescription>
-          <Brand />
+          <SheetDescription className="sr-only">{brand}</SheetDescription>
+          <Brand brand={brand} />
           <NavLinks year={year} onNavigate={() => setDrawer(false)} />
         </SheetContent>
       </Sheet>
@@ -177,13 +178,14 @@ export function AppShell({ user, children }: { user: Me; children: ReactNode }) 
 
 /** Public layout (no session): brand + "Kyçu". */
 export function PublicShell({ children }: { children: ReactNode }) {
+  const brand = useBrand();
   return (
     <div className="min-h-dvh">
       <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/favicon.ico" alt="" width={32} height={32} />
-          <span className="font-heading text-lg font-extrabold text-primary">{sq.brand}</span>
+          <span className="font-heading text-lg font-extrabold text-primary">{brand}</span>
         </Link>
         <Button asChild>
           <a href="/login">{sq.nav.login}</a>
