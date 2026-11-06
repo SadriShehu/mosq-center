@@ -1,6 +1,10 @@
 package handlers
 
 import (
+	"github.com/go-chi/chi"
+	"github.com/gorilla/sessions"
+	"github.com/sadrishehu/mosq-center/config"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -55,10 +59,35 @@ func TestStaticHandler(t *testing.T) {
 func TestIsAdminPath(t *testing.T) {
 	for p, want := range map[string]bool{
 		"/": false, "/lagjet": true, "/lagjet.html": true, "/lagjet/x.txt": true, "/user": true,
+		"/lagjet.txt": true, "/pagesat-pakryera.txt": true, "/user.txt": true, "/familjet.txt": true, "/pagesat.html": true, "/index.txt": false,
 		"/pagesat-pakryera": true, "/_next/static/a.js": false, "/login": false, "/a/../lagjet": true,
 	} {
 		if got := isAdminPath(p); got != want {
 			t.Errorf("%s = %v, want %v", p, got, want)
 		}
+	}
+}
+
+func TestAdminTxtBehindAuth(t *testing.T) {
+	r := chi.NewRouter()
+	h := &handler{
+		RouterService: r,
+		AuthConfig:    &config.Auth0Config{Enable: true},
+		SessionStore:  sessions.NewCookieStore([]byte("s")),
+	}
+	h.RegisterTemplates()
+
+	for _, p := range []string{"/lagjet", "/lagjet.txt", "/lagjet.html", "/user.txt", "/pagesat-pakryera.txt"} {
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, httptest.NewRequest("GET", p, nil))
+		if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/logout" {
+			t.Errorf("%s: status %d location %q, want redirect to /logout", p, rec.Code, rec.Header().Get("Location"))
+		}
+	}
+
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, httptest.NewRequest("GET", "/", nil))
+	if rec.Code == http.StatusSeeOther {
+		t.Errorf("public / must not redirect")
 	}
 }

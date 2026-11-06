@@ -92,6 +92,9 @@ func serveFile(w http.ResponseWriter, req *http.Request, files fs.FS, name strin
 // isAdminPath reports whether the request path belongs to an admin page.
 func isAdminPath(p string) bool {
 	seg := strings.SplitN(strings.TrimPrefix(path.Clean("/"+p), "/"), "/", 2)[0]
-	seg = strings.TrimSuffix(seg, ".html")
+	// Any extension (.html, .txt RSC payloads, ...) still belongs to the page.
+	if i := strings.Index(seg, "."); i >= 0 {
+		seg = seg[:i]
+	}
 	return adminPages[seg]
 }
