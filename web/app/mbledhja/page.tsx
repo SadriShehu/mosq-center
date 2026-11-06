@@ -7,6 +7,7 @@ import { FileText, Users } from 'lucide-react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { DataTable, type Column } from '@/components/DataTable';
 import { EmptyState } from '@/components/EmptyState';
+import { FamilySheet } from '@/components/FamilySheet';
 import { StatCard } from '@/components/StatCard';
 import { errMsg, toastUndo, useToast } from '@/components/Toast';
 import { StatusBadge } from '@/components/ui/badge';
@@ -30,6 +31,7 @@ function Collection() {
   const pathname = usePathname();
   const params = useSearchParams();
   const nbhd = params.get('lagjja') ?? '';
+  const familyId = params.get('familja');
   const qc = useQueryClient();
   const toast = useToast();
   const phone = useMediaQuery('(max-width: 639px)');
@@ -57,6 +59,13 @@ function Collection() {
     if (id) next.set('lagjja', id); else next.delete('lagjja');
     setSelected(new Set());
     router.replace(`${pathname}?${next.toString()}`);
+  };
+
+  /** Open/close the family panel without leaving the list (keeps filters and scroll). */
+  const setFamily = (id: string | null) => {
+    const next = new URLSearchParams(params.toString());
+    if (id) next.set('familja', id); else next.delete('familja');
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   };
 
   const totals = useMemo(() => {
@@ -130,13 +139,16 @@ function Collection() {
       header: sq.fields.name,
       primary: true,
       render: (f) => (
-        <Link
-          href={`/familjet?id=${f.id}&viti=${year}`}
+        <button
+          type="button"
           className="font-semibold text-primary underline-offset-2 hover:underline"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setFamily(f.id);
+          }}
         >
           {fullName(f)}
-        </Link>
+        </button>
       ),
     },
     { header: sq.fields.neighbourhood, render: (f) => f.neighbourhood_name },
@@ -240,6 +252,8 @@ function Collection() {
           </Button>
         </div>
       )}
+
+      <FamilySheet familyId={familyId} year={year} onClose={() => setFamily(null)} />
     </div>
   );
 }

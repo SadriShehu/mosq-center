@@ -74,11 +74,29 @@ test('search narrows the list by family name', async ({ page, seed }) => {
   await expect(rowOf(page, s.families[0])).toHaveCount(0);
 });
 
-test('family name links to the family sheet', async ({ page, seed }) => {
-  const s = await seed.scenario({ families: 1, paid: 0 });
+test('family name opens the sheet in place and paying remaining years updates the row', async ({ page, seed }) => {
+  // The sheet pays the years its history covers; use the server's current year so
+  // the selected collection year is one of them.
+  const s = await seed.scenario({ families: 1, paid: 0, year: new Date().getFullYear() });
+  const family = s.families[0];
   await open(page, s);
-  await rowOf(page, s.families[0]).getByRole('link', { name: fullName(s.families[0]) }).click();
-  await expect(page).toHaveURL(new RegExp(`/familjet\\?id=${s.families[0].id}`));
+
+  await rowOf(page, family).getByRole('button', { name: fullName(family), exact: true }).click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`familja=${family.id}`));
+  // Still on /mbledhja: the list and its filters are kept behind the panel.
+  expect(new URL(page.url()).pathname).toBe('/mbledhja');
+
+  await sheet.getByRole('button', { name: /Paguaj vitet e mbetura/ }).click();
+  await expect(sheet.getByText('Paguar', { exact: true })).toBeVisible();
+
+  await sheet.getByRole('button', { name: 'Mbyll' }).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page).not.toHaveURL(/familja=/);
+  await expect(page.getByRole('combobox', { name: 'Lagjja' })).toHaveValue(s.neighbourhoodId);
+  await expect(rowOf(page, family).getByText('Paguar', { exact: true })).toBeVisible();
+  expect((await seed.stats(s.year)).paid_families).toBe(1);
 });
 
 test('Gjenero faturat downloads a PDF for unpaid families', async ({ page, seed }) => {
