@@ -1,14 +1,22 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 )
+
+// DefaultBrandName is used when BRAND_NAME is not set.
+const DefaultBrandName = "Xhamia Qendër"
 
 type Config struct {
 	Env         string
 	Port        string
 	ServiceName string
+	// FeePerMember is the yearly fee per family member (FEE_PER_MEMBER, default 3).
+	FeePerMember float64
+	// BrandName is the display name of this tenant (BRAND_NAME).
+	BrandName   string
 	DBConfig    *DBConfig
 	Auth        *Auth0Config
 	TunePrayers *TunePrayers
@@ -68,11 +76,27 @@ func GetBoolOrFalse(key string) bool {
 	return ok
 }
 
+// GetFloatOrDefault reads a positive float env var, falling back to the default.
+func GetFloatOrDefault(key string, defaultValue float64) float64 {
+	raw := GetOrDefault(key, "")
+	if raw == "" {
+		return defaultValue
+	}
+	v, err := strconv.ParseFloat(raw, 64)
+	if err != nil || v <= 0 {
+		log.Printf("invalid %s=%q, using default %v\n", key, raw, defaultValue)
+		return defaultValue
+	}
+	return v
+}
+
 func New() *Config {
 	return &Config{
-		Env:         GetOrDefault("ENV", "dev"),
-		ServiceName: GetOrDefault("SERVICE_NAME", "mosq"),
-		Port:        ":8080",
+		FeePerMember: GetFloatOrDefault("FEE_PER_MEMBER", 3),
+		BrandName:    GetOrDefault("BRAND_NAME", DefaultBrandName),
+		Env:          GetOrDefault("ENV", "dev"),
+		ServiceName:  GetOrDefault("SERVICE_NAME", "mosq"),
+		Port:         ":" + GetOrDefault("PORT", "8080"),
 		DBConfig: &DBConfig{
 			MongoDBURI:        GetOrDefault("MONGO_DB_URI", "mongodb://root:root@localhost:27017"),
 			MongoUserCertPath: GetOrDefault("MONGO_USER_CERT_PATH", ""),

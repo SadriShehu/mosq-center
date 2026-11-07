@@ -21,3 +21,13 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Frontend (web/)
+
+The UI is a Next.js static export in `web/`, embedded into the Go binary
+(`web/embed.go`, `//go:embed all:out`). `make web` builds it into `web/out`;
+`make run` builds it and starts the server. `web/out/.gitkeep` is a tracked
+placeholder so `go build` / `go test` work without a web build (pages then
+return 404 until `make web` is run). See `web/README.md` for the dev workflow.
+
+Environment: `FEE_PER_MEMBER` (default `3`) is the yearly fee per family member; stats, collection and bulk payments compute amounts from it server-side.

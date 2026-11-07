@@ -7,3 +7,13 @@ internal/.DS_Store
 .vscode
 **/.terraform
 bin
+# Next.js migration
+node_modules/
+web/.next/
+web/out/*
+!web/out/.gitkeep
+web/next-env.d.ts
+e2e/test-results/
+e2e/playwright-report/
+e2e/.auth/
+web/tsconfig.tsbuildinfo

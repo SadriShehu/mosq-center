@@ -1,0 +1,243 @@
+# Redesign wave for team mosq-web. Spec: docs/redesign/UX.md (read it first; it replaces
+# PLAN.md's 'keep every label' rule). Git rules, ports and DBs from docs/migration/PLAN.md still apply.
+
+# ---------------- R1: no-regret foundations, start now ----------------
+
+[[task]]
+ref = "r-ux"
+title = "Lead: UX sign-off from the user on the new screens (canvas)"
+owner = "lead"
+body = "Lead closes this when the user approves the Fillimi, Mbledhja and phone mockups on the design canvas. Page tasks wait for it."
+
+[[task]]
+ref = "r-api"
+title = "API for the new UX: stats, collection, family history, bulk pay, recent; allowlist gate; FEE_PER_MEMBER"
+owner = "backend"
+body = """
+Implement the 'API additions' table and its two bullets in docs/redesign/UX.md. JSON responses
+(no plain text) for the new endpoints. Amounts are computed server-side from members x FEE_PER_MEMBER.
+Admin gate becomes an allowlist of public paths (UX.md); add a table test listing public vs protected paths,
+including /mbledhja and an unknown route.
+Tests: table-driven service tests for stats/collection/history/bulk (incl. empty DB -> zeros/[] not null,
+a family with no payments, a neighbourhood with no families), httptest for each handler.
+Done when: go vet + go test pass; curl samples for each endpoint in the --note.
+"""
+
+[[task]]
+ref = "r-found"
+title = "Tailwind v4 + shadcn/ui foundation, direction-A tokens, new AppShell, sq.ts, Albanian errors, API client"
+owner = "web-core"
+body = """
+Per docs/redesign/UX.md:
+- Add Tailwind v4 + shadcn/ui (Radix) + lucide-react + sonner; next/font for Plus Jakarta Sans + Inter; tokens as CSS variables.
+  Keep react-bootstrap installed for now so old pages still compile (removed in r-cleanup).
+- New AppShell: dark sidebar (Fillimi, Mbledhja, Familjet, Lagjet, Pagesat) that becomes a drawer under 1024px;
+  top bar with the shared year selector (?viti=, default current year), Ctrl/Cmd-K command search (families + pages),
+  user menu (avatar + name -> Profili, Dil). PublicShell for /.
+- Shared components in web/components/ui (shadcn) and web/components: Button, Input, Select, Dialog, Sheet,
+  AlertDialog, Tabs, Badge (Paguar/Pa paguar), Progress, StatCard, EmptyState, Skeleton, DataTable that renders
+  cards under 640px, Toaster with an undo action helper.
+- web/lib/sq.ts with every string from the UX.md glossary; web/lib/format.ts money/date helpers (sq-AL, EUR).
+- api.ts: Albanian error messages by status (UX.md), typed calls + types for every new endpoint in the API table.
+- Route stub /mbledhja; /pagesat-pakryera redirects to /mbledhja keeping the query.
+Done when: lint/typecheck/test/build pass; a short web/components/README.md lists the components and when to use them.
+"""
+
+[[task]]
+ref = "r-qa-setup"
+title = "e2e: retire migration suite to e2e/legacy, desktop + phone projects, new fixtures"
+owner = "qa"
+body = """
+Move e2e/migration -> e2e/legacy (unchanged; excluded from the default run). Playwright projects 'desktop'
+(1280x800) and 'phone' (390x844, isMobile, hasTouch). Fixtures in e2e/helpers: seed a neighbourhood, families
+and payments through /api/v1 (unique suffix, cleanup), read /api/v1/stats for expected numbers once backend's
+r-api lands (code against the UX.md API table now). Update e2e/README.md and the CI job if it runs e2e.
+Done when: `npx playwright test --list` shows both projects; legacy suite still passes against the old commit
+tag migration-parity when pointed at it (document how).
+"""
+
+[[task]]
+ref = "r-rev-api"
+title = "Review: r-api"
+owner = "reviewer"
+after = ["r-api"]
+body = "Review hive/mosq-web/backend vs feat/nextjs-migration: matches the UX.md API table (paths, JSON fields, status codes), amounts server-side, no null lists, allowlist gate covers every public path and nothing else, tests cover empty DB and missing relations."
+
+[[task]]
+ref = "r-rev-found"
+title = "Review: r-found"
+owner = "reviewer"
+after = ["r-found"]
+body = "Review hive/mosq-web/web-core: tokens match UX.md, strings come from sq.ts with correct spelling, focus rings visible, 4.5:1 contrast, drawer/menu keyboard accessible, DataTable card mode under 640px, Albanian error mapping, no hardcoded fee."
+
+[[task]]
+ref = "r-merge-1"
+title = "Lead: merge r-api + r-found + r-qa-setup (unblocks pages)"
+owner = "lead"
+after = ["r-ux", "r-rev-api", "r-rev-found", "r-qa-setup"]
+body = "Merge, run all checks, smoke-test the new endpoints through next dev, announce."
+
+# ---------------- R2: pages (each owner writes its acceptance spec) ----------------
+
+[[task]]
+ref = "r-mbl"
+title = "Page: /mbledhja (collection) — the core screen"
+owner = "pages-payments"
+after = ["r-merge-1"]
+body = """
+git merge feat/nextjs-migration first. Build per UX.md 'Mbledhja' + the canvas mockups (desktop and phone):
+neighbourhood picker, progress bar, tabs, search, one-tap Paguaj with undo toast (delete the created payment on undo),
+multi-select + Shëno të paguara via /payments/bulk, Gjenero faturat (PDF; 404 -> sq message), sticky action bar on phones,
+family name opens the family sheet (/familjet?id=). Data from /api/v1/collection.
+Write e2e/specs/mbledhja.spec.ts (pay, undo, bulk, tabs, search, PDF) passing on desktop AND phone.
+Done when: lint/typecheck/build pass and that spec is green on both projects.
+"""
+
+[[task]]
+ref = "r-ledger"
+title = "Page: /pagesat (ledger) + CSV export"
+owner = "pages-payments"
+after = ["r-mbl"]
+body = "Ledger per UX.md: filters (year from the shared selector, neighbourhood, search), edit dialog, delete with confirm, Eksporto CSV (client-side, UTF-8 BOM so Excel shows ë/ç). Spec e2e/specs/pagesat.spec.ts green on desktop + phone."
+
+[[task]]
+ref = "r-fam"
+title = "Page: /familjet + family sheet with payment history"
+owner = "pages-crud"
+after = ["r-merge-1"]
+body = """
+git merge feat/nextjs-migration first. Table per UX.md (status for the selected year, neighbourhood filter, search,
+card mode on phones). Row or ?id= opens the Sheet: edit details, history grid by year from /families/{id}/history,
+Paguaj vitet e mbetura (bulk for that family), delete with consequence text. Add family in a Dialog.
+Spec e2e/specs/familjet.spec.ts green on desktop + phone.
+"""
+
+[[task]]
+ref = "r-lag"
+title = "Page: /lagjet"
+owner = "pages-crud"
+after = ["r-fam"]
+body = "Per UX.md: list with families count, % paid, collected/expected (from /stats neighbourhoods), add/edit Dialog with region autofill, delete with consequence text. Spec e2e/specs/lagjet.spec.ts green on desktop + phone."
+
+[[task]]
+ref = "r-pub"
+title = "Page: / public prayer times (mobile-first)"
+owner = "pages-crud"
+after = ["r-lag"]
+body = "Per UX.md + mockup style: next prayer large with countdown, today's 7 times, Kyçu button, PublicShell. Spec e2e/specs/public.spec.ts green on desktop + phone."
+
+[[task]]
+ref = "r-dash"
+title = "Page: /user dashboard (Fillimi)"
+owner = "web-core"
+after = ["r-merge-1"]
+body = "Per UX.md + the Fillimi mockup: KPIs from /stats for the shared year, progress per neighbourhood (links to /mbledhja?lagjja=), recent payments, next prayer card. Spec e2e/specs/fillimi.spec.ts: numbers match /api/v1/stats, links work; green on desktop + phone."
+
+[[task]]
+ref = "r-cleanup"
+title = "Remove bootstrap/react-bootstrap/fontawesome and dead components"
+owner = "web-core"
+after = ["r-dash", "r-mbl", "r-ledger", "r-fam", "r-lag", "r-pub"]
+body = "After all pages are on the new components: remove the old deps, CSS and unused components; bundle shrinks; full e2e (both projects) still green."
+
+# ---------------- QA + review per page ----------------
+
+[[task]]
+ref = "r-qa-mbl"
+title = "QA: /mbledhja"
+owner = "qa"
+after = ["r-mbl"]
+body = "Merge hive/mosq-web/pages-payments. Check the owner's spec covers UX.md for the page; run it on desktop + phone; try the flows by hand at phone width (Playwright screenshots into the team files folder). Report bugs to the owner with exact steps. Add missing cases to the spec."
+
+[[task]]
+ref = "r-qa-ledger"
+title = "QA: /pagesat ledger"
+owner = "qa"
+after = ["r-ledger"]
+body = "As r-qa-mbl, for /pagesat. Also open the CSV and check ë/ç and amounts."
+
+[[task]]
+ref = "r-qa-fam"
+title = "QA: /familjet"
+owner = "qa"
+after = ["r-fam"]
+body = "As r-qa-mbl, for /familjet (owner pages-crud), including the sheet via ?id= deep link."
+
+[[task]]
+ref = "r-qa-lag"
+title = "QA: /lagjet"
+owner = "qa"
+after = ["r-lag"]
+body = "As r-qa-mbl, for /lagjet (owner pages-crud)."
+
+[[task]]
+ref = "r-qa-pub"
+title = "QA: / public"
+owner = "qa"
+after = ["r-pub"]
+body = "As r-qa-mbl, for / (owner pages-crud)."
+
+[[task]]
+ref = "r-qa-dash"
+title = "QA: /user dashboard"
+owner = "qa"
+after = ["r-dash"]
+body = "As r-qa-mbl, for /user (owner web-core); numbers must equal /api/v1/stats."
+
+[[task]]
+ref = "r-rev-mbl"
+title = "Review: /mbledhja"
+owner = "reviewer"
+after = ["r-mbl"]
+body = "Review against UX.md: one-tap pay + undo, bulk, phone sticky bar, sq.ts strings, shared components (no duplicates), no hardcoded fee, a11y."
+
+[[task]]
+ref = "r-rev-ledger"
+title = "Review: /pagesat"
+owner = "reviewer"
+after = ["r-ledger"]
+body = "As r-rev-mbl, for the ledger and CSV export."
+
+[[task]]
+ref = "r-rev-fam"
+title = "Review: /familjet"
+owner = "reviewer"
+after = ["r-fam"]
+body = "As r-rev-mbl, for /familjet and the family sheet."
+
+[[task]]
+ref = "r-rev-lag"
+title = "Review: /lagjet"
+owner = "reviewer"
+after = ["r-lag"]
+body = "As r-rev-mbl, for /lagjet."
+
+[[task]]
+ref = "r-rev-pub"
+title = "Review: / public"
+owner = "reviewer"
+after = ["r-pub"]
+body = "As r-rev-mbl, for /."
+
+[[task]]
+ref = "r-rev-dash"
+title = "Review: /user dashboard"
+owner = "reviewer"
+after = ["r-dash"]
+body = "As r-rev-mbl, for /user."
+
+# ---------------- R3: integrate + final ----------------
+
+[[task]]
+ref = "r-merge-2"
+title = "Lead: merge all pages + cleanup"
+owner = "lead"
+after = ["r-cleanup", "r-qa-mbl", "r-qa-ledger", "r-qa-fam", "r-qa-lag", "r-qa-pub", "r-qa-dash", "r-rev-mbl", "r-rev-ledger", "r-rev-fam", "r-rev-lag", "r-rev-pub", "r-rev-dash"]
+body = "Merge everything, run all checks and the full e2e suite (both projects) against Go serving the build."
+
+[[task]]
+ref = "r-final"
+title = "Final: full e2e on the Docker image, both tenants, both projects + screenshot set"
+owner = "qa"
+after = ["r-merge-2"]
+body = "As #26 but with the new suite on desktop + phone for center and qoku. Save a screenshot of every page (desktop + phone) into the team files folder for the user."

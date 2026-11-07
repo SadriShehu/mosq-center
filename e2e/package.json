@@ -1,0 +1,15 @@
+{
+  "name": "mosq-web-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Acceptance tests (desktop + phone) for mosq-web",
+  "scripts": {
+    "test": "playwright test",
+    "test:desktop": "playwright test --project=desktop",
+    "test:phone": "playwright test --project=phone",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}
