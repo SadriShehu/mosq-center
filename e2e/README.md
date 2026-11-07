@@ -1,12 +1,10 @@
-# e2e — acceptance + legacy parity tests
+# e2e — acceptance tests
 
 Playwright suite for the Next.js app.
 
-- `specs/<area>.spec.ts` — new acceptance suite for the redesign
-  (`docs/redesign/UX.md`). Runs by default on both projects.
-- `legacy/*.spec.ts` — the archived migration/parity suite. **Not part of the
-  default run**; it targets the app at tag `migration-parity`.
-- `helpers/` — seed fixtures, selector helpers, layout assertions.
+- `specs/<area>.spec.ts` — acceptance suite for the redesign
+  (`docs/redesign/UX.md`). Runs on both projects.
+- `helpers/` — the `seed` fixture and a no-reload check.
 
 `BASE_URL` selects the target (default `http://localhost:8086`).
 
@@ -58,30 +56,8 @@ BASE_URL=http://localhost:3006 npm test            # same against next dev
 The HTML report is written to `e2e/playwright-report/` (`npm run report`).
 Traces, screenshots and videos are kept on failure under `e2e/test-results/`.
 
-## Run the legacy migration suite
-
-The legacy suite is unchanged from the migration wave and targets the app at tag
-`migration-parity` (`ccfcab4`), so it keeps a single desktop project. Build and
-run that tag, then point `BASE_URL` at it:
-
-```bash
-# once, from the main repo/worktree
-git worktree add /tmp/mosq-parity migration-parity
-docker build -t mosq-parity /tmp/mosq-parity
-
-# Mongo must be running (docker compose up -d). host.docker.internal reaches it
-# from the container on Docker Desktop.
-docker run --rm -p 8088:8088 \
-  -e PORT=8088 \
-  -e MONGO_COLLECTION_NAME=mosq_qa_legacy \
-  -e MONGO_DB_URI=mongodb://root:root@host.docker.internal:27017 \
-  mosq-parity
-
-cd e2e
-BASE_URL=http://localhost:8088 npx playwright test --config playwright.legacy.config.ts
-```
-
-`npm run test:legacy` is the same command (set `BASE_URL` yourself).
+The old migration/parity suite was removed with the old frontend; it is kept in
+history at commit `ccfcab4` (local tag `migration-parity`), under `e2e/migration/`.
 
 ## Fixtures
 
@@ -117,22 +93,11 @@ Useful `Seed` methods:
 
 ## Selector conventions
 
-New acceptance specs use role/label/text selectors with the Albanian strings
-from `docs/redesign/UX.md` (`web/lib/sq.ts`), never classes or ids. Legacy specs
-still contain a few documented positional exceptions because the old app offers
-no accessible handle:
-
-- **Row action buttons** (legacy `lagjet`, `familjet`, `pagesat`): icon-only
-  buttons; first in a row is edit, second is delete.
-- **Sidebar toggle** (legacy): icon-only; first button inside the top
-  `navigation` landmark.
-- **Pay dialog inputs** (legacy `/pagesat-pakryera`): broken `for=` labels, so
-  amount and year are addressed in order inside the dialog.
-- **Two "Kerko" buttons** (legacy `/pagesat-pakryera`): the search button is
-  scoped to the toolbar holding the search input and "Gjenero Faturat".
+Specs use role/label/text selectors with the Albanian strings from
+`docs/redesign/UX.md` (`web/lib/sq.ts`), never classes or ids.
 
 ## CI
 
 `.github/workflows/pipeline.yml` currently does **not** run Playwright, so there
 is nothing to update there. If e2e is added later, install chromium and run the
-default projects (`npx playwright test`) — never the legacy config.
+default projects (`npx playwright test`).

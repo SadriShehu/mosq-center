@@ -20,7 +20,7 @@ With `AUTH0_ENABLE` unset, `/api/v1/me` returns user "Dev".
 - `lib/api.ts` – typed client (`api.neighbourhoods.list()`, `api.payments.details({year})`, `api.invoices(year, nid)` …). Throws `ApiError`; 401 → `/login`.
 - `lib/types.ts`, `lib/format.ts` (`formatDate`, sq-AL).
 - `components/AuthGuard` (wraps a page in `AppShell`, `useMe()`), `PublicShell`/`AppShell` in `Shell`.
-- `Toast` (`useToast().success/error`, `errMsg(e)`), `ConfirmDialog`, `FormModal` (use with react-hook-form's `handleSubmit`),
-  `DataTable` (columns + optional `searchText` client-side filter), `PrayerGrid`.
+- `Toast` (`useToast().success/error`, `errMsg(e)`), `DataTable`, `FamilySheet`, `StatCard`, `EmptyState`,
+  `NextPrayerCard`, `CommandSearch` — see `components/README.md` for the full list.
 - Fetch with TanStack Query; after mutations `queryClient.invalidateQueries(...)` — never `location.reload()`. Errors → `toast.error(errMsg(e))`.
-- Keep Albanian texts exactly as in the old templates; render dates only via `formatDate`.
+- All UI strings live in `lib/sq.ts` (Albanian); render dates only via `formatDate`.

@@ -2,7 +2,7 @@
 
 The migration wave is done and tagged `migration-parity` (29/29 on both tenants).
 This wave makes the app a **useful platform**, not a restyle. Flows change on
-purpose; the old migration suite is retired to `e2e/legacy/` (kept, not run in CI)
+purpose; the old migration suite is retired (kept in history at commit `ccfcab4`)
 and qa writes a new acceptance suite for the new UX.
 
 Design: **direction A — Emerald & Gold** (canvas: "Xhamia Qender redesign").
@@ -75,7 +75,6 @@ Brand name: **Xhamia Qendër** for center, **Xhamia Qoku** for qoku (user-confir
 
 ## Tests
 
-- `e2e/legacy/` — the migration suite, moved unchanged, not run in CI.
 - `e2e/specs/<area>.spec.ts` — new acceptance suite: collection (pay, undo, bulk, filters, PDF), family sheet (history, pay remaining years, delete consequences), CRUD for neighbourhoods/families, ledger (filters, edit, delete, CSV), dashboard (numbers match `/api/v1/stats`), public prayers, auth (401 → /login), Albanian errors.
 - Two Playwright projects: `desktop` (1280×800) and `phone` (390×844). Both must pass.
 - Selectors: role/label/text (Albanian strings from the glossary), no classes or ids.

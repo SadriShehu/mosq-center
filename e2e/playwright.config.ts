@@ -5,9 +5,6 @@ const baseURL = process.env.BASE_URL ?? 'http://localhost:8086';
 export default defineConfig({
   testDir: '.',
   testMatch: /.*\.spec\.ts/,
-  // The migration/parity suite is archived under legacy/ and is not part of the
-  // default run. Use playwright.legacy.config.ts to run it.
-  testIgnore: ['legacy/**'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

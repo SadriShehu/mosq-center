@@ -1,4 +1,4 @@
-import { APIRequestContext, Page, expect } from '@playwright/test';
+import { APIRequestContext, expect } from '@playwright/test';
 
 export function uniqueToken(prefix = 'QA'): string {
   const random = Math.random().toString(36).slice(2, 8);
@@ -227,16 +227,4 @@ export class Seed {
       }
     }
   }
-}
-
-export interface SeedFixtures {
-  seed: Seed;
-}
-
-export async function withSeed(request: APIRequestContext): Promise<Seed> {
-  return new Seed(request);
-}
-
-export function rowFor(page: Page, text: string) {
-  return page.getByRole('row').filter({ hasText: text });
 }
